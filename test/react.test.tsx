@@ -123,9 +123,10 @@ describe('react', () => {
     expect(mock.calls.some((c) => c.path === '/v1/portal/me/rsvp')).toBe(true);
   });
 
-  it('useSecretLink opens the link in the address bar once', async () => {
+  it('useSecretLink opens the link in the address, even over another session', async () => {
     window.history.pushState({}, '', '/me/ek_abc');
-    const { ek, mock } = client();
+    const staffJwt = `h.${btoa(JSON.stringify({ sub: 'u', kind: 'staff', eventId: EVENT }))}.s`;
+    const { ek, mock } = client({ session: memorySession(staffJwt) });
     mock.on('POST /v1/portal/access', () => ({
       session: { accessToken: 'jwt' },
       me: { name: 'Asha' },
@@ -136,12 +137,17 @@ describe('react', () => {
     await waitFor(() => expect(result.current.status).toBe('open'));
     expect(window.location.pathname).toBe('/me');
     expect(ek.session.token).toBe('jwt');
-    // Signed in already: nothing to open.
-    const { result: again } = renderHook(
+  });
+
+  it('useSecretLink uses a stored participant session when the address has no token', () => {
+    window.history.pushState({}, '', '/p');
+    const jwt = `h.${btoa(JSON.stringify({ sub: 'r', kind: 'participant', eventId: EVENT }))}.s`;
+    const { ek } = client({ session: memorySession(jwt) });
+    const { result } = renderHook(
       () => useSecretLink({ ...DEFAULT_PORTAL_PATHS, me: '/p/{token}' }),
-      { wrapper: w },
+      { wrapper: wrap(ek) },
     );
-    expect(again.current.status).toBe('open');
+    expect(result.current.status).toBe('open');
   });
 
   it('useSecretLink reports a bad link', async () => {

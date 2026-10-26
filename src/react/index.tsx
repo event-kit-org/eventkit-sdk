@@ -14,6 +14,7 @@ import {
   useSyncExternalStore,
 } from 'react';
 import type { EventKit } from '../client';
+import { DEFAULT_PORTAL_PATHS, parseLink } from '../portal';
 import { decodeSession, type SessionInfo } from '../session';
 import type { Schemas } from '../types';
 import type { EventApi } from '../event';
@@ -121,15 +122,23 @@ export function usePortalInfo() {
 }
 
 /**
- * On a personal-link page (/me/{token}): opens the link once, keeps the
- * session and strips the token from the address bar. Later visits use the
- * stored session. `paths`: the event's (from usePortalInfo), if overridden.
+ * On a personal-link page (/me/{token}): opens the link in the address (even
+ * when another session is stored), keeps the session and strips the token
+ * from the address bar. Without a token in the address, a stored participant
+ * session is used. `paths`: the event's (from usePortalInfo), if overridden.
  */
 export function useSecretLink(paths?: Schemas['PortalPaths']) {
   const ek = useEventKit();
   const queryClient = useQueryClient();
   const [state, setState] = useState<{ status: 'opening' | 'open' | 'error'; error?: unknown }>(
-    () => ({ status: ek.session.isSignedIn ? 'open' : 'opening' }),
+    () => {
+      const inAddress =
+        typeof location !== 'undefined' &&
+        parseLink(location.pathname, paths ?? DEFAULT_PORTAL_PATHS)?.kind === 'me';
+      return {
+        status: !inAddress && ek.session.who?.kind === 'participant' ? 'open' : 'opening',
+      };
+    },
   );
   useEffect(() => {
     let cancelled = false;
@@ -138,6 +147,7 @@ export function useSecretLink(paths?: Schemas['PortalPaths']) {
       (me) => {
         if (cancelled) return;
         queryClient.setQueryData(portalKeys.of('me'), me);
+        void queryClient.invalidateQueries({ queryKey: portalKeys.all });
         setState({ status: 'open' });
       },
       (error: unknown) => !cancelled && setState({ status: 'error', error }),
