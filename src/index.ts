@@ -1,7 +1,14 @@
 export { createEventKit, type EventKit, type EventKitOptions } from './client';
 export type { EventApi } from './event';
 export { EventKitError, isEventKitError, fieldErrors, type ErrorCode } from './errors';
-export { localStorageSession, memorySession, Session, type SessionStore } from './session';
+export {
+  decodeSession,
+  localStorageSession,
+  memorySession,
+  Session,
+  type SessionInfo,
+  type SessionStore,
+} from './session';
 export {
   createScanner,
   describeScan,

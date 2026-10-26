@@ -14,6 +14,7 @@ import {
   useSyncExternalStore,
 } from 'react';
 import type { EventKit } from '../client';
+import { decodeSession, type SessionInfo } from '../session';
 import type { Schemas } from '../types';
 import type { EventApi } from '../event';
 import type { Scanner, ScannerOptions } from '../scanner';
@@ -34,15 +35,22 @@ export function useEventKit(): EventKit {
   return ek;
 }
 
-/** Whether someone is signed in; re-renders on sign-in, sign-out and expired tokens. */
-export function useSession(): { isSignedIn: boolean; token: string | null } {
+/**
+ * Whether someone is signed in, and who (`who.kind`: client, staff or
+ * participant); re-renders on sign-in, sign-out and expired tokens.
+ */
+export function useSession(): {
+  isSignedIn: boolean;
+  token: string | null;
+  who: SessionInfo | null;
+} {
   const { session } = useEventKit();
   const token = useSyncExternalStore(
     (cb) => session.onChange(cb),
     () => session.token,
     () => session.token,
   );
-  return { isSignedIn: token !== null, token };
+  return { isSignedIn: token !== null, token, who: decodeSession(token) };
 }
 
 /** Query keys the hooks use: everything for one event sits under ['eventkit', eventId]. */

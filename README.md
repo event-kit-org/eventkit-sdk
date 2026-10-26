@@ -81,6 +81,7 @@ and (where their role allows) staff.
 ## Also
 
 - Errors throw `EventKitError` with the API's `code`: `isEventKitError(e, 'LINK_NOT_FOUND')`.
+- `session.who` (`decodeSession(token)`): whether the session is a participant, staff or client one.
 - `parseLink(url, paths)` tells registration, staff and personal links apart; `portalUrl(base, path, token)` builds one.
 - `@eventkit/sdk/react`: `<EventKitProvider>`, `usePortalInfo()`, `useSecretLink()`, `useMe()`,
   `useMyTeam()`, `useMyPolls()`, `useMyNotifications()`, `usePortalMutation()`, `useScanner()`,

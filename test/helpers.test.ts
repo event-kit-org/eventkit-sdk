@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
+  decodeSession,
+  memorySession,
+  Session,
   amountDue,
   checkRegistration,
   checkTeamRules,
@@ -167,5 +170,39 @@ describe('status and links', () => {
       'https://club.site/join/a%20b?ref=1',
     );
     expect(linkFor('https://club.site/t/', 'tok')).toBe('https://club.site/t/tok');
+  });
+});
+
+describe('decodeSession', () => {
+  const jwt = (claims: object) =>
+    `h.${btoa(JSON.stringify(claims)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')}.s`;
+  it('reads the kind, id, event and expiry', () => {
+    expect(decodeSession(jwt({ sub: 'r1', kind: 'participant', eventId: 'e1', exp: 10 }))).toEqual({
+      kind: 'participant',
+      id: 'r1',
+      eventId: 'e1',
+      expiresAt: new Date(10_000),
+    });
+    expect(decodeSession(jwt({ sub: 'u1', kind: 'client' }))).toEqual({
+      kind: 'client',
+      id: 'u1',
+      eventId: null,
+      expiresAt: null,
+    });
+    expect(
+      new Session(memorySession(jwt({ sub: 'u', kind: 'staff', eventId: 'e' }))).who?.kind,
+    ).toBe('staff');
+  });
+  it('is null for anything else', () => {
+    for (const t of [
+      null,
+      '',
+      'abc',
+      'a.!!!.c',
+      jwt({ kind: 'staff' }),
+      jwt({ sub: 'x', kind: 'admin' }),
+    ]) {
+      expect(decodeSession(t)).toBeNull();
+    }
   });
 });

@@ -49,7 +49,7 @@ describe('react', () => {
   it('tracks the session', async () => {
     const { ek } = client({ session: memorySession('t') });
     const { result } = renderHook(() => useSession(), { wrapper: wrap(ek) });
-    expect(result.current).toEqual({ isSignedIn: true, token: 't' });
+    expect(result.current).toMatchObject({ isSignedIn: true, token: 't', who: null });
     act(() => ek.console.auth.logout());
     expect(result.current.isSignedIn).toBe(false);
   });
