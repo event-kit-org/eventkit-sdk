@@ -1,5 +1,6 @@
 import type { Schemas } from '../types';
 import {
+  type Answers,
   checkTeamRules,
   type Field,
   memberFields,
@@ -10,8 +11,7 @@ import {
   toDraft,
 } from './fields';
 
-export type DisplayStatus =
-  Schemas['RegistrationStatus'] | 'forming' | 'expired' | 'confirmation_pending';
+export type DisplayStatus = Schemas['RegistrationStatus'] | 'confirmation_pending';
 
 /** A team's status as people read it: a receipt waiting for review is "confirmation pending". */
 export function teamDisplayStatus(team: Schemas['Team']): DisplayStatus {
@@ -19,10 +19,16 @@ export function teamDisplayStatus(team: Schemas['Team']): DisplayStatus {
   if ((team.status === 'registered' || team.status === 'shortlisted') && latest === 'pending') {
     return 'confirmation_pending';
   }
-  return team.status ?? team.stage;
+  return team.status;
 }
 
-export interface RegisterCheck {
+/** What a registration form holds before it is sent (`portal.register`'s input). */
+export interface RegistrationDraft {
+  team: { name: string; answers?: Answers };
+  members: { name: string; email: string; phone: string; answers?: Answers }[];
+}
+
+export interface RegistrationCheck {
   ok: boolean;
   /** Human-readable reasons the team can't register yet. */
   reasons: string[];
@@ -31,41 +37,46 @@ export interface RegisterCheck {
 }
 
 /**
- * Everything a leader must sort out before submitting: team size, team rules
- * (enforced only by front ends) and required details. The API re-checks size
- * and details; it does not check rules.
+ * Checks a registration form before sending it: team size, repeated emails,
+ * required details and the event's team rules, with reasons people can read.
+ * The API checks all of this again (and capacity, the window and uniqueness).
  */
-export function canRegister(
-  team: Schemas['Team'],
-  event: Pick<Schemas['Event'], 'minTeamSize' | 'maxTeamSize'>,
+export function checkRegistration(
+  draft: RegistrationDraft,
+  event: Pick<Schemas['PortalInfo']['event'], 'minTeamSize' | 'maxTeamSize'>,
   fields: Field[],
   rules: TeamRule[],
-): RegisterCheck {
+): RegistrationCheck {
   const reasons: string[] = [];
-  if (team.stage !== 'forming') reasons.push(`The team has ${team.stage}.`);
-  const members = team.members.filter((m) => m.status === 'accepted');
-  if (members.length < event.minTeamSize || members.length > event.maxTeamSize) {
+  const count = draft.members.length;
+  if (!draft.team.name.trim()) reasons.push('Give the team a name.');
+  if (count < event.minTeamSize || count > event.maxTeamSize) {
     reasons.push(
-      `A team needs ${event.minTeamSize}–${event.maxTeamSize} accepted members; this one has ${members.length}.`,
+      `A team needs ${event.minTeamSize}–${event.maxTeamSize} members; this one has ${count}.`,
     );
   }
+  for (const [i, m] of draft.members.entries()) {
+    if (!m.name.trim() || !m.email.trim() || !m.phone.trim()) {
+      reasons.push(`Member ${i + 1}: name, email and phone are needed.`);
+    }
+  }
+  const emails = draft.members.map((m) => m.email.trim().toLowerCase()).filter(Boolean);
+  const repeated = emails.find((e, i) => emails.indexOf(e) !== i);
+  if (repeated) reasons.push(`${repeated} appears twice.`);
+
   const ruleChecks = checkTeamRules(
     rules,
-    members.map((m) => m.answers as Record<string, string | number>),
+    draft.members.map((m) => m.answers ?? {}),
   );
   for (const c of ruleChecks.filter((r) => !r.met)) {
     reasons.push(`${c.rule.description} (has ${c.count}).`);
   }
   const missing = [
-    ...missingRequired(
-      teamFields(fields),
-      toDraft(team.answers as Record<string, string | number>),
-    ).map((f) => f.label),
-    ...members.flatMap((m) =>
-      missingRequired(
-        memberFields(fields),
-        toDraft(m.answers as Record<string, string | number>),
-      ).map((f) => `${m.user.name}: ${f.label}`),
+    ...missingRequired(teamFields(fields), toDraft(draft.team.answers)).map((f) => f.label),
+    ...draft.members.flatMap((m, i) =>
+      missingRequired(memberFields(fields), toDraft(m.answers)).map(
+        (f) => `${m.name.trim() || `Member ${i + 1}`}: ${f.label}`,
+      ),
     ),
   ];
   if (missing.length > 0) reasons.push(`Missing details: ${missing.join('; ')}.`);

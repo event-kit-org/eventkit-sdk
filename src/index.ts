@@ -27,9 +27,18 @@ export {
   toDraft,
 } from './helpers/fields';
 export {
-  canRegister,
+  checkRegistration,
   type DisplayStatus,
   linkFor,
-  type RegisterCheck,
+  type RegistrationCheck,
+  type RegistrationDraft,
   teamDisplayStatus,
 } from './helpers/status';
+export {
+  DEFAULT_PORTAL_PATHS,
+  parseLink,
+  type PortalApi,
+  type PortalLink,
+  portalUrl,
+} from './portal';
+export type { PushDevice } from './account';

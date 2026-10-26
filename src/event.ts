@@ -3,19 +3,20 @@ import { uploadFile, type UploadPurpose } from './uploads';
 import type { Body, Feature, Query, Role } from './types';
 
 type E = '/v1/events/{eventId}';
-type AnswersInput = Record<string, string | number | null>;
 
 /**
- * Everything inside one event. Every call needs a signed-in user with a role in
- * the event, and the API checks that role: a participant calling an admin
- * function gets ROLE_FORBIDDEN.
+ * Everything inside one event, for its owner (a client) and its staff
+ * (volunteers, judges, signed in on the portal). The API checks the role: a
+ * volunteer calling an admin function gets ROLE_FORBIDDEN. Participants use
+ * `portal.me` instead.
  */
 export function eventApi(t: Transport, eventId: string) {
   const { api, call } = t;
   const at = <X extends object = Record<never, never>>(extra?: X) => ({
     params: { path: { eventId, ...(extra ?? ({} as X)) } },
   });
-  const upload = (purpose: UploadPurpose, file: Blob) => uploadFile(t, eventId, purpose, file);
+  const upload = (purpose: UploadPurpose, file: Blob, teamId?: string) =>
+    uploadFile(t, eventId, purpose, file, teamId);
 
   return {
     id: eventId,
@@ -26,6 +27,18 @@ export function eventApi(t: Transport, eventId: string) {
     /** Admin. Payment mode, fee and currency lock once anyone has registered. */
     update: (patch: Body<E, 'patch'>) =>
       call(api.PATCH('/v1/events/{eventId}', { ...at(), body: patch })),
+    /**
+     * Admin: where the event's portal lives, e.g. https://machzero.vercel.app,
+     * and optional path overrides (defaults /register/{token}, /staff/{token},
+     * /me/{token}, /notifications). Links come back as URLs on it.
+     */
+    setPortal: (portal: { url: string | null; paths?: Body<E, 'patch'>['portalPaths'] }) =>
+      call(
+        api.PATCH('/v1/events/{eventId}', {
+          ...at(),
+          body: { portalUrl: portal.url, ...(portal.paths ? { portalPaths: portal.paths } : {}) },
+        }),
+      ),
     /** Which features are on. Every member can read this, to hide what's off. */
     features: () => call(api.GET('/v1/events/{eventId}/features', at())),
     /** Admin: switch a feature off, or back on if it was bought. */
@@ -60,8 +73,26 @@ export function eventApi(t: Transport, eventId: string) {
       revoke: (keyId: string) =>
         call(api.DELETE('/v1/events/{eventId}/api-keys/{keyId}', at({ keyId }))),
     },
+    /**
+     * Admin: a registration link on the portal, e.g. https://machzero.vercel.app/register/<token>.
+     * Teams register through it. Several can exist (one per channel, say).
+     */
+    createRegistrationLink: (options: { label?: string; expiresAt?: string } = {}) =>
+      call(
+        api.POST('/v1/events/{eventId}/invite-links', {
+          ...at(),
+          body: { role: 'participant', ...options },
+        }),
+      ),
+    /** Admin: a staff link on the portal for volunteers or judges, with a password to share separately. */
+    createStaffLink: (options: {
+      role: 'volunteer' | 'judge';
+      password: string;
+      label?: string;
+      expiresAt?: string;
+    }) => call(api.POST('/v1/events/{eventId}/invite-links', { ...at(), body: options })),
     inviteLinks: {
-      /** Staff links (volunteer, judge, admin) need a password; participant links have none. */
+      /** Low level: registration (role participant) or staff (volunteer, judge; with a password) links. */
       create: (input: Body<`${E}/invite-links`, 'post'>) =>
         call(api.POST('/v1/events/{eventId}/invite-links', { ...at(), body: input })),
       list: () => call(api.GET('/v1/events/{eventId}/invite-links', at())),
@@ -75,12 +106,12 @@ export function eventApi(t: Transport, eventId: string) {
             params: { path: { eventId }, query: role ? { role } : {} },
           }),
         ),
-      /** Taking someone out of the participant role works like them cancelling. */
-      changeRole: (userId: string, role: Role) =>
+      /** Switch a staff member between volunteer and judge. */
+      changeRole: (userId: string, role: 'volunteer' | 'judge') =>
         call(
           api.PATCH('/v1/events/{eventId}/members/{userId}', { ...at({ userId }), body: { role } }),
         ),
-      /** The last admin can't be removed. */
+      /** Remove a volunteer or judge (the owner can't be removed). */
       remove: (userId: string) =>
         call(api.DELETE('/v1/events/{eventId}/members/{userId}', at({ userId }))),
     },
@@ -103,75 +134,6 @@ export function eventApi(t: Transport, eventId: string) {
         call(api.POST('/v1/events/{eventId}/team-rules', { ...at(), body: input })),
       remove: (ruleId: string) =>
         call(api.DELETE('/v1/events/{eventId}/team-rules/{ruleId}', at({ ruleId }))),
-    },
-
-    // ------------------------------------------------------------ participants
-    myTeam: {
-      get: () => call(api.GET('/v1/events/{eventId}/my-team', at())),
-      /** Leader, while forming: rename, or edit team details. */
-      update: (patch: { name?: string; answers?: AnswersInput }) =>
-        call(api.PATCH('/v1/events/{eventId}/my-team', { ...at(), body: patch })),
-      /** Leader: invite by account email (no account: NO_ACCOUNT, ask them to sign up). */
-      invite: (email: string, answers?: AnswersInput) =>
-        call(
-          api.POST('/v1/events/{eventId}/my-team/invites', {
-            ...at(),
-            body: answers ? { email, answers } : { email },
-          }),
-        ),
-      withdrawInvite: (membershipId: string) =>
-        call(
-          api.DELETE('/v1/events/{eventId}/my-team/invites/{membershipId}', at({ membershipId })),
-        ),
-      /** The leader edits leader-filled fields; each member edits their own. */
-      updateMember: (membershipId: string, answers: AnswersInput) =>
-        call(
-          api.PATCH('/v1/events/{eventId}/my-team/members/{membershipId}', {
-            ...at({ membershipId }),
-            body: { answers },
-          }),
-        ),
-      removeMember: (userId: string) =>
-        call(api.DELETE('/v1/events/{eventId}/my-team/members/{userId}', at({ userId }))),
-      leave: () => call(api.POST('/v1/events/{eventId}/my-team/leave', at())),
-      disband: () => call(api.DELETE('/v1/events/{eventId}/my-team', at())),
-      handOver: (userId: string) =>
-        call(api.POST('/v1/events/{eventId}/my-team/leader', { ...at(), body: { userId } })),
-      /** Leader: a new join link; the old one stops working. */
-      resetJoinLink: () => call(api.POST('/v1/events/{eventId}/my-team/join-link/reset', at())),
-      /**
-       * Leader: submit the team. When the event takes payment at registration,
-       * pass the receipt: it is uploaded first, then submitted with the team.
-       */
-      async register(options: { receipt?: Blob } = {}) {
-        const receiptKey = options.receipt ? await upload('receipt', options.receipt) : undefined;
-        return call(
-          api.POST('/v1/events/{eventId}/my-team/registration', {
-            ...at(),
-            body: receiptKey ? { receiptKey } : {},
-          }),
-        );
-      },
-      /** Leader: pay after a rejection, or after shortlisting (before the payment deadline). */
-      async payReceipt(receipt: Blob) {
-        const receiptKey = await upload('receipt', receipt);
-        return call(
-          api.POST('/v1/events/{eventId}/my-team/payment-proofs', {
-            ...at(),
-            body: { receiptKey },
-          }),
-        );
-      },
-    },
-    myRegistration: {
-      /** Status and `qrToken`: render the token as a QR code for check-in. */
-      get: () => call(api.GET('/v1/events/{eventId}/my-registration', at())),
-      /** confirmed → attending. */
-      rsvp: () => call(api.POST('/v1/events/{eventId}/my-registration/rsvp', at())),
-      /** attending → confirmed, until check-in. */
-      unrsvp: () => call(api.POST('/v1/events/{eventId}/my-registration/unrsvp', at())),
-      /** A leader cancelling cancels the whole team. Not after check-in. */
-      cancel: () => call(api.POST('/v1/events/{eventId}/my-registration/cancel', at())),
     },
 
     // ------------------------------------------------------------ admin review
@@ -201,6 +163,25 @@ export function eventApi(t: Transport, eventId: string) {
             at({ registrationId }),
           ),
         ),
+      /**
+       * A new personal link for someone whose link leaked or was lost (check
+       * who they are first). The old link and its sessions stop working.
+       */
+      reissueLink: (registrationId: string) =>
+        call(
+          api.POST(
+            '/v1/events/{eventId}/registrations/{registrationId}/reissue-link',
+            at({ registrationId }),
+          ),
+        ),
+      /** A new QR code; the old one stops scanning. */
+      rotateQr: (registrationId: string) =>
+        call(
+          api.POST(
+            '/v1/events/{eventId}/registrations/{registrationId}/rotate-qr',
+            at({ registrationId }),
+          ),
+        ),
     },
     payments: {
       list: (status?: Query<`${E}/payment-proofs`, 'get'>['status']) =>
@@ -212,6 +193,16 @@ export function eventApi(t: Transport, eventId: string) {
       /** The team is confirmed (refused with NOT_ENOUGH_PLACES at capacity). */
       approve: (proofId: string) =>
         call(api.POST('/v1/events/{eventId}/payment-proofs/{proofId}/approve', at({ proofId }))),
+      /** Attach a receipt for a team (one it sent another way). Uploads, then hands it in. */
+      async attachReceipt(teamId: string, receipt: Blob) {
+        const receiptKey = await upload('receipt', receipt, teamId);
+        return call(
+          api.POST('/v1/events/{eventId}/teams/{teamId}/payment-proofs', {
+            ...at({ teamId }),
+            body: { receiptKey },
+          }),
+        );
+      },
       /** The leader can upload again, for the same amount. */
       reject: (proofId: string, note: string) =>
         call(
@@ -239,12 +230,13 @@ export function eventApi(t: Transport, eventId: string) {
     },
     /**
      * One scan, low level: `id` must be a UUID made on the device and reused on
-     * retries. Prefer createScanner(), which does that for you.
+     * retries; `qrToken` may also be a participant ID typed by hand. Prefer
+     * createScanner(), which does that for you.
      */
     scan: (input: { id: string; checkpointId: string; qrToken: string }) =>
       call(api.POST('/v1/events/{eventId}/scans', { ...at(), body: input })),
     attendance: {
-      /** Staff at the gate: mark someone attending (or not) by their QR code. */
+      /** Staff at the gate: mark someone attending (or not) by their QR code or participant ID. */
       mark: (qrToken: string, attending = true) =>
         call(
           api.POST('/v1/events/{eventId}/attendance', { ...at(), body: { qrToken, attending } }),
@@ -390,7 +382,7 @@ export function eventApi(t: Transport, eventId: string) {
 
     // ------------------------------------------------------------ files
     uploads: {
-      /** Low level: upload a file and get its key. register/payReceipt/setPaymentQr do this for you. */
+      /** Low level: upload the payment QR, or a team's receipt (with teamId), and get its key. */
       upload,
     },
   };

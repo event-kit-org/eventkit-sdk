@@ -1,188 +1,226 @@
 import {
-  canRegister,
+  checkRegistration,
+  type Draft,
+  type Field,
   formatIST,
   formatMoney,
   isEventKitError,
-  linkFor,
-  teamDisplayStatus,
+  memberFields,
+  parseLink,
+  teamFields,
+  toAnswers,
 } from '@eventkit/sdk';
-import {
-  useEvent,
-  useEventKit,
-  useEventMutation,
-  useFields,
-  useMyRegistration,
-  useMyTeam,
-  useSession,
-  useTeamRules,
-} from '@eventkit/sdk/react';
+import { useMe, usePortalInfo, usePortalMutation, useSecretLink } from '@eventkit/sdk/react';
 import { QRCodeSVG } from 'qrcode.react';
-import { type FormEvent, useState } from 'react';
+import { useState } from 'react';
 
-const LINK = import.meta.env.VITE_PARTICIPANT_LINK_TOKEN as string;
-
-/** A club's own registration site in about 150 lines, on @eventkit/sdk. */
+/**
+ * A club's own event portal in about 200 lines, on @eventkit/sdk. No router:
+ * the address decides the page (/register/{token}, /me/{token}, or /me after
+ * the personal link was opened).
+ */
 export function App() {
-  const { isSignedIn } = useSession();
+  const info = usePortalInfo();
+  if (!info.data) return <main style={page}>{info.error ? info.error.message : 'Loading…'}</main>;
+  const link = parseLink(location.pathname, info.data.paths);
+  const onMe = link?.kind === 'me' || location.pathname === '/me';
+  const { event } = info.data;
   return (
-    <main
-      style={{ maxWidth: 560, margin: '2rem auto', fontFamily: 'system-ui', padding: '0 1rem' }}
-    >
-      {isSignedIn ? <Dashboard /> : <SignIn />}
+    <main style={page}>
+      <h1>{event.name}</h1>
+      <p>
+        {formatIST(event.startAt)} · {event.venue} · by {event.hostedBy}
+      </p>
+      {link?.kind === 'register' ? <Register linkToken={link.token} /> : onMe ? <Me /> : <Home />}
     </main>
   );
 }
 
-function SignIn() {
-  const ek = useEventKit();
-  const [mode, setMode] = useState<'login' | 'signup'>('signup');
-  const [error, setError] = useState('');
-  async function submit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const f = new FormData(e.currentTarget);
-    const email = String(f.get('email'));
-    const password = String(f.get('password'));
-    try {
-      if (mode === 'signup') await ek.auth.signup({ email, password, name: String(f.get('name')) });
-      else await ek.auth.login({ email, password });
-    } catch (err) {
-      setError(isEventKitError(err) ? err.message : 'Something went wrong.');
-    }
-  }
+const page = { maxWidth: 640, margin: '2rem auto', fontFamily: 'system-ui', padding: '0 1rem' };
+
+function Home() {
+  const { event, registrationOpen } = usePortalInfo().data!;
   return (
-    <form onSubmit={submit} style={{ display: 'grid', gap: 8 }}>
-      <h1>{mode === 'signup' ? 'Create your account' : 'Log in'}</h1>
-      {mode === 'signup' && <input name="name" placeholder="Name" required />}
-      <input name="email" type="email" placeholder="Email" required />
-      <input name="password" type="password" placeholder="Password (8+ characters)" required />
-      {error && <p role="alert">{error}</p>}
-      <button type="submit">{mode === 'signup' ? 'Sign up' : 'Log in'}</button>
-      <button type="button" onClick={() => setMode(mode === 'signup' ? 'login' : 'signup')}>
-        {mode === 'signup' ? 'I have an account' : 'Create an account instead'}
-      </button>
+    <p>
+      {registrationOpen
+        ? `Registration is open until ${formatIST(event.registrationDeadline)}. Ask the organisers for the registration link.`
+        : 'Registration is not open.'}
+    </p>
+  );
+}
+
+type Member = { name: string; email: string; phone: string; answers: Draft };
+const blank = (): Member => ({ name: '', email: '', phone: '', answers: {} });
+
+/** The leader registers the whole team at once. No accounts. */
+function Register({ linkToken }: { linkToken: string }) {
+  const info = usePortalInfo().data!;
+  const { event, fields, teamRules } = info;
+  const [name, setName] = useState('');
+  const [teamAnswers, setTeamAnswers] = useState<Draft>({});
+  const [members, setMembers] = useState<Member[]>(() =>
+    Array.from({ length: event.minTeamSize }, blank),
+  );
+  const [receipt, setReceipt] = useState<File | null>(null);
+  const register = usePortalMutation((portal, input: Parameters<typeof portal.register>[0]) =>
+    portal.register(input),
+  );
+
+  const draft = {
+    team: { name, answers: toAnswers(teamFields(fields), teamAnswers) },
+    members: members.map((m) => ({ ...m, answers: toAnswers(memberFields(fields), m.answers) })),
+  };
+  const check = checkRegistration(
+    { team: { name }, members: members.map((m) => ({ ...m, answers: m.answers })) },
+    event,
+    fields,
+    teamRules,
+  );
+  const paysNow = event.paymentMode === 'at_registration' && event.registrationFee !== null;
+  const set = (i: number, patch: Partial<Member>) =>
+    setMembers(members.map((m, j) => (j === i ? { ...m, ...patch } : m)));
+
+  if (register.data) {
+    return (
+      <section>
+        <h2>{register.data.team.name} is registered</h2>
+        <p>Save these now: each person's link is shown only once. Send each one to its owner.</p>
+        {register.data.members.map((m) => (
+          <article key={m.registrationId} style={{ borderTop: '1px solid #ccc', padding: 8 }}>
+            <strong>
+              {m.name} · {m.participantCode}
+            </strong>
+            <QRCodeSVG value={m.qrToken} size={120} title={`${m.name}'s check-in QR code`} />
+            <p>
+              Personal link: <code>{m.link.url ?? m.link.token}</code>
+            </p>
+          </article>
+        ))}
+      </section>
+    );
+  }
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        register.mutate({ linkToken, ...draft, ...(receipt ? { receipt } : {}) });
+      }}
+      style={{ display: 'grid', gap: 8 }}
+    >
+      <h2>Register your team</h2>
+      <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Team name" />
+      <FieldInputs fields={teamFields(fields)} value={teamAnswers} onChange={setTeamAnswers} />
+      {members.map((m, i) => (
+        <fieldset key={i}>
+          <legend>{i === 0 ? 'You (team leader)' : `Member ${i + 1}`}</legend>
+          <input
+            value={m.name}
+            onChange={(e) => set(i, { name: e.target.value })}
+            placeholder="Name"
+          />
+          <input
+            type="email"
+            value={m.email}
+            onChange={(e) => set(i, { email: e.target.value })}
+            placeholder="Email"
+          />
+          <input
+            value={m.phone}
+            onChange={(e) => set(i, { phone: e.target.value })}
+            placeholder="Phone"
+          />
+          <FieldInputs
+            fields={memberFields(fields)}
+            value={m.answers}
+            onChange={(answers) => set(i, { answers })}
+          />
+        </fieldset>
+      ))}
+      {members.length < event.maxTeamSize && (
+        <button type="button" onClick={() => setMembers([...members, blank()])}>
+          Add a member
+        </button>
+      )}
+      {paysNow && (
+        <label>
+          Pay {formatMoney(event.registrationFee! * members.length, event.currency)} to the UPI QR
+          {info.paymentQrUrl && <img src={info.paymentQrUrl} alt="UPI QR" width={160} />}
+          then upload the receipt:{' '}
+          <input
+            type="file"
+            accept="image/*,application/pdf"
+            onChange={(e) => setReceipt(e.target.files?.[0] ?? null)}
+          />
+        </label>
+      )}
+      {check.reasons.map((r) => (
+        <p key={r}>{r}</p>
+      ))}
+      {register.error && <p role="alert">{register.error.message}</p>}
+      <button disabled={!check.ok || (paysNow && !receipt) || register.isPending}>Register</button>
     </form>
   );
 }
 
-function Dashboard() {
-  const ek = useEventKit();
-  const event = useEvent();
-  const team = useMyTeam();
-  return (
-    <>
-      <header style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <h1>{event.data?.event.name ?? 'Loading…'}</h1>
-        <button onClick={() => ek.auth.logout()}>Log out</button>
-      </header>
-      {event.data && (
-        <p>
-          {formatIST(event.data.event.startAt)} · {event.data.event.venue}
-        </p>
-      )}
-      {team.isError && isEventKitError(team.error, 'NO_TEAM', 'EVENT_NOT_FOUND') ? (
-        <StartTeam />
-      ) : null}
-      {team.data && <Team />}
-      <Registration />
-    </>
-  );
+function FieldInputs(props: { fields: Field[]; value: Draft; onChange: (d: Draft) => void }) {
+  return props.fields.map((f) => {
+    const v = props.value[f.id] ?? '';
+    const change = (x: string) => props.onChange({ ...props.value, [f.id]: x });
+    return f.type === 'choice' ? (
+      <select key={f.id} value={v} onChange={(e) => change(e.target.value)}>
+        <option value="">{f.label}</option>
+        {f.options.map((o) => (
+          <option key={o}>{o}</option>
+        ))}
+      </select>
+    ) : (
+      <input key={f.id} value={v} onChange={(e) => change(e.target.value)} placeholder={f.label} />
+    );
+  });
 }
 
-function StartTeam() {
-  const ek = useEventKit();
-  const [name, setName] = useState('');
-  const start = useEventMutation(() => ek.invites.startTeam(LINK, { name }));
-  return (
-    <section>
-      <h2>Start a team</h2>
-      <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Team name" />
-      <button disabled={!name || start.isPending} onClick={() => start.mutate(undefined)}>
-        Create team
-      </button>
-      {start.error && <p role="alert">{start.error.message}</p>}
-    </section>
-  );
-}
-
-function Team() {
-  const team = useMyTeam().data!;
-  const event = useEvent().data!.event;
-  const fields = useFields().data ?? [];
-  const rules = useTeamRules().data ?? [];
-  const [email, setEmail] = useState('');
-  const [receipt, setReceipt] = useState<File | null>(null);
-  const invite = useEventMutation((e, to: string) => e.myTeam.invite(to));
-  const register = useEventMutation((e) => e.myTeam.register(receipt ? { receipt } : {}));
-  const check = canRegister(team, event, fields, rules);
-  const paysNow = event.paymentMode === 'at_registration';
+/** The personal-link page: opens the link once, then shows status, QR and RSVP. */
+function Me() {
+  const { paths } = usePortalInfo().data!;
+  const link = useSecretLink(paths);
+  const me = useMe();
+  const rsvp = usePortalMutation((portal) => portal.me.rsvp());
+  const reset = usePortalMutation((portal) => portal.me.resetLink());
+  if (link.status === 'error') {
+    return (
+      <p role="alert">
+        {isEventKitError(link.error, 'LINK_NOT_FOUND')
+          ? 'This link was replaced. Use your newest link, or ask your team leader for a new one.'
+          : 'Could not open your link.'}
+      </p>
+    );
+  }
+  if (!me.data) return <p>Opening your link…</p>;
+  const { name, participantCode, status, qrToken, team } = me.data;
   return (
     <section>
       <h2>
-        {team.name} · {teamDisplayStatus(team)}
+        {name} · {participantCode}
       </h2>
-      <ul>
-        {team.members.map((m) => (
-          <li key={m.membershipId}>
-            {m.user.name} ({m.status})
-          </li>
-        ))}
-      </ul>
-      {team.stage === 'forming' && (
-        <>
-          <p>
-            Team link: <code>{linkFor(`${location.origin}/join/{token}`, team.joinToken)}</code>
-          </p>
-          <input
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Teammate's email"
-          />
-          <button disabled={!email} onClick={() => invite.mutate(email)}>
-            Invite
-          </button>
-          {invite.error && <p role="alert">{invite.error.message}</p>}
-          <h3>Register</h3>
-          {check.reasons.map((r) => (
-            <p key={r}>{r}</p>
-          ))}
-          {paysNow && team.payment.amountDue !== null && (
-            <label>
-              Pay {formatMoney(team.payment.amountDue, team.payment.currency)} to the UPI QR, then
-              upload the receipt:{' '}
-              <input
-                type="file"
-                accept="image/*,application/pdf"
-                onChange={(e) => setReceipt(e.target.files?.[0] ?? null)}
-              />
-            </label>
-          )}
-          <button
-            disabled={!check.ok || (paysNow && !receipt) || register.isPending}
-            onClick={() => register.mutate(undefined)}
-          >
-            Register team
-          </button>
-          {register.error && <p role="alert">{register.error.message}</p>}
-        </>
-      )}
-    </section>
-  );
-}
-
-function Registration() {
-  const reg = useMyRegistration();
-  const rsvp = useEventMutation((e) => e.myRegistration.rsvp());
-  if (!reg.data) return null;
-  const { status, qrToken } = reg.data;
-  return (
-    <section>
-      <h2>Your registration: {status}</h2>
+      <p>
+        Team {team.name}. Your status: {status}.
+      </p>
       {status === 'confirmed' && (
         <button onClick={() => rsvp.mutate(undefined)}>I will attend</button>
       )}
       {['confirmed', 'attending', 'checked_in'].includes(status) && (
         <QRCodeSVG value={qrToken} size={200} title="Your check-in QR code" />
       )}
+      <p>
+        <button onClick={() => reset.mutate(undefined)}>My link leaked: give me a new one</button>
+        {reset.data && (
+          <>
+            {' '}
+            New link: <code>{reset.data.url ?? reset.data.token}</code>
+          </>
+        )}
+      </p>
     </section>
   );
 }

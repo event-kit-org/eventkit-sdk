@@ -7,8 +7,7 @@ export type Answers = Record<string, string | number>;
 export type Draft = Record<string, string>;
 
 export const teamFields = (fields: Field[]) => fields.filter((f) => f.scope === 'team');
-export const memberFields = (fields: Field[], filledBy?: Field['filledBy']) =>
-  fields.filter((f) => f.scope === 'member' && (!filledBy || f.filledBy === filledBy));
+export const memberFields = (fields: Field[]) => fields.filter((f) => f.scope === 'member');
 
 export const toDraft = (answers: Answers | undefined): Draft =>
   Object.fromEntries(Object.entries(answers ?? {}).map(([k, v]) => [k, String(v)]));
@@ -38,8 +37,8 @@ export interface RuleCheck {
 
 /**
  * How the members' answers stand against each team rule ("at least N members
- * with <field> = <value>"). The API stores rules but does not enforce them:
- * front ends must check before registering.
+ * with <field> = <value>"). The API checks them at registration too; check
+ * here first to show people what's missing.
  */
 export function checkTeamRules(rules: TeamRule[], members: Answers[]): RuleCheck[] {
   return rules.map((rule) => {

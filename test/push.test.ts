@@ -58,6 +58,14 @@ describe('push', () => {
     expect(mock.calls.length).toBe(before);
   });
 
+  it('participants register their device under the portal', async () => {
+    browser();
+    const { ek, mock } = client();
+    mock.on('GET /v1/push/config', () => ({ enabled: true, publicKey: 'AQAB' }));
+    await ek.portal.me.push.enable();
+    expect(mock.last()).toMatchObject({ method: 'PUT', path: '/v1/portal/me/push' });
+  });
+
   it('refuses without browser support, without API push, or when blocked', async () => {
     const { ek, mock } = client();
     vi.stubGlobal('navigator', {});

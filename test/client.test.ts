@@ -6,8 +6,11 @@ import {
   isEventKitError,
   localStorageSession,
   memorySession,
+  DEFAULT_PORTAL_PATHS,
+  parseLink,
+  portalUrl,
 } from '../src';
-import { API, apiError, client, EVENT, json, KEY } from './mock';
+import { API, apiError, client, EVENT, json, KEY, png } from './mock';
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -15,10 +18,10 @@ describe('requests', () => {
   it('send the API key always, and the token once signed in', async () => {
     const { ek, mock } = client();
     mock.on('POST /v1/auth/login', () => ({ user: { id: 'u' }, token: { accessToken: 'tok' } }));
-    await ek.auth.me();
+    await ek.console.auth.me();
     expect(mock.last().headers.get('x-api-key')).toBe(KEY);
     expect(mock.last().headers.get('authorization')).toBeNull();
-    await ek.auth.login({ email: 'a@b.co', password: 'password1' });
+    await ek.console.auth.login({ email: 'a@b.co', password: 'password1' });
     expect(ek.session.isSignedIn).toBe(true);
     await ek.event().get();
     expect(mock.last().url).toBe(`${API}/v1/events/${EVENT}`);
@@ -38,8 +41,20 @@ describe('requests', () => {
     expect(new URL(mock.last().url).search).toBe('?status=pending');
     await event.payments.list();
     expect(new URL(mock.last().url).search).toBe('');
-    await event.myTeam.invite('x@y.co', { f: 'v' });
-    expect(mock.last().body).toEqual({ email: 'x@y.co', answers: { f: 'v' } });
+    await event.createStaffLink({ role: 'judge', password: 'judges-only', label: 'Judges' });
+    expect(mock.last().body).toEqual({ role: 'judge', password: 'judges-only', label: 'Judges' });
+    await event.createRegistrationLink({ label: 'Instagram' });
+    expect(mock.last().body).toEqual({ role: 'participant', label: 'Instagram' });
+    await event.setPortal({
+      url: 'https://machzero.vercel.app',
+      paths: { register: '/join/{token}' },
+    });
+    expect(mock.last().body).toEqual({
+      portalUrl: 'https://machzero.vercel.app',
+      portalPaths: { register: '/join/{token}' },
+    });
+    await event.setPortal({ url: null });
+    expect(mock.last().body).toEqual({ portalUrl: null });
     await event.attendance.mark('qr', false);
     expect(mock.last().body).toEqual({ qrToken: 'qr', attending: false });
   });
@@ -87,20 +102,20 @@ describe('requests', () => {
 describe('errors', () => {
   it('carry the API code, message and details', async () => {
     const { event, mock } = client();
-    mock.on('POST /v1/events/:id/my-team/invites', () =>
-      json({ error: { code: 'TEAM_FULL', message: 'Full.', details: { max: 4 } } }, 409),
+    mock.on('POST /v1/events/:id/teams/:t/confirm', () =>
+      json({ error: { code: 'NOT_ENOUGH_PLACES', message: 'Full.', details: { max: 4 } } }, 409),
     );
-    const err = await event.myTeam.invite('x@y.co').catch((e) => e);
+    const err = await event.teams.confirm('t1').catch((e: unknown) => e);
     expect(err).toBeInstanceOf(EventKitError);
     expect(err).toMatchObject({
       status: 409,
-      code: 'TEAM_FULL',
+      code: 'NOT_ENOUGH_PLACES',
       message: 'Full.',
       details: { max: 4 },
     });
     expect(isEventKitError(err)).toBe(true);
-    expect(isEventKitError(err, 'TEAM_FULL', 'TEAM_LOCKED')).toBe(true);
-    expect(isEventKitError(err, 'TEAM_LOCKED')).toBe(false);
+    expect(isEventKitError(err, 'NOT_ENOUGH_PLACES', 'TEAM_SIZE')).toBe(true);
+    expect(isEventKitError(err, 'TEAM_SIZE')).toBe(false);
     expect(isEventKitError(new Error('x'))).toBe(false);
   });
 
@@ -108,8 +123,11 @@ describe('errors', () => {
     const { ek, mock } = client();
     mock.on('GET /v1/auth/me', () => new Response('<html>blocked</html>', { status: 429 }));
     mock.on('GET /v1/events', () => new Response(null, { status: 502 }));
-    await expect(ek.events.mine()).rejects.toMatchObject({ status: 502, code: 'UNKNOWN_ERROR' });
-    await expect(ek.auth.me()).rejects.toMatchObject({
+    await expect(ek.console.events.mine()).rejects.toMatchObject({
+      status: 502,
+      code: 'UNKNOWN_ERROR',
+    });
+    await expect(ek.console.auth.me()).rejects.toMatchObject({
       status: 429,
       code: 'UNKNOWN_ERROR',
       message: 'Request failed (429).',
@@ -129,12 +147,12 @@ describe('errors', () => {
     const changes: boolean[] = [];
     ek.session.onChange((s) => changes.push(s));
     mock.on('GET /v1/auth/me', () => apiError(401, 'API_KEY_INVALID'));
-    await expect(ek.auth.me()).rejects.toMatchObject({ code: 'API_KEY_INVALID' });
+    await expect(ek.console.auth.me()).rejects.toMatchObject({ code: 'API_KEY_INVALID' });
     mock.on('POST /v1/auth/login', () => apiError(401, 'INVALID_CREDENTIALS'));
-    await expect(ek.auth.login({ email: 'a@b.co', password: 'x' })).rejects.toThrow();
+    await expect(ek.console.auth.login({ email: 'a@b.co', password: 'x' })).rejects.toThrow();
     expect(ek.session.token).toBe('old');
     mock.on('GET /v1/auth/me', () => apiError(401, 'UNAUTHORIZED'));
-    await expect(ek.auth.me()).rejects.toMatchObject({ code: 'UNAUTHORIZED' });
+    await expect(ek.console.auth.me()).rejects.toMatchObject({ code: 'UNAUTHORIZED' });
     expect(ek.session.isSignedIn).toBe(false);
     expect(changes).toEqual([false]);
   });
@@ -158,10 +176,10 @@ describe('sessions', () => {
     mock.on('POST /v1/auth/signup', () => ({ user: {}, token: { accessToken: 'new' } }));
     const seen: boolean[] = [];
     const off = ek.session.onChange((s) => seen.push(s));
-    await ek.auth.signup({ email: 'a@b.co', name: 'A', password: 'password1' });
+    await ek.console.auth.signup({ email: 'a@b.co', name: 'A', password: 'password1' });
     expect(ek.session.token).toBe('new');
-    ek.auth.logout();
-    ek.auth.logout();
+    ek.console.auth.logout();
+    ek.console.auth.logout();
     off();
     ek.session.set('again');
     expect(seen).toEqual([true, false]);
@@ -210,23 +228,140 @@ describe('sessions', () => {
   });
 });
 
-describe('links', () => {
-  it('canUse refuses someone who already has a role, except a participant on a participant link', () => {
-    const { ek } = client();
-    const p = (role: string, yourRole: string | null) => ({ role, yourRole }) as never;
-    expect(ek.invites.canUse(p('volunteer', null))).toBe(true);
-    expect(ek.invites.canUse(p('participant', 'participant'))).toBe(true);
-    expect(ek.invites.canUse(p('volunteer', 'participant'))).toBe(false);
-    expect(ek.invites.canUse(p('participant', 'judge'))).toBe(false);
+describe('the portal', () => {
+  it('reads portal links, including overridden paths', () => {
+    expect(parseLink('https://club.site/register/abc')).toEqual({ kind: 'register', token: 'abc' });
+    expect(parseLink('/staff/s%20t/')).toEqual({ kind: 'staff', token: 's t' });
+    expect(parseLink('/me/ek_1?x=1#y')).toEqual({ kind: 'me', token: 'ek_1' });
+    expect(parseLink('/elsewhere')).toBeNull();
+    const paths = { ...DEFAULT_PORTAL_PATHS, register: '/join/{token}/start' };
+    expect(parseLink('/join/abc/start', paths)).toEqual({ kind: 'register', token: 'abc' });
+    expect(portalUrl('https://club.site/', '/me/{token}', 'a b')).toBe(
+      'https://club.site/me/a%20b',
+    );
   });
 
-  it('accept and join send answers only when given', async () => {
+  it('registers a team, uploading the receipt first through the registration link', async () => {
     const { ek, mock } = client();
-    await ek.teamInvites.accept('i', { f: 1 });
-    expect(mock.last().body).toEqual({ answers: { f: 1 } });
-    await ek.teamLinks.join('t', { f: 'x' });
-    expect(mock.last().body).toEqual({ answers: { f: 'x' } });
-    await ek.teamLinks.join('t');
-    expect(mock.last().body).toEqual({});
+    mock.on('POST /v1/portal/uploads', () =>
+      json(
+        {
+          key: 'events/e/pending/l/k.png',
+          url: 'https://bucket.test/k',
+          method: 'PUT',
+          headers: { 'Content-Type': 'image/png' },
+        },
+        201,
+      ),
+    );
+    mock.on('PUT /k', () => new Response(null));
+    const members = [{ name: 'Asha', email: 'a@x.co', phone: '+91 98' }];
+    await ek.portal.register({ linkToken: 'reg', team: { name: 'T' }, members, receipt: png(20) });
+    const [ticket, , submit] = mock.calls;
+    expect(ticket!.body).toEqual({ linkToken: 'reg', contentType: 'image/png', size: 20 });
+    expect(submit!.body).toEqual({
+      linkToken: 'reg',
+      team: { name: 'T' },
+      members,
+      receiptKey: 'events/e/pending/l/k.png',
+    });
+    await ek.portal.register({ linkToken: 'reg', team: { name: 'U' }, members, leaderIndex: 0 });
+    expect(mock.last().body).toEqual({
+      linkToken: 'reg',
+      team: { name: 'U' },
+      members,
+      leaderIndex: 0,
+    });
+  });
+
+  it('opens a personal link from the address bar, keeps the session and strips the token', async () => {
+    const { ek, mock } = client();
+    mock.on('POST /v1/portal/access', () => ({
+      session: { accessToken: 'participant' },
+      me: { name: 'Asha' },
+    }));
+    const replaceState = vi.fn();
+    const me = await ek.portal.openSecretLink(undefined, {
+      location: { pathname: '/me/ek_secret' } as Location,
+      history: { state: null, replaceState } as unknown as History,
+    });
+    expect(me).toEqual({ name: 'Asha' });
+    expect(mock.last().body).toEqual({ token: 'ek_secret' });
+    expect(ek.session.token).toBe('participant');
+    expect(replaceState).toHaveBeenCalledWith(null, '', '/me');
+    await ek.portal.me.get();
+    expect(mock.last().headers.get('authorization')).toBe('Bearer participant');
+
+    // A path at the root strips to "/".
+    await ek.portal.openSecretLink(undefined, {
+      location: { pathname: '/ek_root' } as Location,
+      history: { state: 1, replaceState } as unknown as History,
+      paths: { ...DEFAULT_PORTAL_PATHS, me: '/{token}' },
+    });
+    expect(replaceState).toHaveBeenLastCalledWith(1, '', '/');
+    // A token given directly needs no address bar.
+    await ek.portal.openSecretLink('ek_direct');
+    expect(mock.last().body).toEqual({ token: 'ek_direct' });
+    await expect(
+      ek.portal.openSecretLink(undefined, { location: { pathname: '/register/x' } as Location }),
+    ).rejects.toMatchObject({ code: 'LINK_NOT_FOUND' });
+  });
+
+  it('resetting the link swaps the session; staff sign up and sign in; logout forgets', async () => {
+    const { ek, mock } = client();
+    mock.on('POST /v1/portal/me/access/reset', () => ({
+      link: { token: 'ek_new', url: null },
+      session: { accessToken: 'fresh' },
+    }));
+    expect(await ek.portal.me.resetLink()).toEqual({ token: 'ek_new', url: null });
+    expect(ek.session.token).toBe('fresh');
+    mock.on('POST /v1/portal/staff/signup', () =>
+      json({ user: {}, role: 'judge', token: { accessToken: 'staff' } }, 201),
+    );
+    await ek.portal.staff.signup({
+      linkToken: 's',
+      linkPassword: 'p',
+      name: 'J',
+      email: 'j@x.co',
+      password: 'password1',
+    });
+    expect(ek.session.token).toBe('staff');
+    mock.on('POST /v1/portal/login', () => ({
+      user: {},
+      role: 'admin',
+      token: { accessToken: 'owner' },
+    }));
+    await ek.portal.login('o@x.co', 'password1');
+    expect(ek.session.token).toBe('owner');
+    ek.portal.logout();
+    expect(ek.session.isSignedIn).toBe(false);
+  });
+
+  it('the leader pays through their link; participants page their feed', async () => {
+    const { ek, mock } = client({ session: memorySession('participant') });
+    mock.on('POST /v1/portal/me/uploads', () =>
+      json(
+        {
+          key: 'k2',
+          url: 'https://bucket.test/k2',
+          method: 'PUT',
+          headers: { 'Content-Type': 'image/png' },
+        },
+        201,
+      ),
+    );
+    mock.on('PUT /k2', () => new Response(null));
+    await ek.portal.me.team.payReceipt(png(8));
+    expect(mock.last().body).toEqual({ receiptKey: 'k2' });
+    mock.on('GET /v1/portal/me/notifications', (c) =>
+      new URL(c.url).searchParams.get('before') ? [] : [{ id: 'n1', sentAt: 'x' }],
+    );
+    const ids: string[] = [];
+    for await (const n of ek.portal.me.notifications.all({ pageSize: 1, channelId: 'c' }))
+      ids.push(n.id);
+    expect(ids).toEqual(['n1']);
+    expect(new URL(mock.last().url).searchParams.get('channelId')).toBe('c');
+    for await (const n of ek.portal.me.notifications.all()) ids.push(n.id);
+    expect(new URL(mock.last().url).searchParams.get('limit')).toBe('50');
   });
 });

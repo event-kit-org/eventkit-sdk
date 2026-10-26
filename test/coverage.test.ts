@@ -33,26 +33,84 @@ describe('every API operation is reachable through the devkit', () => {
 
     await ek.health();
     await ek.ready();
-    await ek.auth.signup({ email: 'a@b.co', name: 'A', password: 'password1' });
-    await ek.auth.login({ email: 'a@b.co', password: 'password1' });
-    await ek.auth.me();
-    await ek.events.create({} as never);
-    await ek.events.mine();
-    await ek.invites.preview('tok');
-    await ek.invites.joinAsStaff('tok', 'pw');
-    await ek.invites.startTeam('tok', { name: 'T' });
-    await ek.teamInvites.list();
-    await ek.teamInvites.accept(ID);
-    await ek.teamInvites.decline(ID);
-    await ek.teamLinks.preview('tok');
-    await ek.teamLinks.join('tok');
+    // Console (clients)
+    await ek.console.auth.signup({ email: 'a@b.co', name: 'A', password: 'password1' });
+    await ek.console.auth.login({ email: 'a@b.co', password: 'password1' });
+    await ek.console.auth.me();
+    await ek.console.events.create({} as never);
+    await ek.console.events.mine();
     await ek.push.config();
-    // push subscribe/unsubscribe need a browser; the raw calls are the same routes.
     await ek.raw.PUT('/v1/push/subscriptions', {
       body: { endpoint: 'https://p.test', keys: { p256dh: 'p', auth: 'a' } },
     });
     await ek.raw.DELETE('/v1/push/subscriptions', { body: { endpoint: 'https://p.test' } });
 
+    // Portal
+    const p = ek.portal;
+    mock.on('POST /v1/portal/access', () => ({ session: { accessToken: 's' }, me: {} }));
+    mock.on('POST /v1/portal/me/access/reset', () => ({
+      link: {},
+      session: { accessToken: 's2' },
+    }));
+    mock.on('POST /v1/portal/staff/signup', () =>
+      json({ user: {}, role: 'volunteer', token: { accessToken: 't' } }, 201),
+    );
+    mock.on('POST /v1/portal/login', () => ({
+      user: {},
+      role: 'volunteer',
+      token: { accessToken: 't' },
+    }));
+    mock.on('POST /v1/portal/uploads', () =>
+      json(
+        {
+          key: 'k',
+          url: 'https://bucket.test/k',
+          method: 'PUT',
+          headers: { 'Content-Type': 'image/png' },
+        },
+        201,
+      ),
+    );
+    mock.on('POST /v1/portal/me/uploads', () =>
+      json(
+        {
+          key: 'k',
+          url: 'https://bucket.test/k',
+          method: 'PUT',
+          headers: { 'Content-Type': 'image/png' },
+        },
+        201,
+      ),
+    );
+    await p.info();
+    await p.previewLink('tok');
+    await p.register({ linkToken: 'tok', team: { name: 'T' }, members: [], receipt: png() });
+    await p.openSecretLink('ek_x');
+    await p.me.get();
+    await p.me.resetLink();
+    await p.me.rsvp();
+    await p.me.unrsvp();
+    await p.me.cancel('a@b.co');
+    await p.me.team.get();
+    await p.me.team.payReceipt(png());
+    await p.me.team.handOver(ID, 'a@b.co');
+    await p.me.team.reissueMemberLink(ID);
+    await p.me.polls.list();
+    await p.me.polls.vote(ID, ID);
+    await p.me.notifications.feed();
+    await p.me.leaderboard();
+    await p.me.pushDevice.put({ endpoint: 'https://p.test', keys: { p256dh: 'p', auth: 'a' } });
+    await p.me.pushDevice.remove('https://p.test');
+    await p.staff.signup({
+      linkToken: 't',
+      linkPassword: 'p',
+      name: 'V',
+      email: 'v@x.co',
+      password: 'password1',
+    });
+    await p.login('v@x.co', 'password1');
+
+    // Event (owner and staff)
     await e.get();
     await e.update({});
     await e.features();
@@ -64,7 +122,7 @@ describe('every API operation is reachable through the devkit', () => {
     await e.apiKeys.create('site');
     await e.apiKeys.list();
     await e.apiKeys.revoke(ID);
-    await e.inviteLinks.create({ role: 'participant' });
+    await e.createRegistrationLink();
     await e.inviteLinks.list();
     await e.inviteLinks.revoke(ID);
     await e.members.list();
@@ -77,29 +135,16 @@ describe('every API operation is reachable through the devkit', () => {
     await e.teamRules.list();
     await e.teamRules.create({} as never);
     await e.teamRules.remove(ID);
-    await e.myTeam.get();
-    await e.myTeam.update({ name: 'T' });
-    await e.myTeam.invite('x@y.co');
-    await e.myTeam.withdrawInvite(ID);
-    await e.myTeam.updateMember(ID, {});
-    await e.myTeam.removeMember(ID);
-    await e.myTeam.leave();
-    await e.myTeam.disband();
-    await e.myTeam.handOver(ID);
-    await e.myTeam.resetJoinLink();
-    await e.myTeam.register();
-    await e.myTeam.payReceipt(png());
-    await e.myRegistration.get();
-    await e.myRegistration.rsvp();
-    await e.myRegistration.unrsvp();
-    await e.myRegistration.cancel();
     await e.teams.list();
     await e.teams.get(ID);
     await e.teams.shortlist(ID);
     await e.teams.confirm(ID);
     await e.registrations.cancel(ID);
     await e.registrations.restore(ID);
+    await e.registrations.reissueLink(ID);
+    await e.registrations.rotateQr(ID);
     await e.payments.list();
+    await e.payments.attachReceipt(ID, png());
     await e.payments.approve(ID);
     await e.payments.reject(ID, 'blurry');
     await e.checkpoints.list();
@@ -146,6 +191,6 @@ describe('every API operation is reachable through the devkit', () => {
     );
     const missing = all.filter((op) => !reached.has(op) && !NOT_FOR_FRONT_ENDS.includes(op));
     expect(missing).toEqual([]);
-    expect(all.length - NOT_FOR_FRONT_ENDS.length).toBe(96);
+    expect(all.length - NOT_FOR_FRONT_ENDS.length).toBe(98);
   });
 });

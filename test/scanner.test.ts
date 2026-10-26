@@ -11,7 +11,12 @@ const result = (over: Partial<ScanResult> = {}): ScanResult => ({
   previousScanAt: null,
   checkpoint: { id: 'gate', name: 'Gate', type: 'entry' },
   meal: null,
-  participant: { name: 'Asha', teamName: 'Byte Club', status: 'checked_in' },
+  participant: {
+    name: 'Asha',
+    participantCode: 'MZ-0001',
+    teamName: 'Byte Club',
+    status: 'checked_in',
+  },
   ...over,
 });
 

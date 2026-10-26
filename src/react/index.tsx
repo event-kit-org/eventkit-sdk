@@ -14,6 +14,7 @@ import {
   useSyncExternalStore,
 } from 'react';
 import type { EventKit } from '../client';
+import type { Schemas } from '../types';
 import type { EventApi } from '../event';
 import type { Scanner, ScannerOptions } from '../scanner';
 
@@ -82,10 +83,6 @@ export function useEventMutation<TVars, TData>(
 type EventOpt = { eventId?: string };
 export const useEvent = (o: EventOpt = {}) => useEventQuery('event', (e) => e.get(), o);
 export const useFeatures = (o: EventOpt = {}) => useEventQuery('features', (e) => e.features(), o);
-export const useMyTeam = (o: EventOpt = {}) =>
-  useEventQuery('my-team', (e) => e.myTeam.get(), { retry: false, ...o });
-export const useMyRegistration = (o: EventOpt = {}) =>
-  useEventQuery('my-registration', (e) => e.myRegistration.get(), { retry: false, ...o });
 export const useFields = (o: EventOpt = {}) => useEventQuery('fields', (e) => e.fields.list(), o);
 export const useTeamRules = (o: EventOpt = {}) =>
   useEventQuery('team-rules', (e) => e.teamRules.list(), o);
@@ -101,10 +98,88 @@ export const useNotifications = (o: EventOpt & { refetchIntervalMs?: number } = 
     ...(o.eventId ? { eventId: o.eventId } : {}),
   });
 
-/** Team invitations addressed to you, across events. */
-export function useTeamInvites() {
+// ------------------------------------------------------------ the portal
+
+/** Portal queries sit under ['eventkit', 'portal', …]; portal mutations refresh them. */
+export const portalKeys = {
+  all: ['eventkit', 'portal'] as const,
+  of: (name: string) => ['eventkit', 'portal', name] as const,
+};
+
+/** The event, its registration form and team rules, the portal's paths (no sign-in). */
+export function usePortalInfo() {
   const ek = useEventKit();
-  return useQuery({ queryKey: ['eventkit', 'team-invites'], queryFn: () => ek.teamInvites.list() });
+  return useQuery({ queryKey: portalKeys.of('info'), queryFn: () => ek.portal.info() });
+}
+
+/**
+ * On a personal-link page (/me/{token}): opens the link once, keeps the
+ * session and strips the token from the address bar. Later visits use the
+ * stored session. `paths`: the event's (from usePortalInfo), if overridden.
+ */
+export function useSecretLink(paths?: Schemas['PortalPaths']) {
+  const ek = useEventKit();
+  const queryClient = useQueryClient();
+  const [state, setState] = useState<{ status: 'opening' | 'open' | 'error'; error?: unknown }>(
+    () => ({ status: ek.session.isSignedIn ? 'open' : 'opening' }),
+  );
+  useEffect(() => {
+    let cancelled = false;
+    if (state.status !== 'opening') return;
+    ek.portal.openSecretLink(undefined, paths ? { paths } : {}).then(
+      (me) => {
+        if (cancelled) return;
+        queryClient.setQueryData(portalKeys.of('me'), me);
+        setState({ status: 'open' });
+      },
+      (error: unknown) => !cancelled && setState({ status: 'error', error }),
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [ek, paths, queryClient, state.status]);
+  return state;
+}
+
+/** The participant's own registration (after their link is open). */
+export function useMe() {
+  const ek = useEventKit();
+  return useQuery({
+    queryKey: portalKeys.of('me'),
+    queryFn: () => ek.portal.me.get(),
+    retry: false,
+  });
+}
+/** The participant's team (the leader also sees contacts and payment). */
+export function useMyTeam() {
+  const ek = useEventKit();
+  return useQuery({ queryKey: portalKeys.of('team'), queryFn: () => ek.portal.me.team.get() });
+}
+/** Polls for participants, with their vote. */
+export function useMyPolls() {
+  const ek = useEventKit();
+  return useQuery({ queryKey: portalKeys.of('polls'), queryFn: () => ek.portal.me.polls.list() });
+}
+/** The participant's notification feed, refreshed every 30 s. */
+export function useMyNotifications(refetchIntervalMs = 30_000) {
+  const ek = useEventKit();
+  return useQuery({
+    queryKey: portalKeys.of('notifications'),
+    queryFn: () => ek.portal.me.notifications.feed(),
+    refetchInterval: refetchIntervalMs,
+  });
+}
+
+/** Runs a portal call, then refreshes the portal's queries. */
+export function usePortalMutation<TVars, TData>(
+  fn: (portal: EventKit['portal'], vars: TVars) => Promise<TData>,
+) {
+  const ek = useEventKit();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (vars: TVars) => fn(ek.portal, vars),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: portalKeys.all }),
+  });
 }
 
 /**

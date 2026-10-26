@@ -148,6 +148,1599 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/portal': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** The event, its registration form and the portal's paths (no sign-in) */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['PortalInfo'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/portal/links/{token}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** What a registration or staff link is for (no sign-in) */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          token: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['LinkPreview'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        410: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/portal/uploads': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** A presigned link to upload the payment receipt before registering (allowed by the registration link). JPG/PNG/WebP/PDF, at most 5 MB. */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            linkToken: string;
+            /** @enum {string} */
+            contentType: 'image/jpeg' | 'image/png' | 'image/webp' | 'application/pdf';
+            size: number;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['UploadTicket'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        410: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        413: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        415: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/portal/register': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Register a whole team at once through a registration link (no accounts). Returns each member's participant ID, QR token and personal secret link: show them now, they are not shown again. */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            linkToken: string;
+            team: {
+              name: string;
+              answers?: components['schemas']['AnswersBodyInput'];
+            };
+            members: {
+              name: string;
+              /** Format: email */
+              email: string;
+              phone: string;
+              answers?: components['schemas']['AnswersBodyInput'];
+            }[];
+            /** @description Default 0: the first member */
+            leaderIndex?: number;
+            /** @description Pay-at-registration events: from POST /v1/portal/uploads */
+            receiptKey?: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['TeamRegistered'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        410: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        413: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        415: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/portal/access': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Open a personal secret link: swaps the link's token for a session. Remove the token from the address bar afterwards. */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            token: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ParticipantSession'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        410: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/portal/staff/signup': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Volunteers and judges: create this event's portal account through a staff link and its password */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            linkToken: string;
+            linkPassword: string;
+            name: string;
+            /** Format: email */
+            email: string;
+            phone?: string;
+            password: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['StaffSession'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        410: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/portal/login': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Sign in on the portal: this event's volunteers and judges, or its owner with their eventKit login */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            /** Format: email */
+            email: string;
+            password: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['StaffSession'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/portal/me': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Your registration, team and QR */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Me'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/portal/me/access/reset': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Replace your personal link (e.g. it leaked). The old link and every session made from it stop working; this returns the new link and a new session. */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              link: components['schemas']['PersonalLink'];
+              session: components['schemas']['AccessToken'];
+            };
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/portal/me/rsvp': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Confirm you will attend (once your registration is confirmed) */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Me'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/portal/me/unrsvp': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Withdraw your RSVP (before check-in) */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Me'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/portal/me/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Cancel your registration (the leader cancels the whole team). Confirm with the email or phone you registered with. */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            confirm: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              /** @enum {boolean} */
+              ok: true;
+            };
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/portal/me/team': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Your team. The leader also sees contacts, link activity and payment. */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Team'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/portal/me/uploads': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Leader: a presigned link to upload the team's receipt (after a rejection or shortlisting) */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            contentType: 'image/jpeg' | 'image/png' | 'image/webp' | 'application/pdf';
+            size: number;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['UploadTicket'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        413: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        415: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/portal/me/team/payment-proofs': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Leader: hand in a receipt after a rejection, or after shortlisting (before the payment deadline) */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            receiptKey: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['PaymentProof'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        413: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        415: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/portal/me/team/leader': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Leader: hand the team to another member. Confirm with your email or phone. */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            /** Format: uuid */
+            registrationId: string;
+            confirm: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              /** @enum {boolean} */
+              ok: true;
+            };
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/portal/me/team/members/{registrationId}/reissue-link': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Leader: a new personal link for a teammate (theirs leaked or was lost) */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          registrationId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['PersonalLink'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/portal/me/polls': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Polls for participants, with your vote */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Poll'][];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/portal/me/polls/{pollId}/vote': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Vote, or change your vote, until the poll closes */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          pollId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            /** Format: uuid */
+            optionId: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Poll'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/portal/me/notifications': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Notifications for participants, newest first (page with ?before=<sentAt>) */
+    get: {
+      parameters: {
+        query?: {
+          channelId?: string;
+          before?: string;
+          limit?: number;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Notification'][];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/portal/me/leaderboard': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Team totals, ranked, once the organiser shows the leaderboard */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Leaderboard'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/portal/me/push': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Get urgent notifications on this device (the browser PushSubscription) */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            /** Format: uri */
+            endpoint: string;
+            keys: {
+              p256dh: string;
+              auth: string;
+            };
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    post?: never;
+    /** Stop urgent notifications on this device */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            /** Format: uri */
+            endpoint: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/auth/signup': {
     parameters: {
       query?: never;
@@ -157,7 +1750,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Create an account */
+    /** Create a client account (an event manager) */
     post: {
       parameters: {
         query?: never;
@@ -221,7 +1814,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Log in with email and password */
+    /** Log in to a client account */
     post: {
       parameters: {
         query?: never;
@@ -281,7 +1874,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** The logged-in account */
+    /** The signed-in account (a client, or staff on a portal) */
     get: {
       parameters: {
         query?: never;
@@ -335,7 +1928,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Events the caller belongs to, with their role in each */
+    /** Events the client owns */
     get: {
       parameters: {
         query?: never;
@@ -366,7 +1959,7 @@ export interface paths {
       };
     };
     put?: never;
-    /** Create an event; the caller becomes its admin */
+    /** Create an event (clients); the caller becomes its owner and only admin */
     post: {
       parameters: {
         query?: never;
@@ -401,6 +1994,15 @@ export interface paths {
             discoverable?: boolean;
             /** @default false */
             leaderboardVisible?: boolean;
+            portalUrl?: string | null;
+            /** @default {} */
+            portalPaths?: {
+              register?: string;
+              staff?: string;
+              me?: string;
+              notifications?: string;
+            };
+            participantPrefix?: string;
           };
         };
       };
@@ -425,604 +2027,6 @@ export interface paths {
         };
         /** @description Default Response */
         401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/v1/invites/{token}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Preview an invite link. No login needed; with a Bearer token it also says your role in the event, so a link you cannot use is refused up front. */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          token: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['InvitePreview'];
-          };
-        };
-        /** @description Default Response */
-        404: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        410: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/v1/invites/{token}/join': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Join as volunteer, judge or admin using the link password */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          token: string;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          'application/json': {
-            password?: string;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['JoinedEvent'];
-          };
-        };
-        /** @description Default Response */
-        400: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        404: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        409: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        410: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/v1/invites/{token}/team': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Start a team through a participant link; you become its leader */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          token: string;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          'application/json': {
-            name: string;
-            answers?: components['schemas']['AnswersBodyInput'];
-            memberAnswers?: components['schemas']['AnswersBodyInput'];
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': {
-              /** Format: uuid */
-              eventId: string;
-              /** Format: uuid */
-              teamId: string;
-            };
-          };
-        };
-        /** @description Default Response */
-        400: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        404: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        409: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        410: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/v1/team-invites': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Team invitations waiting for your answer, across events */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['TeamInvite'][];
-          };
-        };
-        /** @description Default Response */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/v1/team-links/{token}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Preview a team's join link: the team, its event and the details you'd fill in */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          token: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['TeamLinkPreview'];
-          };
-        };
-        /** @description Default Response */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        404: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/v1/team-links/{token}/join': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Join a forming team through its join link (you become a participant) */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          token: string;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          'application/json': {
-            answers?: components['schemas']['AnswersBodyInput'];
-          } | null;
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': {
-              /** Format: uuid */
-              eventId: string;
-              /** Format: uuid */
-              teamId: string;
-            };
-          };
-        };
-        /** @description Default Response */
-        400: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        404: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        409: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/v1/team-invites/{inviteId}/accept': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Accept a team invitation with your member details (you become a participant) */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          inviteId: string;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          'application/json': {
-            answers?: components['schemas']['AnswersBodyInput'];
-          } | null;
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': {
-              /** Format: uuid */
-              eventId: string;
-              /** Format: uuid */
-              teamId: string;
-            };
-          };
-        };
-        /** @description Default Response */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        404: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        409: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/v1/team-invites/{inviteId}/decline': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Decline a team invitation */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          inviteId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': {
-              /** @enum {boolean} */
-              ok: true;
-            };
-          };
-        };
-        /** @description Default Response */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        404: {
           headers: {
             [name: string]: unknown;
           };
@@ -1245,7 +2249,7 @@ export interface paths {
     delete?: never;
     options?: never;
     head?: never;
-    /** Edit the event (payment settings lock once anyone has registered) */
+    /** Edit the event, including the portal URL and its link paths (payment settings lock once anyone has registered) */
     patch: {
       parameters: {
         query?: never;
@@ -1278,6 +2282,14 @@ export interface paths {
             paymentDeadline?: string | null;
             discoverable?: boolean;
             leaderboardVisible?: boolean;
+            portalUrl?: string | null;
+            portalPaths?: {
+              register?: string;
+              staff?: string;
+              me?: string;
+              notifications?: string;
+            };
+            participantPrefix?: string;
           };
         };
       };
@@ -2022,7 +3034,7 @@ export interface paths {
       };
     };
     put?: never;
-    /** Create an invite link for a role (staff links need a password) */
+    /** Create a registration link (role participant) or a staff link (volunteer, judge; needs a password) */
     post: {
       parameters: {
         query?: never;
@@ -2035,7 +3047,7 @@ export interface paths {
       requestBody: {
         content: {
           'application/json': {
-            role: components['schemas']['RoleInput'];
+            role: components['schemas']['LinkRoleInput'];
             label?: string;
             password?: string;
             /** Format: date-time */
@@ -2170,7 +3182,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Everyone in the event and their role */
+    /** The owner and the staff (volunteers, judges). Participants are under teams. */
     get: {
       parameters: {
         query?: {
@@ -2240,7 +3252,7 @@ export interface paths {
     get?: never;
     put?: never;
     post?: never;
-    /** Remove someone from the event (a participant is cancelled first) */
+    /** Remove a volunteer or judge (their portal account stops working) */
     delete: {
       parameters: {
         query?: never;
@@ -2300,7 +3312,7 @@ export interface paths {
     };
     options?: never;
     head?: never;
-    /** Change someone's role (a participant is cancelled first, as if they cancelled) */
+    /** Switch a staff member between volunteer and judge */
     patch: {
       parameters: {
         query?: never;
@@ -2314,7 +3326,8 @@ export interface paths {
       requestBody: {
         content: {
           'application/json': {
-            role: components['schemas']['RoleInput'];
+            /** @enum {string} */
+            role: 'volunteer' | 'judge';
           };
         };
       };
@@ -2381,760 +3394,6 @@ export interface paths {
     };
     trace?: never;
   };
-  '/v1/events/{eventId}/my-team': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Your team */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          eventId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Team'];
-          };
-        };
-        /** @description Default Response */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        404: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    /** Disband a team that has not registered (leader) */
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          eventId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': {
-              /** @enum {boolean} */
-              ok: true;
-            };
-          };
-        };
-        /** @description Default Response */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        404: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        409: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-      };
-    };
-    options?: never;
-    head?: never;
-    /** Rename the team or edit its details (leader, while forming) */
-    patch: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          eventId: string;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          'application/json': {
-            name?: string;
-            answers?: components['schemas']['AnswersBodyInput'];
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Team'];
-          };
-        };
-        /** @description Default Response */
-        400: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        404: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        409: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-      };
-    };
-    trace?: never;
-  };
-  '/v1/events/{eventId}/my-team/invites': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Invite someone by their account email, with the details the leader fills in */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          eventId: string;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          'application/json': {
-            /** Format: email */
-            email: string;
-            answers?: components['schemas']['AnswersBodyInput'];
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Team'];
-          };
-        };
-        /** @description Default Response */
-        400: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        404: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        409: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/v1/events/{eventId}/my-team/members/{membershipId}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    /** Edit a member's details while forming: the leader edits leader-filled fields, members their own */
-    patch: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          eventId: string;
-          membershipId: string;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          'application/json': {
-            answers: components['schemas']['AnswersBodyInput'];
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Team'];
-          };
-        };
-        /** @description Default Response */
-        400: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        404: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        409: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-      };
-    };
-    trace?: never;
-  };
-  '/v1/events/{eventId}/my-team/invites/{membershipId}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post?: never;
-    /** Withdraw a pending invitation (leader) */
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          eventId: string;
-          membershipId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Team'];
-          };
-        };
-        /** @description Default Response */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        404: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-      };
-    };
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/v1/events/{eventId}/my-team/members/{userId}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post?: never;
-    /** Remove a member while forming (leader) */
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          eventId: string;
-          userId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Team'];
-          };
-        };
-        /** @description Default Response */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        404: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        409: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-      };
-    };
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/v1/events/{eventId}/my-team/leave': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Leave a team that has not registered */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          eventId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': {
-              /** @enum {boolean} */
-              ok: true;
-            };
-          };
-        };
-        /** @description Default Response */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        404: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        409: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/v1/events/{eventId}/my-team/join-link/reset': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Replace the team's join link; the old one stops working (leader, while forming) */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          eventId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Team'];
-          };
-        };
-        /** @description Default Response */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        404: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        409: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/v1/events/{eventId}/my-team/leader': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Hand leadership to a teammate (leader, any stage) */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          eventId: string;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          'application/json': {
-            /** Format: uuid */
-            userId: string;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Team'];
-          };
-        };
-        /** @description Default Response */
-        400: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        404: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   '/v1/events/{eventId}/teams': {
     parameters: {
       query?: never;
@@ -3142,7 +3401,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** All teams, with stage, status and payment state */
+    /** All teams, with status and payment state */
     get: {
       parameters: {
         query?: never;
@@ -3260,403 +3519,6 @@ export interface paths {
     };
     put?: never;
     post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/v1/events/{eventId}/my-team/registration': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Submit the team (leader). Pay-at-registration events: receiptKey is required, from an upload with purpose receipt. Other events: no receiptKey. */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          eventId: string;
-        };
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          'application/json': {
-            receiptKey?: string;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Team'];
-          };
-        };
-        /** @description Default Response */
-        400: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        404: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        409: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        413: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        415: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/v1/events/{eventId}/my-registration': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Your registration, status and QR token */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          eventId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['MyRegistration'];
-          };
-        };
-        /** @description Default Response */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        404: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/v1/events/{eventId}/my-registration/rsvp': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Confirm you will attend (after your registration is confirmed) */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          eventId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['MyRegistration'];
-          };
-        };
-        /** @description Default Response */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        404: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        409: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/v1/events/{eventId}/my-registration/unrsvp': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Withdraw your RSVP (before check-in) */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          eventId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['MyRegistration'];
-          };
-        };
-        /** @description Default Response */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        404: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        409: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/v1/events/{eventId}/my-registration/cancel': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Cancel your registration (a leader cancels the whole team) */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          eventId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': {
-              /** @enum {boolean} */
-              ok: true;
-            };
-          };
-        };
-        /** @description Default Response */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        404: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        409: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-      };
-    };
     delete?: never;
     options?: never;
     head?: never;
@@ -3969,7 +3831,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/v1/events/{eventId}/my-team/payment-proofs': {
+  '/v1/events/{eventId}/registrations/{registrationId}/reissue-link': {
     parameters: {
       query?: never;
       header?: never;
@@ -3978,13 +3840,217 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Submit a payment receipt (leader): after a rejection, or after shortlisting and before the payment deadline. receiptKey comes from an upload with purpose receipt. */
+    /** Issue a new personal secret link (e.g. it leaked or was lost). The old link and its sessions stop working. */
     post: {
       parameters: {
         query?: never;
         header?: never;
         path: {
           eventId: string;
+          registrationId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['SecretLink'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/registrations/{registrationId}/rotate-qr': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Issue a new QR code; the old one stops scanning */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          registrationId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              /** Format: uuid */
+              registrationId: string;
+              qrToken: string;
+            };
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/payment-proofs': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Receipts to review (filter by status), newest first */
+    get: {
+      parameters: {
+        query?: {
+          status?: 'pending' | 'approved' | 'rejected';
+        };
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['PaymentProofForReview'][];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/teams/{teamId}/payment-proofs': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Attach a receipt for a team (admin), e.g. one the team sent another way. receiptKey comes from an upload with purpose receipt and this teamId. */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          teamId: string;
         };
         cookie?: never;
       };
@@ -4070,73 +4136,6 @@ export interface paths {
         };
       };
     };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/v1/events/{eventId}/payment-proofs': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Receipts to review (filter by status), newest first */
-    get: {
-      parameters: {
-        query?: {
-          status?: 'pending' | 'approved' | 'rejected';
-        };
-        header?: never;
-        path: {
-          eventId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['PaymentProofForReview'][];
-          };
-        };
-        /** @description Default Response */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        404: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -4629,6 +4628,7 @@ export interface paths {
             id: string;
             /** Format: uuid */
             checkpointId: string;
+            /** @description The QR token, or the participant ID typed by hand */
             qrToken: string;
           };
         };
@@ -4705,7 +4705,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Mark someone attending (or not) by their QR code, e.g. at the gate when they didn't RSVP */
+    /** Mark someone attending (or not) by their QR code or participant ID, e.g. at the gate when they didn't RSVP */
     post: {
       parameters: {
         query?: never;
@@ -4795,7 +4795,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Get a presigned upload link. receipt: the team leader (JPG/PNG/WebP/PDF); payment_qr: an admin (JPG/PNG/WebP). At most 5 MB. */
+    /** Get a presigned upload link (admins). payment_qr: the UPI QR (JPG/PNG/WebP). receipt: a team's receipt (JPG/PNG/WebP/PDF), with teamId. At most 5 MB. Participants upload through the portal (/v1/portal/uploads, /v1/portal/me/uploads). */
     post: {
       parameters: {
         query?: never;
@@ -4813,6 +4813,11 @@ export interface paths {
             /** @enum {string} */
             contentType: 'image/jpeg' | 'image/png' | 'image/webp' | 'application/pdf';
             size: number;
+            /**
+             * Format: uuid
+             * @description Receipts: the team it is for
+             */
+            teamId?: string;
           };
         };
       };
@@ -6591,8 +6596,6 @@ export interface paths {
             /** @enum {string} */
             scope: 'team' | 'member';
             /** @enum {string} */
-            filledBy: 'leader' | 'member';
-            /** @enum {string} */
             type: 'short_text' | 'long_text' | 'number' | 'choice';
           };
         };
@@ -6712,7 +6715,7 @@ export interface paths {
     };
     options?: never;
     head?: never;
-    /** Edit a field (scope, filler and type are fixed) */
+    /** Edit a field (scope and type are fixed) */
     patch: {
       parameters: {
         query?: never;
@@ -7070,6 +7073,12 @@ export interface components {
     };
     /** @enum {string} */
     PaymentModeInput: 'none' | 'at_registration' | 'after_shortlist';
+    PortalPathsInput: {
+      register: string;
+      staff: string;
+      me: string;
+      notifications: string;
+    };
     EventInput: {
       /** Format: uuid */
       id: string;
@@ -7094,6 +7103,11 @@ export interface components {
       /** @description After shortlist only: receipts cannot be uploaded after this */
       paymentDeadline: string | null;
       hasPaymentQr: boolean;
+      /** @description The event portal's address; registration and staff links are built on it */
+      portalUrl: string | null;
+      portalPaths: components['schemas']['PortalPathsInput'];
+      /** @description Participant IDs look like <prefix>-0042 */
+      participantPrefix: string;
       discoverable: boolean;
       leaderboardVisible: boolean;
       /** Format: date-time */
@@ -7129,19 +7143,43 @@ export interface components {
       /** Format: date-time */
       createdAt: string;
     };
+    /** @enum {string} */
+    LinkRoleInput: 'participant' | 'volunteer' | 'judge';
+    InviteLinkInput: {
+      /** Format: uuid */
+      id: string;
+      /** @enum {string} */
+      kind: 'registration' | 'staff';
+      role: components['schemas']['LinkRoleInput'];
+      label: string | null;
+      /** @description Goes in the link URL */
+      token: string;
+      /** @description The link on the event's portal; null until the portal URL is set */
+      url: string | null;
+      requiresPassword: boolean;
+      /** Format: date-time */
+      createdAt: string;
+      expiresAt: string | null;
+      revokedAt: string | null;
+    };
+    MemberInput: {
+      /** Format: uuid */
+      userId: string;
+      name: string;
+      email: string;
+      phone: string | null;
+      role: components['schemas']['RoleInput'];
+      /** Format: date-time */
+      joinedAt: string;
+    };
     EventFieldInput: {
       /** Format: uuid */
       id: string;
       /**
-       * @description team: once per team; member: once per member
+       * @description team: once per team; member: once per member (the leader fills in both)
        * @enum {string}
        */
       scope: 'team' | 'member';
-      /**
-       * @description Who fills it in. Team fields: always the leader
-       * @enum {string}
-       */
-      filledBy: 'leader' | 'member';
       label: string;
       help: string | null;
       /** @enum {string} */
@@ -7173,74 +7211,11 @@ export interface components {
     AnswersInput: {
       [key: string]: string | number;
     };
-    InviteLinkInput: {
-      /** Format: uuid */
-      id: string;
-      role: components['schemas']['RoleInput'];
-      label: string | null;
-      /** @description Goes in the link URL */
-      token: string;
-      requiresPassword: boolean;
-      /** Format: date-time */
-      createdAt: string;
-      expiresAt: string | null;
-      revokedAt: string | null;
-    };
-    InvitePreviewInput: {
-      role: components['schemas']['RoleInput'];
-      requiresPassword: boolean;
-      expiresAt: string | null;
-      /** @description Participant links: what starting a team asks for */
-      fields: components['schemas']['EventFieldInput'][];
-      teamRules: components['schemas']['TeamRuleInput'][];
-      /** @description Signed-in callers only: your role in this event. Anyone who already has a role can't use another link (an admin changes roles); a participant link is also refused if you are already in a team. */
-      yourRole: components['schemas']['RoleInput'] | null;
-      event: {
-        /** Format: uuid */
-        id: string;
-        name: string;
-        hostedBy: string;
-        venue: string;
-        /** Format: date-time */
-        startAt: string;
-        /** Format: date-time */
-        endAt: string;
-        /** Format: date-time */
-        registrationStart: string;
-        /** Format: date-time */
-        registrationDeadline: string;
-        minTeamSize: number;
-        maxTeamSize: number;
-        paymentMode: components['schemas']['PaymentModeInput'];
-        registrationFee: number | null;
-        currency: string | null;
-      };
-    };
-    JoinedEventInput: {
-      /** Format: uuid */
-      eventId: string;
-      role: components['schemas']['RoleInput'];
-    };
-    MemberInput: {
-      /** Format: uuid */
-      userId: string;
-      name: string;
-      email: string;
-      phone: string | null;
-      role: components['schemas']['RoleInput'];
-      /** Format: date-time */
-      joinedAt: string;
-    };
     /** @enum {string} */
     RegistrationStatusInput:
       'registered' | 'shortlisted' | 'confirmed' | 'attending' | 'checked_in' | 'cancelled';
     /** @enum {string} */
-    TeamMemberStatusInput:
-      'invited' | 'accepted' | 'declined' | 'expired' | 'withdrawn' | 'left' | 'removed';
-    /** @enum {string} */
     PaymentProofStatusInput: 'pending' | 'approved' | 'rejected';
-    /** @enum {string} */
-    TeamStageInput: 'forming' | 'expired' | 'registered';
     PaymentProofInput: {
       /** Format: uuid */
       id: string;
@@ -7261,50 +7236,33 @@ export interface components {
       id: string;
       name: string;
       /** Format: uuid */
-      leaderId: string;
-      /** @description The team's join link token: share it so teammates can join while forming */
-      joinToken: string;
+      leaderRegistrationId: string;
       /** Format: date-time */
       createdAt: string;
-      stage: components['schemas']['TeamStageInput'];
-      /** @description The leader's registration status; null until the team registers */
-      status: components['schemas']['RegistrationStatusInput'] | null;
-      /** @description Registered, but cancellations left it too small */
+      /** @description The leader's registration status */
+      status: components['schemas']['RegistrationStatusInput'];
+      /** @description Cancellations left the team below the minimum size */
       belowMinimum: boolean;
       /** @description Team field answers */
       answers: components['schemas']['AnswersInput'];
-      /** @description Accepted members and invitations (pending, or expired at the deadline) */
       members: {
         /** Format: uuid */
-        membershipId: string;
-        user: {
-          /** Format: uuid */
-          id: string;
-          name: string;
-          email: string;
-        };
-        status: components['schemas']['TeamMemberStatusInput'];
-        isLeader: boolean;
-        /** Format: date-time */
-        invitedAt: string;
-        /** @description When they accepted or joined */
-        respondedAt: string | null;
-        answers: components['schemas']['AnswersInput'];
-      }[];
-      registrations: {
-        /** Format: uuid */
-        id: string;
-        user: {
-          /** Format: uuid */
-          id: string;
-          name: string;
-          email: string;
-        };
+        registrationId: string;
+        name: string;
+        /** @description Shown to admins and the leader */
+        email: string | null;
+        /** @description Shown to admins and the leader */
+        phone: string | null;
+        participantCode: string;
         status: components['schemas']['RegistrationStatusInput'];
+        isLeader: boolean;
+        answers: components['schemas']['AnswersInput'];
+        /** @description When their personal link was last opened (admins and the leader) */
+        linkLastUsedAt: string | null;
       }[];
       payment: {
         mode: components['schemas']['PaymentModeInput'];
-        /** @description In paise; null while forming or unpaid events */
+        /** @description In paise; null for unpaid events */
         amountDue: number | null;
         currency: string | null;
         /** @description After shortlist: receipts must be uploaded before this */
@@ -7333,9 +7291,9 @@ export interface components {
         name: string;
       };
       uploadedBy: {
-        /** Format: uuid */
-        id: string;
         name: string;
+        /** @enum {string} */
+        by: 'leader' | 'admin';
       };
       /**
        * Format: uri
@@ -7349,90 +7307,31 @@ export interface components {
       name: string;
       leader: {
         /** Format: uuid */
-        id: string;
+        registrationId: string;
         name: string;
         email: string;
+        phone: string;
       };
-      stage: components['schemas']['TeamStageInput'];
-      status: components['schemas']['RegistrationStatusInput'] | null;
+      status: components['schemas']['RegistrationStatusInput'];
       memberCount: number;
       belowMinimum: boolean;
       latestProofStatus: ('pending' | 'approved' | 'rejected') | null;
       /** Format: date-time */
       createdAt: string;
     };
-    MyRegistrationInput: {
+    SecretLinkInput: {
       /** Format: uuid */
-      id: string;
-      status: components['schemas']['RegistrationStatusInput'];
-      /** @description Encode this in the participant's QR code */
-      qrToken: string;
-      team: {
-        /** Format: uuid */
-        id: string;
-        name: string;
-      };
-      /** Format: date-time */
-      registeredAt: string;
-      shortlistedAt: string | null;
-      confirmedAt: string | null;
-      attendingAt: string | null;
-      checkedInAt: string | null;
-      cancelledAt: string | null;
+      registrationId: string;
+      /** @description Shown once. Only its hash is stored. */
+      token: string;
+      /** @description The personal link on the event's portal (null until the portal URL is set) */
+      url: string | null;
     };
     AttendanceInput: {
       /** Format: uuid */
       registrationId: string;
       status: components['schemas']['RegistrationStatusInput'];
       name: string;
-    };
-    UploadTicketInput: {
-      /** @description Pass this back to the API once the upload is done */
-      key: string;
-      /**
-       * Format: uri
-       * @description PUT the file here, with exactly the given headers
-       */
-      url: string;
-      /** @constant */
-      method: 'PUT';
-      headers: {
-        'Content-Type': string;
-      };
-      /** @description Seconds until the link stops working */
-      expiresIn: number;
-    };
-    ScanResultInput: {
-      /** Format: uuid */
-      id: string;
-      /** @enum {string} */
-      result: 'accepted' | 'rejected';
-      reason:
-        | ('duplicate' | 'not_open' | 'closed' | 'not_attending' | 'not_checked_in' | 'cancelled')
-        | null;
-      /** Format: date-time */
-      scannedAt: string;
-      /** @description True if this repeated an earlier request */
-      replayed: boolean;
-      /** @description For duplicates: the earlier scan */
-      previousScanAt: string | null;
-      checkpoint: {
-        /** Format: uuid */
-        id: string;
-        name: string;
-        type: components['schemas']['CheckpointTypeInput'];
-      };
-      /** @description At a meal checkpoint linked to a poll: exactly what to hand over */
-      meal: {
-        label: string;
-        /** @description False: the default meal */
-        chosen: boolean;
-      } | null;
-      participant: {
-        name: string;
-        teamName: string;
-        status: components['schemas']['RegistrationStatusInput'];
-      };
     };
     ChannelInput: {
       /** Format: uuid */
@@ -7462,6 +7361,42 @@ export interface components {
       priority: 'normal' | 'urgent';
       /** Format: date-time */
       sentAt: string;
+    };
+    PollInput: {
+      /** Format: uuid */
+      id: string;
+      question: string;
+      audience: components['schemas']['RoleInput'][];
+      closesAt: string | null;
+      closed: boolean;
+      resultsVisible: boolean;
+      defaultOptionId: string | null;
+      createdBy: {
+        /** Format: uuid */
+        id: string;
+        name: string;
+      };
+      /** Format: date-time */
+      createdAt: string;
+      options: {
+        /** Format: uuid */
+        id: string;
+        label: string;
+        position: number;
+        /** @description Null when results are hidden from you */
+        votes: number | null;
+      }[];
+      totalVotes: number | null;
+      myVote: string | null;
+      canVote: boolean;
+      canManage: boolean;
+      /** @description Someone has voted: options can only be added */
+      optionsLocked: boolean;
+      mealCheckpoints: {
+        /** Format: uuid */
+        id: string;
+        name: string;
+      }[];
     };
     CriterionInput: {
       /** Format: uuid */
@@ -7507,96 +7442,166 @@ export interface components {
         }[];
       }[];
     };
-    PollInput: {
-      /** Format: uuid */
-      id: string;
-      question: string;
-      audience: components['schemas']['RoleInput'][];
-      closesAt: string | null;
-      closed: boolean;
-      resultsVisible: boolean;
-      defaultOptionId: string | null;
-      createdBy: {
-        /** Format: uuid */
-        id: string;
-        name: string;
+    UploadTicketInput: {
+      /** @description Pass this back to the API once the upload is done */
+      key: string;
+      /**
+       * Format: uri
+       * @description PUT the file here, with exactly the given headers
+       */
+      url: string;
+      /** @constant */
+      method: 'PUT';
+      headers: {
+        'Content-Type': string;
       };
-      /** Format: date-time */
-      createdAt: string;
-      options: {
-        /** Format: uuid */
-        id: string;
-        label: string;
-        position: number;
-        /** @description Null when results are hidden from you */
-        votes: number | null;
-      }[];
-      totalVotes: number | null;
-      myVote: string | null;
-      canVote: boolean;
-      canManage: boolean;
-      /** @description Someone has voted: options can only be added */
-      optionsLocked: boolean;
-      mealCheckpoints: {
-        /** Format: uuid */
-        id: string;
-        name: string;
-      }[];
+      /** @description Seconds until the link stops working */
+      expiresIn: number;
     };
-    TeamInviteInput: {
-      /** Format: uuid */
-      id: string;
-      team: {
-        /** Format: uuid */
-        id: string;
-        name: string;
-      };
+    PersonalLinkInput: {
+      /** @description Shown once; only its hash is stored */
+      token: string;
+      /** @description The personal link on this portal */
+      url: string | null;
+    };
+    PortalInfoInput: {
       event: {
         /** Format: uuid */
         id: string;
         name: string;
         hostedBy: string;
+        venue: string;
         /** Format: date-time */
         startAt: string;
         /** Format: date-time */
-        registrationDeadline: string;
-      };
-      invitedBy: {
-        name: string;
-      };
-      /** Format: date-time */
-      invitedAt: string;
-      /** @description Details the leader already filled in for you */
-      answers: components['schemas']['AnswersInput'];
-      /** @description The event's member fields: those filled by 'member' are yours to answer when accepting */
-      fields: components['schemas']['EventFieldInput'][];
-    };
-    TeamLinkPreviewInput: {
-      team: {
-        /** Format: uuid */
-        id: string;
-        name: string;
-        leader: {
-          name: string;
-        };
-        memberCount: number;
-        stage: components['schemas']['TeamStageInput'];
-      };
-      event: {
-        /** Format: uuid */
-        id: string;
-        name: string;
-        hostedBy: string;
-        /** Format: date-time */
-        startAt: string;
+        endAt: string;
         /** Format: date-time */
         registrationStart: string;
         /** Format: date-time */
         registrationDeadline: string;
+        minTeamSize: number;
         maxTeamSize: number;
+        /** @description Of max participants, counting confirmed people */
+        placesLeft: number;
+        paymentMode: components['schemas']['PaymentModeInput'];
+        /** @description Per person, in paise */
+        registrationFee: number | null;
+        currency: string | null;
+        paymentDeadline: string | null;
+        leaderboardVisible: boolean;
       };
-      /** @description Member fields; those filled by 'member' are yours to answer */
+      /** @description Feature on and inside the window */
+      registrationOpen: boolean;
+      paths: components['schemas']['PortalPathsInput'];
+      /** @description The registration form */
       fields: components['schemas']['EventFieldInput'][];
+      teamRules: components['schemas']['TeamRuleInput'][];
+      /** @description Short-lived link to the UPI QR image */
+      paymentQrUrl: string | null;
+    };
+    MeInput: {
+      /** Format: uuid */
+      registrationId: string;
+      name: string;
+      email: string;
+      phone: string;
+      participantCode: string;
+      /** @description Show as a QR code at the entry and checkpoints */
+      qrToken: string;
+      status: components['schemas']['RegistrationStatusInput'];
+      isLeader: boolean;
+      team: {
+        /** Format: uuid */
+        id: string;
+        name: string;
+        status: components['schemas']['RegistrationStatusInput'];
+      };
+      /** Format: date-time */
+      registeredAt: string;
+      confirmedAt: string | null;
+      attendingAt: string | null;
+      checkedInAt: string | null;
+      cancelledAt: string | null;
+      linkLastUsedAt: string | null;
+      /**
+       * Format: date-time
+       * @description The link and its sessions stop working then
+       */
+      accessEndsAt: string;
+    };
+    ParticipantSessionInput: {
+      session: components['schemas']['AccessTokenInput'];
+      me: components['schemas']['MeInput'];
+    };
+    ScanResultInput: {
+      /** Format: uuid */
+      id: string;
+      /** @enum {string} */
+      result: 'accepted' | 'rejected';
+      reason:
+        | ('duplicate' | 'not_open' | 'closed' | 'not_attending' | 'not_checked_in' | 'cancelled')
+        | null;
+      /** Format: date-time */
+      scannedAt: string;
+      /** @description True if this repeated an earlier request */
+      replayed: boolean;
+      /** @description For duplicates: the earlier scan */
+      previousScanAt: string | null;
+      checkpoint: {
+        /** Format: uuid */
+        id: string;
+        name: string;
+        type: components['schemas']['CheckpointTypeInput'];
+      };
+      /** @description At a meal checkpoint linked to a poll: exactly what to hand over */
+      meal: {
+        label: string;
+        /** @description False: the default meal */
+        chosen: boolean;
+      } | null;
+      participant: {
+        name: string;
+        participantCode: string;
+        teamName: string;
+        status: components['schemas']['RegistrationStatusInput'];
+      };
+    };
+    LinkPreviewInput: {
+      /** @enum {string} */
+      kind: 'registration' | 'staff';
+      role: components['schemas']['LinkRoleInput'];
+      label: string | null;
+      requiresPassword: boolean;
+      expiresAt: string | null;
+    };
+    TeamRegisteredInput: {
+      team: {
+        /** Format: uuid */
+        id: string;
+        name: string;
+      };
+      members: {
+        /** Format: uuid */
+        registrationId: string;
+        name: string;
+        email: string;
+        participantCode: string;
+        qrToken: string;
+        isLeader: boolean;
+        link: components['schemas']['PersonalLinkInput'];
+      }[];
+      payment: {
+        mode: components['schemas']['PaymentModeInput'];
+        amountDue: number | null;
+        currency: string | null;
+        proof: components['schemas']['PaymentProofInput'] | null;
+      };
+    };
+    StaffSessionInput: {
+      user: components['schemas']['UserInput'];
+      /** @enum {string} */
+      role: 'admin' | 'volunteer' | 'judge';
+      token: components['schemas']['AccessTokenInput'];
     };
     Error: {
       error: {
@@ -7673,6 +7678,12 @@ export interface components {
     };
     /** @enum {string} */
     PaymentMode: 'none' | 'at_registration' | 'after_shortlist';
+    PortalPaths: {
+      register: string;
+      staff: string;
+      me: string;
+      notifications: string;
+    };
     Event: {
       /** Format: uuid */
       id: string;
@@ -7697,6 +7708,11 @@ export interface components {
       /** @description After shortlist only: receipts cannot be uploaded after this */
       paymentDeadline: string | null;
       hasPaymentQr: boolean;
+      /** @description The event portal's address; registration and staff links are built on it */
+      portalUrl: string | null;
+      portalPaths: components['schemas']['PortalPaths'];
+      /** @description Participant IDs look like <prefix>-0042 */
+      participantPrefix: string;
       discoverable: boolean;
       leaderboardVisible: boolean;
       /** Format: date-time */
@@ -7732,19 +7748,43 @@ export interface components {
       /** Format: date-time */
       createdAt: string;
     };
+    /** @enum {string} */
+    LinkRole: 'participant' | 'volunteer' | 'judge';
+    InviteLink: {
+      /** Format: uuid */
+      id: string;
+      /** @enum {string} */
+      kind: 'registration' | 'staff';
+      role: components['schemas']['LinkRole'];
+      label: string | null;
+      /** @description Goes in the link URL */
+      token: string;
+      /** @description The link on the event's portal; null until the portal URL is set */
+      url: string | null;
+      requiresPassword: boolean;
+      /** Format: date-time */
+      createdAt: string;
+      expiresAt: string | null;
+      revokedAt: string | null;
+    };
+    Member: {
+      /** Format: uuid */
+      userId: string;
+      name: string;
+      email: string;
+      phone: string | null;
+      role: components['schemas']['Role'];
+      /** Format: date-time */
+      joinedAt: string;
+    };
     EventField: {
       /** Format: uuid */
       id: string;
       /**
-       * @description team: once per team; member: once per member
+       * @description team: once per team; member: once per member (the leader fills in both)
        * @enum {string}
        */
       scope: 'team' | 'member';
-      /**
-       * @description Who fills it in. Team fields: always the leader
-       * @enum {string}
-       */
-      filledBy: 'leader' | 'member';
       label: string;
       help: string | null;
       /** @enum {string} */
@@ -7776,74 +7816,11 @@ export interface components {
     Answers: {
       [key: string]: string | number;
     };
-    InviteLink: {
-      /** Format: uuid */
-      id: string;
-      role: components['schemas']['Role'];
-      label: string | null;
-      /** @description Goes in the link URL */
-      token: string;
-      requiresPassword: boolean;
-      /** Format: date-time */
-      createdAt: string;
-      expiresAt: string | null;
-      revokedAt: string | null;
-    };
-    InvitePreview: {
-      role: components['schemas']['Role'];
-      requiresPassword: boolean;
-      expiresAt: string | null;
-      /** @description Participant links: what starting a team asks for */
-      fields: components['schemas']['EventField'][];
-      teamRules: components['schemas']['TeamRule'][];
-      /** @description Signed-in callers only: your role in this event. Anyone who already has a role can't use another link (an admin changes roles); a participant link is also refused if you are already in a team. */
-      yourRole: components['schemas']['Role'] | null;
-      event: {
-        /** Format: uuid */
-        id: string;
-        name: string;
-        hostedBy: string;
-        venue: string;
-        /** Format: date-time */
-        startAt: string;
-        /** Format: date-time */
-        endAt: string;
-        /** Format: date-time */
-        registrationStart: string;
-        /** Format: date-time */
-        registrationDeadline: string;
-        minTeamSize: number;
-        maxTeamSize: number;
-        paymentMode: components['schemas']['PaymentMode'];
-        registrationFee: number | null;
-        currency: string | null;
-      };
-    };
-    JoinedEvent: {
-      /** Format: uuid */
-      eventId: string;
-      role: components['schemas']['Role'];
-    };
-    Member: {
-      /** Format: uuid */
-      userId: string;
-      name: string;
-      email: string;
-      phone: string | null;
-      role: components['schemas']['Role'];
-      /** Format: date-time */
-      joinedAt: string;
-    };
     /** @enum {string} */
     RegistrationStatus:
       'registered' | 'shortlisted' | 'confirmed' | 'attending' | 'checked_in' | 'cancelled';
     /** @enum {string} */
-    TeamMemberStatus:
-      'invited' | 'accepted' | 'declined' | 'expired' | 'withdrawn' | 'left' | 'removed';
-    /** @enum {string} */
     PaymentProofStatus: 'pending' | 'approved' | 'rejected';
-    /** @enum {string} */
-    TeamStage: 'forming' | 'expired' | 'registered';
     PaymentProof: {
       /** Format: uuid */
       id: string;
@@ -7864,50 +7841,33 @@ export interface components {
       id: string;
       name: string;
       /** Format: uuid */
-      leaderId: string;
-      /** @description The team's join link token: share it so teammates can join while forming */
-      joinToken: string;
+      leaderRegistrationId: string;
       /** Format: date-time */
       createdAt: string;
-      stage: components['schemas']['TeamStage'];
-      /** @description The leader's registration status; null until the team registers */
-      status: components['schemas']['RegistrationStatus'] | null;
-      /** @description Registered, but cancellations left it too small */
+      /** @description The leader's registration status */
+      status: components['schemas']['RegistrationStatus'];
+      /** @description Cancellations left the team below the minimum size */
       belowMinimum: boolean;
       /** @description Team field answers */
       answers: components['schemas']['Answers'];
-      /** @description Accepted members and invitations (pending, or expired at the deadline) */
       members: {
         /** Format: uuid */
-        membershipId: string;
-        user: {
-          /** Format: uuid */
-          id: string;
-          name: string;
-          email: string;
-        };
-        status: components['schemas']['TeamMemberStatus'];
-        isLeader: boolean;
-        /** Format: date-time */
-        invitedAt: string;
-        /** @description When they accepted or joined */
-        respondedAt: string | null;
-        answers: components['schemas']['Answers'];
-      }[];
-      registrations: {
-        /** Format: uuid */
-        id: string;
-        user: {
-          /** Format: uuid */
-          id: string;
-          name: string;
-          email: string;
-        };
+        registrationId: string;
+        name: string;
+        /** @description Shown to admins and the leader */
+        email: string | null;
+        /** @description Shown to admins and the leader */
+        phone: string | null;
+        participantCode: string;
         status: components['schemas']['RegistrationStatus'];
+        isLeader: boolean;
+        answers: components['schemas']['Answers'];
+        /** @description When their personal link was last opened (admins and the leader) */
+        linkLastUsedAt: string | null;
       }[];
       payment: {
         mode: components['schemas']['PaymentMode'];
-        /** @description In paise; null while forming or unpaid events */
+        /** @description In paise; null for unpaid events */
         amountDue: number | null;
         currency: string | null;
         /** @description After shortlist: receipts must be uploaded before this */
@@ -7936,9 +7896,9 @@ export interface components {
         name: string;
       };
       uploadedBy: {
-        /** Format: uuid */
-        id: string;
         name: string;
+        /** @enum {string} */
+        by: 'leader' | 'admin';
       };
       /**
        * Format: uri
@@ -7952,90 +7912,31 @@ export interface components {
       name: string;
       leader: {
         /** Format: uuid */
-        id: string;
+        registrationId: string;
         name: string;
         email: string;
+        phone: string;
       };
-      stage: components['schemas']['TeamStage'];
-      status: components['schemas']['RegistrationStatus'] | null;
+      status: components['schemas']['RegistrationStatus'];
       memberCount: number;
       belowMinimum: boolean;
       latestProofStatus: ('pending' | 'approved' | 'rejected') | null;
       /** Format: date-time */
       createdAt: string;
     };
-    MyRegistration: {
+    SecretLink: {
       /** Format: uuid */
-      id: string;
-      status: components['schemas']['RegistrationStatus'];
-      /** @description Encode this in the participant's QR code */
-      qrToken: string;
-      team: {
-        /** Format: uuid */
-        id: string;
-        name: string;
-      };
-      /** Format: date-time */
-      registeredAt: string;
-      shortlistedAt: string | null;
-      confirmedAt: string | null;
-      attendingAt: string | null;
-      checkedInAt: string | null;
-      cancelledAt: string | null;
+      registrationId: string;
+      /** @description Shown once. Only its hash is stored. */
+      token: string;
+      /** @description The personal link on the event's portal (null until the portal URL is set) */
+      url: string | null;
     };
     Attendance: {
       /** Format: uuid */
       registrationId: string;
       status: components['schemas']['RegistrationStatus'];
       name: string;
-    };
-    UploadTicket: {
-      /** @description Pass this back to the API once the upload is done */
-      key: string;
-      /**
-       * Format: uri
-       * @description PUT the file here, with exactly the given headers
-       */
-      url: string;
-      /** @constant */
-      method: 'PUT';
-      headers: {
-        'Content-Type': string;
-      };
-      /** @description Seconds until the link stops working */
-      expiresIn: number;
-    };
-    ScanResult: {
-      /** Format: uuid */
-      id: string;
-      /** @enum {string} */
-      result: 'accepted' | 'rejected';
-      reason:
-        | ('duplicate' | 'not_open' | 'closed' | 'not_attending' | 'not_checked_in' | 'cancelled')
-        | null;
-      /** Format: date-time */
-      scannedAt: string;
-      /** @description True if this repeated an earlier request */
-      replayed: boolean;
-      /** @description For duplicates: the earlier scan */
-      previousScanAt: string | null;
-      checkpoint: {
-        /** Format: uuid */
-        id: string;
-        name: string;
-        type: components['schemas']['CheckpointType'];
-      };
-      /** @description At a meal checkpoint linked to a poll: exactly what to hand over */
-      meal: {
-        label: string;
-        /** @description False: the default meal */
-        chosen: boolean;
-      } | null;
-      participant: {
-        name: string;
-        teamName: string;
-        status: components['schemas']['RegistrationStatus'];
-      };
     };
     Channel: {
       /** Format: uuid */
@@ -8065,6 +7966,42 @@ export interface components {
       priority: 'normal' | 'urgent';
       /** Format: date-time */
       sentAt: string;
+    };
+    Poll: {
+      /** Format: uuid */
+      id: string;
+      question: string;
+      audience: components['schemas']['Role'][];
+      closesAt: string | null;
+      closed: boolean;
+      resultsVisible: boolean;
+      defaultOptionId: string | null;
+      createdBy: {
+        /** Format: uuid */
+        id: string;
+        name: string;
+      };
+      /** Format: date-time */
+      createdAt: string;
+      options: {
+        /** Format: uuid */
+        id: string;
+        label: string;
+        position: number;
+        /** @description Null when results are hidden from you */
+        votes: number | null;
+      }[];
+      totalVotes: number | null;
+      myVote: string | null;
+      canVote: boolean;
+      canManage: boolean;
+      /** @description Someone has voted: options can only be added */
+      optionsLocked: boolean;
+      mealCheckpoints: {
+        /** Format: uuid */
+        id: string;
+        name: string;
+      }[];
     };
     Criterion: {
       /** Format: uuid */
@@ -8110,96 +8047,166 @@ export interface components {
         }[];
       }[];
     };
-    Poll: {
-      /** Format: uuid */
-      id: string;
-      question: string;
-      audience: components['schemas']['Role'][];
-      closesAt: string | null;
-      closed: boolean;
-      resultsVisible: boolean;
-      defaultOptionId: string | null;
-      createdBy: {
-        /** Format: uuid */
-        id: string;
-        name: string;
+    UploadTicket: {
+      /** @description Pass this back to the API once the upload is done */
+      key: string;
+      /**
+       * Format: uri
+       * @description PUT the file here, with exactly the given headers
+       */
+      url: string;
+      /** @constant */
+      method: 'PUT';
+      headers: {
+        'Content-Type': string;
       };
-      /** Format: date-time */
-      createdAt: string;
-      options: {
-        /** Format: uuid */
-        id: string;
-        label: string;
-        position: number;
-        /** @description Null when results are hidden from you */
-        votes: number | null;
-      }[];
-      totalVotes: number | null;
-      myVote: string | null;
-      canVote: boolean;
-      canManage: boolean;
-      /** @description Someone has voted: options can only be added */
-      optionsLocked: boolean;
-      mealCheckpoints: {
-        /** Format: uuid */
-        id: string;
-        name: string;
-      }[];
+      /** @description Seconds until the link stops working */
+      expiresIn: number;
     };
-    TeamInvite: {
-      /** Format: uuid */
-      id: string;
-      team: {
-        /** Format: uuid */
-        id: string;
-        name: string;
-      };
+    PersonalLink: {
+      /** @description Shown once; only its hash is stored */
+      token: string;
+      /** @description The personal link on this portal */
+      url: string | null;
+    };
+    PortalInfo: {
       event: {
         /** Format: uuid */
         id: string;
         name: string;
         hostedBy: string;
+        venue: string;
         /** Format: date-time */
         startAt: string;
         /** Format: date-time */
-        registrationDeadline: string;
-      };
-      invitedBy: {
-        name: string;
-      };
-      /** Format: date-time */
-      invitedAt: string;
-      /** @description Details the leader already filled in for you */
-      answers: components['schemas']['Answers'];
-      /** @description The event's member fields: those filled by 'member' are yours to answer when accepting */
-      fields: components['schemas']['EventField'][];
-    };
-    TeamLinkPreview: {
-      team: {
-        /** Format: uuid */
-        id: string;
-        name: string;
-        leader: {
-          name: string;
-        };
-        memberCount: number;
-        stage: components['schemas']['TeamStage'];
-      };
-      event: {
-        /** Format: uuid */
-        id: string;
-        name: string;
-        hostedBy: string;
-        /** Format: date-time */
-        startAt: string;
+        endAt: string;
         /** Format: date-time */
         registrationStart: string;
         /** Format: date-time */
         registrationDeadline: string;
+        minTeamSize: number;
         maxTeamSize: number;
+        /** @description Of max participants, counting confirmed people */
+        placesLeft: number;
+        paymentMode: components['schemas']['PaymentMode'];
+        /** @description Per person, in paise */
+        registrationFee: number | null;
+        currency: string | null;
+        paymentDeadline: string | null;
+        leaderboardVisible: boolean;
       };
-      /** @description Member fields; those filled by 'member' are yours to answer */
+      /** @description Feature on and inside the window */
+      registrationOpen: boolean;
+      paths: components['schemas']['PortalPaths'];
+      /** @description The registration form */
       fields: components['schemas']['EventField'][];
+      teamRules: components['schemas']['TeamRule'][];
+      /** @description Short-lived link to the UPI QR image */
+      paymentQrUrl: string | null;
+    };
+    Me: {
+      /** Format: uuid */
+      registrationId: string;
+      name: string;
+      email: string;
+      phone: string;
+      participantCode: string;
+      /** @description Show as a QR code at the entry and checkpoints */
+      qrToken: string;
+      status: components['schemas']['RegistrationStatus'];
+      isLeader: boolean;
+      team: {
+        /** Format: uuid */
+        id: string;
+        name: string;
+        status: components['schemas']['RegistrationStatus'];
+      };
+      /** Format: date-time */
+      registeredAt: string;
+      confirmedAt: string | null;
+      attendingAt: string | null;
+      checkedInAt: string | null;
+      cancelledAt: string | null;
+      linkLastUsedAt: string | null;
+      /**
+       * Format: date-time
+       * @description The link and its sessions stop working then
+       */
+      accessEndsAt: string;
+    };
+    ParticipantSession: {
+      session: components['schemas']['AccessToken'];
+      me: components['schemas']['Me'];
+    };
+    ScanResult: {
+      /** Format: uuid */
+      id: string;
+      /** @enum {string} */
+      result: 'accepted' | 'rejected';
+      reason:
+        | ('duplicate' | 'not_open' | 'closed' | 'not_attending' | 'not_checked_in' | 'cancelled')
+        | null;
+      /** Format: date-time */
+      scannedAt: string;
+      /** @description True if this repeated an earlier request */
+      replayed: boolean;
+      /** @description For duplicates: the earlier scan */
+      previousScanAt: string | null;
+      checkpoint: {
+        /** Format: uuid */
+        id: string;
+        name: string;
+        type: components['schemas']['CheckpointType'];
+      };
+      /** @description At a meal checkpoint linked to a poll: exactly what to hand over */
+      meal: {
+        label: string;
+        /** @description False: the default meal */
+        chosen: boolean;
+      } | null;
+      participant: {
+        name: string;
+        participantCode: string;
+        teamName: string;
+        status: components['schemas']['RegistrationStatus'];
+      };
+    };
+    LinkPreview: {
+      /** @enum {string} */
+      kind: 'registration' | 'staff';
+      role: components['schemas']['LinkRole'];
+      label: string | null;
+      requiresPassword: boolean;
+      expiresAt: string | null;
+    };
+    TeamRegistered: {
+      team: {
+        /** Format: uuid */
+        id: string;
+        name: string;
+      };
+      members: {
+        /** Format: uuid */
+        registrationId: string;
+        name: string;
+        email: string;
+        participantCode: string;
+        qrToken: string;
+        isLeader: boolean;
+        link: components['schemas']['PersonalLink'];
+      }[];
+      payment: {
+        mode: components['schemas']['PaymentMode'];
+        amountDue: number | null;
+        currency: string | null;
+        proof: components['schemas']['PaymentProof'] | null;
+      };
+    };
+    StaffSession: {
+      user: components['schemas']['User'];
+      /** @enum {string} */
+      role: 'admin' | 'volunteer' | 'judge';
+      token: components['schemas']['AccessToken'];
     };
   };
   responses: never;

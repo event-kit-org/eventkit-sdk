@@ -1,36 +1,96 @@
 # @eventkit/sdk
 
-Build your own front end on eventKit: accounts, teams, registration and UPI
-payments, QR check-in, polls, notifications with web push, and judging. Every
-API operation a front end can call is a typed function here.
+Build your event's own site (its **portal**) on eventKit: team registration
+with UPI receipts, personal links with QR codes, RSVP, check-in scanning,
+polls, notifications with web push, and judging. Every API operation is a
+typed function here.
 
 ```bash
 npm install @eventkit/sdk
 ```
+
+## Who uses what
+
+| Who                    | Where                                      | How they identify                                                                                                    |
+| ---------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| The organiser (client) | the eventKit console, and their own portal | an eventKit account                                                                                                  |
+| Volunteers, judges     | the portal                                 | a portal account for that event, made through a password-protected staff link                                        |
+| Participants           | the portal                                 | **no account**: the team leader registers everyone; each member gets a participant ID, a QR code and a personal link |
+
+## The portal
 
 ```ts
 import { createEventKit, localStorageSession, isEventKitError } from '@eventkit/sdk';
 
 const ek = createEventKit({
   apiUrl: 'https://api.your-eventkit.example',
-  apiKey: 'ek_…', // your event's API key: identifies your app, grants nothing
+  apiKey: 'ek_…', // the event's API key: identifies the portal, grants nothing
   eventId: '…',
   session: localStorageSession(),
 });
 
-await ek.auth.signup({ email, name, password });
-await ek.invites.startTeam(participantLinkToken, { name: 'Byte Club' });
-await ek.event().myTeam.register({ receipt: file }); // uploaded straight to storage
-const { qrToken } = await ek.event().myRegistration.get();
+const info = await ek.portal.info(); // event, form fields, team rules, paths, payment QR
+
+// /register/{token}: the leader registers the whole team (receipt uploaded first).
+const { members } = await ek.portal.register({
+  linkToken,
+  team: { name: 'Byte Club' },
+  members: [
+    { name: 'Asha', email: 'asha@…', phone: '+91 …' },
+    { name: 'Ravi', email: 'ravi@…', phone: '+91 …' },
+  ],
+  receipt: file,
+});
+// members[i]: participantCode, qrToken, link.url — shown once, save and share them.
+
+// /me/{token}: swaps the token for a session and strips it from the address bar.
+const me = await ek.portal.openSecretLink(undefined, { paths: info.paths });
+await ek.portal.me.rsvp();
+await ek.portal.me.resetLink(); // the link leaked: old link and sessions stop working
+
+// Staff: sign up through a staff link, or sign in (the owner too).
+await ek.portal.staff.signup({ linkToken, linkPassword, name, email, password });
+await ek.portal.login(email, password);
+const scanner = ek.createScanner({ checkpointId }); // QR codes or typed participant IDs
 ```
 
-- Errors throw `EventKitError` with the API's `code`; `isEventKitError(e, 'TEAM_FULL')`.
-- `ek.createScanner({ checkpointId })`: online-only scanning with device-made ids and safe retries.
-- `@eventkit/sdk/react`: `<EventKitProvider>`, `useMyTeam()`, `useScanner()`, `useEventMutation()`, … (TanStack Query v5).
-- `@eventkit/sdk/sw`: `registerPushHandlers(self, { urlFor })` for urgent notifications.
-- Helpers: `formatIST`, `formatMoney`, `canRegister` (team rules are enforced by front ends), `linkFor`.
+Personal links (`/me/ek_…`) last until 7 days after the event. A leaked link
+can be replaced by its owner (`me.resetLink()`), the team leader
+(`me.team.reissueMemberLink(id)`) or the organiser
+(`event.registrations.reissueLink(id)`). Cancelling and handing over the team
+also need the registered email or phone.
 
-See `examples/vite-react` for a complete club site.
+## The console
+
+```ts
+const ek = createEventKit({ apiUrl, apiKey: PLATFORM_KEY, session });
+await ek.console.auth.signup({ email, name, password });
+const { event } = await ek.console.events.create({ … });
+const ev = ek.event(event.id);
+await ev.setPortal({ url: 'https://machzero.vercel.app', paths: { me: '/p/{token}' } });
+await ev.billing.purchase(['registration', 'scanning']);
+const { key } = await ev.apiKeys.create('Portal');
+const reg = await ev.createRegistrationLink(); // reg.url: https://machzero.vercel.app/register/…
+const gate = await ev.createStaffLink({ role: 'volunteer', password: 'gate-pass' });
+```
+
+`ek.event()` also has teams, registrations, payments, checkpoints, attendance,
+polls, channels, criteria, judging, fields and team rules, for the organiser
+and (where their role allows) staff.
+
+## Also
+
+- Errors throw `EventKitError` with the API's `code`: `isEventKitError(e, 'LINK_NOT_FOUND')`.
+- `parseLink(url, paths)` tells registration, staff and personal links apart; `portalUrl(base, path, token)` builds one.
+- `@eventkit/sdk/react`: `<EventKitProvider>`, `usePortalInfo()`, `useSecretLink()`, `useMe()`,
+  `useMyTeam()`, `useMyPolls()`, `useMyNotifications()`, `usePortalMutation()`, `useScanner()`,
+  and the event hooks (`useEvent()`, `useEventMutation()`, …). TanStack Query v5.
+- `@eventkit/sdk/sw`: `registerPushHandlers(self, { urlFor })` for urgent notifications;
+  participants enable push with `ek.portal.me.push.enable()`, staff with `ek.push.enable()`.
+- Helpers: `checkRegistration` (team size, details and team rules before sending; the API checks
+  again), `formatIST`, `formatMoney`, `teamDisplayStatus`.
+
+See `examples/vite-react` for a complete portal.
 
 ## Develop
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   amountDue,
-  canRegister,
+  checkRegistration,
   checkTeamRules,
   formatDateIST,
   formatIST,
@@ -35,30 +35,16 @@ const field = (over: Partial<Schemas['EventField']>): Schemas['EventField'] =>
     ...over,
   }) as Schemas['EventField'];
 
-const member = (name: string, answers: Record<string, string> = {}, status = 'accepted') =>
-  ({
-    membershipId: name,
-    user: { id: name, name, email: `${name}@x.co` },
-    status,
-    isLeader: false,
-    invitedAt: '',
-    respondedAt: null,
-    answers,
-  }) as never;
-
 function team(over: Partial<Schemas['Team']> = {}): Schemas['Team'] {
   return {
     id: 't',
     name: 'T',
-    leaderId: 'a',
-    joinToken: 'j',
+    leaderRegistrationId: 'r1',
     createdAt: '',
-    stage: 'forming',
-    status: null,
+    status: 'registered',
     belowMinimum: false,
     answers: {},
-    members: [member('Asha', { dept: 'CSE' }), member('Ravi', { dept: 'ECE' })],
-    registrations: [],
+    members: [],
     payment: { mode: 'none', amountDue: null, currency: null, deadline: null, proofs: [] },
     ...over,
   } as Schemas['Team'];
@@ -84,14 +70,13 @@ describe('dates and money', () => {
 
 describe('fields and rules', () => {
   const fields = [
-    field({ id: 'title', scope: 'team', filledBy: 'leader', required: true, label: 'Title' }),
-    field({ id: 'dept', type: 'choice', filledBy: 'leader' }),
+    field({ id: 'title', scope: 'team', required: true, label: 'Title' }),
+    field({ id: 'dept', type: 'choice' }),
     field({ id: 'age', type: 'number', required: true, label: 'Age' }),
   ];
   it('splits fields and turns drafts into answers', () => {
     expect(teamFields(fields).map((f) => f.id)).toEqual(['title']);
     expect(memberFields(fields).map((f) => f.id)).toEqual(['dept', 'age']);
-    expect(memberFields(fields, 'leader').map((f) => f.id)).toEqual(['dept']);
     expect(toAnswers(fields, { age: ' 19 ', dept: '', title: 'X' })).toEqual({
       age: 19,
       dept: null,
@@ -114,7 +99,7 @@ describe('fields and rules', () => {
       { rule, count: 1, met: false },
     ]);
   });
-  it('canRegister explains everything that blocks submitting', () => {
+  it('checkRegistration explains everything that blocks sending the form', () => {
     const rule = {
       id: 'r',
       fieldId: 'dept',
@@ -123,40 +108,46 @@ describe('fields and rules', () => {
       minCount: 2,
       description: 'At least 2 members with Dept: CSE',
     };
-    const blocked = canRegister(team(), { minTeamSize: 3, maxTeamSize: 4 }, fields, [rule]);
+    const asha = { name: 'Asha', email: 'a@x.co', phone: '+91 9', answers: { dept: 'CSE' } };
+    const blocked = checkRegistration(
+      {
+        team: { name: ' ' },
+        members: [asha, { ...asha, name: '', answers: { dept: 'ECE' } }],
+      },
+      { minTeamSize: 3, maxTeamSize: 4 },
+      fields,
+      [rule],
+    );
     expect(blocked.ok).toBe(false);
     expect(blocked.reasons).toEqual([
-      'A team needs 3–4 accepted members; this one has 2.',
+      'Give the team a name.',
+      'A team needs 3–4 members; this one has 2.',
+      'Member 2: name, email and phone are needed.',
+      'a@x.co appears twice.',
       'At least 2 members with Dept: CSE (has 1).',
-      'Missing details: Title; Asha: Age; Ravi: Age.',
+      'Missing details: Title; Asha: Age; Member 2: Age.',
     ]);
     expect(blocked.missing).toHaveLength(3);
-    const fine = canRegister(
-      team({ answers: { title: 'X' } }),
+    const fine = checkRegistration(
+      {
+        team: { name: 'T', answers: { title: 'X' } },
+        members: [{ ...asha, answers: undefined as never }],
+      },
       { minTeamSize: 1, maxTeamSize: 4 },
       [fields[0]!],
       [],
     );
     expect(fine).toMatchObject({ ok: true, reasons: [] });
-    expect(
-      canRegister(
-        team({ stage: 'registered', answers: { title: 'X' } }),
-        { minTeamSize: 1, maxTeamSize: 4 },
-        [],
-        [],
-      ).reasons,
-    ).toEqual(['The team has registered.']);
   });
 });
 
 describe('status and links', () => {
   it('reads a pending receipt as confirmation pending', () => {
     const proof = { status: 'pending' } as never;
-    expect(teamDisplayStatus(team())).toBe('forming');
+    expect(teamDisplayStatus(team())).toBe('registered');
     expect(
       teamDisplayStatus(
         team({
-          stage: 'registered',
           status: 'registered',
           payment: { ...team().payment, proofs: [proof] },
         }),
@@ -165,7 +156,6 @@ describe('status and links', () => {
     expect(
       teamDisplayStatus(
         team({
-          stage: 'registered',
           status: 'confirmed',
           payment: { ...team().payment, proofs: [proof] },
         }),
