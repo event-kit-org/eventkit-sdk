@@ -6,7 +6,7 @@
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Crossbow2560/eventkit-sdk.git"
+    "url": "git+https://github.com/event-kit-org/eventkit-sdk.git"
   },
   "keywords": [
     "eventkit",
