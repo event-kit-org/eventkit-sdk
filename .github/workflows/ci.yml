@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - name: Tests with coverage gate
+        run: npm run test:coverage
+      - run: npm run build
+      - name: Package exports resolve (ESM, CJS, bundlers)
+        run: npm run check:exports
+
+  # Fails when src/schema.d.ts no longer matches eventkit-core's spec, and walks
+  # the spec so every operation must stay reachable through the devkit.
+  api-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/eventkit-core
+          path: eventkit-core
+          token: ${{ secrets.CORE_REPO_TOKEN || github.token }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: OPENAPI_SPEC=eventkit-core/openapi.json npm run gen:api
+      - run: git diff --exit-code src/schema.d.ts
+      - run: mkdir -p ../eventkit-core && cp eventkit-core/openapi.json ../eventkit-core/
+      - run: npx vitest run test/coverage.test.ts

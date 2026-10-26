@@ -1,0 +1,26 @@
+{
+  "name": "eventkit-example-vite-react",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build"
+  },
+  "dependencies": {
+    "@eventkit/sdk": "file:../..",
+    "@tanstack/react-query": "^5.0.0",
+    "qrcode.react": "^4.2.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^6.0.0",
+    "typescript": "~6.0.3",
+    "vite": "^8.0.0"
+  },
+  "allowScripts": {
+    "esbuild": true
+  }
+}
