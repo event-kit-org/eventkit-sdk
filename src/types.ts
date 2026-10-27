@@ -26,3 +26,4 @@ export type Result<P extends keyof paths, M extends keyof paths[P]> =
 
 export type Role = Schemas['Role'];
 export type Feature = Schemas['Feature'];
+export type EmailKind = Schemas['EmailKind'];

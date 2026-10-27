@@ -78,6 +78,40 @@ const gate = await ev.createStaffLink({ role: 'volunteer', password: 'gate-pass'
 polls, channels, criteria, judging, fields and team rules, for the organiser
 and (where their role allows) staff.
 
+## Your own registration email
+
+When a team registers, eventKit emails the leader every member's participant ID
+and dashboard link. The organiser can replace that email with their own HTML:
+any layout and styles, filled in and escaped by eventKit when it sends.
+Mail apps run no scripts, so buttons are links; the helpers put the right link
+in each one.
+
+```ts
+import { registrationEmail as t } from '@eventkit/sdk';
+
+const html = `<!doctype html><html><body style="background:#1a1b2f;color:#ebe5f6">
+  <h1>${t.team.name} is registered for ${t.event.name}</h1>
+  ${t.eachMember(
+    (m) => `
+    <p>${m.name}${t.when(m.isLeader, ' (leader)')} · ${m.participantCode}</p>
+    ${t.when(m.dashboardUrl, t.button({ href: m.dashboardUrl, label: 'Open dashboard', background: '#a78bfa' }))}`,
+  )}
+  ${t.when(t.links.portal, `<a href="${t.links.portal}">Event site</a>`)}
+</body></html>`;
+
+const ev = ek.event(eventId); // signed in as the event's owner
+const draft = { subject: `${t.event.name}: ${t.team.name} is registered`, html };
+await ev.emails.preview('registration', draft); // filled with a made-up team
+await ev.emails.sendTest('registration', draft); // to the owner's inbox
+await ev.emails.save('registration', draft); // INVALID_TEMPLATE lists any mistakes
+await ev.emails.reset('registration'); // back to eventKit's default
+```
+
+`ev.emails.get('registration')` returns the current template and every variable
+it can use. You can also write the Mustache yourself (`{{team.name}}`,
+`{{#members}}…{{/members}}`); `{{{raw}}}` is refused. The email holds no QR
+codes: each member's QR appears on their dashboard once the team is confirmed.
+
 ## Also
 
 - Errors throw `EventKitError` with the API's `code`: `isEventKitError(e, 'LINK_NOT_FOUND')`.

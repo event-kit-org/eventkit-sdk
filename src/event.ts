@@ -1,8 +1,9 @@
 import type { Transport } from './http';
 import { uploadFile, type UploadPurpose } from './uploads';
-import type { Body, Feature, Query, Role } from './types';
+import type { Body, EmailKind, Feature, Query, Role } from './types';
 
 type E = '/v1/events/{eventId}';
+type Mail = '/v1/events/{eventId}/emails/{kind}';
 
 /**
  * Everything inside one event, for its owner (a client) and its staff
@@ -39,6 +40,12 @@ export function eventApi(t: Transport, eventId: string) {
           body: { portalUrl: portal.url, ...(portal.paths ? { portalPaths: portal.paths } : {}) },
         }),
       ),
+    /**
+     * Admin: delete the event for good, with all its teams, registrations, links,
+     * polls, judging and staff accounts. Confirm with the event's exact name.
+     */
+    delete: (confirmName: string) =>
+      call(api.DELETE('/v1/events/{eventId}', { ...at(), body: { confirmName } })),
     /** Which features are on. Every member can read this, to hide what's off. */
     features: () => call(api.GET('/v1/events/{eventId}/features', at())),
     /** Admin: switch a feature off, or back on if it was bought. */
@@ -74,6 +81,42 @@ export function eventApi(t: Transport, eventId: string) {
       call(api.DELETE('/v1/events/{eventId}/payment-instructions-file', at())),
 
     // ------------------------------------------------------------ admin setup
+    /**
+     * Admin: the emails eventKit sends, written your way. A template is a whole
+     * HTML document with Mustache variables; build it with `registrationEmail`
+     * (from '@eventkit/sdk') or write the `{{…}}` yourself. eventKit fills and
+     * escapes it when it sends. Buttons are links: mail apps run no scripts.
+     */
+    emails: {
+      /** The current template (eventKit's default until you save one) and its variables. */
+      get: (kind: EmailKind) => call(api.GET('/v1/events/{eventId}/emails/{kind}', at({ kind }))),
+      /** Save your template. Refused with INVALID_TEMPLATE (each problem in `details`) if it has mistakes. */
+      save: (kind: EmailKind, template: Body<Mail, 'put'>) =>
+        call(api.PUT('/v1/events/{eventId}/emails/{kind}', { ...at({ kind }), body: template })),
+      /** Go back to eventKit's default. */
+      reset: (kind: EmailKind) =>
+        call(api.DELETE('/v1/events/{eventId}/emails/{kind}', at({ kind }))),
+      /**
+       * The email filled in with a made-up team on this event. Pass a draft to
+       * try changes before saving; parts left out come from the current template.
+       */
+      preview: (kind: EmailKind, draft?: NonNullable<Body<`${Mail}/preview`, 'post'>>) =>
+        call(
+          api.POST('/v1/events/{eventId}/emails/{kind}/preview', {
+            ...at({ kind }),
+            body: draft ?? {},
+          }),
+        ),
+      /** Send that preview to the event owner's email, to see it in a real inbox. */
+      sendTest: (kind: EmailKind, draft?: NonNullable<Body<`${Mail}/test`, 'post'>>) =>
+        call(
+          api.POST('/v1/events/{eventId}/emails/{kind}/test', {
+            ...at({ kind }),
+            body: draft ?? {},
+          }),
+        ),
+    },
+
     billing: {
       /** Buy features; an approved purchase switches them on. */
       purchase: (features: Feature[]) =>
@@ -162,6 +205,12 @@ export function eventApi(t: Transport, eventId: string) {
       /** Events without payment: registered → confirmed (refused if places run out). */
       confirm: (teamId: string) =>
         call(api.POST('/v1/events/{eventId}/teams/{teamId}/confirm', at({ teamId }))),
+      /**
+       * Admin: delete the team for good (registrations, check-ins, votes,
+       * receipts, scores) and free its places. Cancelling keeps a record instead.
+       */
+      delete: (teamId: string) =>
+        call(api.DELETE('/v1/events/{eventId}/teams/{teamId}', at({ teamId }))),
     },
     registrations: {
       cancel: (registrationId: string) =>

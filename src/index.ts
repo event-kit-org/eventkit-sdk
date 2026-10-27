@@ -17,7 +17,23 @@ export {
   type ScanResult,
 } from './scanner';
 export { MAX_UPLOAD_BYTES, UPLOAD_TYPES, type UploadPurpose } from './uploads';
-export type { Body, components, Feature, paths, Query, Result, Role, Schemas } from './types';
+export type {
+  Body,
+  components,
+  EmailKind,
+  Feature,
+  paths,
+  Query,
+  Result,
+  Role,
+  Schemas,
+} from './types';
+export {
+  type ButtonOptions,
+  type MemberVariables,
+  registrationEmail,
+  type TemplateVariable,
+} from './email';
 export { formatDateIST, formatIST, fromISTInput, toISTInput } from './helpers/datetime';
 export { amountDue, describeFee, formatMoney, paiseToRupees, rupeesToPaise } from './helpers/money';
 export {

@@ -115,6 +115,13 @@ describe('every API operation is reachable through the devkit', () => {
     await e.update({});
     await e.features();
     await e.setFeature('scanning', true);
+    await e.teams.delete(ID);
+    await e.delete('Event');
+    await e.emails.get('registration');
+    await e.emails.save('registration', { subject: 's', html: '<p>h</p>' });
+    await e.emails.reset('registration');
+    await e.emails.preview('registration');
+    await e.emails.sendTest('registration', { subject: 'Draft' });
     await e.paymentQr();
     await e.setPaymentQr(png());
     await e.paymentInstructionsFile();
@@ -194,6 +201,6 @@ describe('every API operation is reachable through the devkit', () => {
     );
     const missing = all.filter((op) => !reached.has(op) && !NOT_FOR_FRONT_ENDS.includes(op));
     expect(missing).toEqual([]);
-    expect(all.length - NOT_FOR_FRONT_ENDS.length).toBe(101);
+    expect(all.length - NOT_FOR_FRONT_ENDS.length).toBe(108);
   });
 });
