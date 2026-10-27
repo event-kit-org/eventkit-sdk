@@ -56,6 +56,22 @@ export function eventApi(t: Transport, eventId: string) {
       const key = await upload('payment_qr', file);
       return call(api.PUT('/v1/events/{eventId}/payment-qr', { ...at(), body: { key } }));
     },
+    /** A short-lived link to the payment instructions file. */
+    paymentInstructionsFile: () =>
+      call(api.GET('/v1/events/{eventId}/payment-instructions-file', at())),
+    /**
+     * Admin: upload a payment instructions file (JPG, PNG, WebP or PDF, up to
+     * 5 MB), e.g. bank details. Written instructions go in `update({ paymentInstructions })`.
+     */
+    async setPaymentInstructionsFile(file: Blob) {
+      const key = await upload('payment_instructions', file);
+      return call(
+        api.PUT('/v1/events/{eventId}/payment-instructions-file', { ...at(), body: { key } }),
+      );
+    },
+    /** Admin: remove the payment instructions file. */
+    removePaymentInstructionsFile: () =>
+      call(api.DELETE('/v1/events/{eventId}/payment-instructions-file', at())),
 
     // ------------------------------------------------------------ admin setup
     billing: {

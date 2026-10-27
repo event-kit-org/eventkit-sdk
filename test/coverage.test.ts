@@ -117,6 +117,9 @@ describe('every API operation is reachable through the devkit', () => {
     await e.setFeature('scanning', true);
     await e.paymentQr();
     await e.setPaymentQr(png());
+    await e.paymentInstructionsFile();
+    await e.setPaymentInstructionsFile(png());
+    await e.removePaymentInstructionsFile();
     await e.billing.purchase(['registration']);
     await e.billing.usage();
     await e.apiKeys.create('site');
@@ -191,6 +194,6 @@ describe('every API operation is reachable through the devkit', () => {
     );
     const missing = all.filter((op) => !reached.has(op) && !NOT_FOR_FRONT_ENDS.includes(op));
     expect(missing).toEqual([]);
-    expect(all.length - NOT_FOR_FRONT_ENDS.length).toBe(98);
+    expect(all.length - NOT_FOR_FRONT_ENDS.length).toBe(101);
   });
 });

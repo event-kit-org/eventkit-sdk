@@ -48,6 +48,24 @@ describe('uploads', () => {
     expect(mock.last().body).toEqual({ key: 'k2' });
   });
 
+  it('sets, reads and removes the payment instructions file (PDF allowed)', async () => {
+    const { event, mock } = client();
+    mock.on('POST /v1/events/:id/uploads', () => ticket('k3'));
+    mock.on('PUT /k3', () => new Response(null));
+    await event.setPaymentInstructionsFile(new Blob(['%PDF'], { type: 'application/pdf' }));
+    expect(mock.calls[0]!.body).toEqual({
+      purpose: 'payment_instructions',
+      contentType: 'application/pdf',
+      size: 4,
+    });
+    expect(mock.last().path).toMatch(/\/payment-instructions-file$/);
+    expect(mock.last().body).toEqual({ key: 'k3' });
+    await event.paymentInstructionsFile();
+    expect(mock.last().method).toBe('GET');
+    await event.removePaymentInstructionsFile();
+    expect(mock.last().method).toBe('DELETE');
+  });
+
   it('refuses wrong types and big files before asking the API', async () => {
     const { event, mock } = client();
     const pdf = new Blob(['%PDF'], { type: 'application/pdf' });

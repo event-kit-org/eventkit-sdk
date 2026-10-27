@@ -4,6 +4,7 @@ import {
   memorySession,
   Session,
   amountDue,
+  describeFee,
   checkRegistration,
   checkTeamRules,
   formatDateIST,
@@ -68,6 +69,28 @@ describe('dates and money', () => {
     expect(amountDue({ paymentMode: 'at_registration', registrationFee: 50000 }, 3)).toBe(150000);
     expect(amountDue({ paymentMode: 'none', registrationFee: 50000 }, 3)).toBe(0);
     expect(amountDue({ paymentMode: 'after_shortlist', registrationFee: null }, 3)).toBe(0);
+    expect(
+      amountDue(
+        { paymentMode: 'at_registration', registrationFee: 120000, feeBasis: 'per_team' },
+        3,
+      ),
+    ).toBe(120000);
+    expect(
+      amountDue(
+        { paymentMode: 'at_registration', registrationFee: 50000, feeBasis: 'per_person' },
+        3,
+      ),
+    ).toBe(150000);
+  });
+
+  it('describes the fee and what it is for', () => {
+    const paid = { paymentMode: 'at_registration', registrationFee: 50000, currency: 'INR' };
+    expect(describeFee(paid)).toBe('₹500 per person');
+    expect(describeFee({ ...paid, feeBasis: 'per_team', registrationFee: 120000 })).toBe(
+      '₹1,200 per team',
+    );
+    expect(describeFee({ ...paid, paymentMode: 'none' })).toBeNull();
+    expect(describeFee({ ...paid, registrationFee: null })).toBeNull();
   });
 });
 

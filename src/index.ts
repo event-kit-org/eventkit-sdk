@@ -19,7 +19,7 @@ export {
 export { MAX_UPLOAD_BYTES, UPLOAD_TYPES, type UploadPurpose } from './uploads';
 export type { Body, components, Feature, paths, Query, Result, Role, Schemas } from './types';
 export { formatDateIST, formatIST, fromISTInput, toISTInput } from './helpers/datetime';
-export { amountDue, formatMoney, paiseToRupees, rupeesToPaise } from './helpers/money';
+export { amountDue, describeFee, formatMoney, paiseToRupees, rupeesToPaise } from './helpers/money';
 export {
   checkTeamRules,
   type Answers,

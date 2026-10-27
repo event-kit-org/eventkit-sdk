@@ -1,13 +1,14 @@
 import { EventKitError } from './errors';
 import type { Transport } from './http';
 
-export type UploadPurpose = 'receipt' | 'payment_qr';
+export type UploadPurpose = 'receipt' | 'payment_qr' | 'payment_instructions';
 type FileType = 'image/jpeg' | 'image/png' | 'image/webp' | 'application/pdf';
 
 /** What each upload accepts. The API checks again, by the file's first bytes. */
 export const UPLOAD_TYPES: Record<UploadPurpose, readonly FileType[]> = {
   receipt: ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'],
   payment_qr: ['image/jpeg', 'image/png', 'image/webp'],
+  payment_instructions: ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'],
 };
 export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
 

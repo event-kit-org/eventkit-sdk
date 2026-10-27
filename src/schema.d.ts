@@ -1987,6 +1987,8 @@ export interface paths {
             paymentMode?: components['schemas']['PaymentModeInput'];
             /** @default null */
             registrationFee?: number | null;
+            feeBasis?: components['schemas']['FeeBasisInput'];
+            paymentInstructions?: string | null;
             /** @default null */
             currency?: string | null;
             paymentDeadline?: string | null;
@@ -2278,6 +2280,8 @@ export interface paths {
             maxTeamSize?: number;
             paymentMode?: components['schemas']['PaymentModeInput'];
             registrationFee?: number | null;
+            feeBasis?: components['schemas']['FeeBasisInput'];
+            paymentInstructions?: string | null;
             currency?: string | null;
             paymentDeadline?: string | null;
             discoverable?: boolean;
@@ -2485,6 +2489,193 @@ export interface paths {
     };
     post?: never;
     delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/payment-instructions-file': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** A short-lived link to the payment instructions file */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['SignedUrl'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    /** Set the payment instructions file to an uploaded file (purpose payment_instructions in /uploads; JPG/PNG/WebP/PDF) */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            key: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['EventWithRole'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        413: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        415: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    post?: never;
+    /** Remove the payment instructions file */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['EventWithRole'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
     options?: never;
     head?: never;
     patch?: never;
@@ -4795,7 +4986,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Get a presigned upload link (admins). payment_qr: the UPI QR (JPG/PNG/WebP). receipt: a team's receipt (JPG/PNG/WebP/PDF), with teamId. At most 5 MB. Participants upload through the portal (/v1/portal/uploads, /v1/portal/me/uploads). */
+    /** Get a presigned upload link (admins). payment_qr: the UPI QR (JPG/PNG/WebP). payment_instructions: how to pay (JPG/PNG/WebP/PDF). receipt: a team's receipt (JPG/PNG/WebP/PDF), with teamId. At most 5 MB. Participants upload through the portal (/v1/portal/uploads, /v1/portal/me/uploads). */
     post: {
       parameters: {
         query?: never;
@@ -4809,7 +5000,7 @@ export interface paths {
         content: {
           'application/json': {
             /** @enum {string} */
-            purpose: 'receipt' | 'payment_qr';
+            purpose: 'receipt' | 'payment_qr' | 'payment_instructions';
             /** @enum {string} */
             contentType: 'image/jpeg' | 'image/png' | 'image/webp' | 'application/pdf';
             size: number;
@@ -7073,6 +7264,11 @@ export interface components {
     };
     /** @enum {string} */
     PaymentModeInput: 'none' | 'at_registration' | 'after_shortlist';
+    /**
+     * @description per_person: the fee × team members; per_team: the fee once per team
+     * @enum {string}
+     */
+    FeeBasisInput: 'per_person' | 'per_team';
     PortalPathsInput: {
       register: string;
       staff: string;
@@ -7099,10 +7295,14 @@ export interface components {
       paymentMode: components['schemas']['PaymentModeInput'];
       /** @description In paise */
       registrationFee: number | null;
+      feeBasis: components['schemas']['FeeBasisInput'];
       currency: string | null;
       /** @description After shortlist only: receipts cannot be uploaded after this */
       paymentDeadline: string | null;
+      /** @description How to pay (bank details, UPI ID, steps), shown before the receipt upload */
+      paymentInstructions: string | null;
       hasPaymentQr: boolean;
+      hasPaymentInstructionsFile: boolean;
       /** @description The event portal's address; registration and staff links are built on it */
       portalUrl: string | null;
       portalPaths: components['schemas']['PortalPathsInput'];
@@ -7484,10 +7684,13 @@ export interface components {
         /** @description Of max participants, counting confirmed people */
         placesLeft: number;
         paymentMode: components['schemas']['PaymentModeInput'];
-        /** @description Per person, in paise */
+        /** @description In paise: per person or per team, see feeBasis */
         registrationFee: number | null;
+        feeBasis: components['schemas']['FeeBasisInput'];
         currency: string | null;
         paymentDeadline: string | null;
+        /** @description How to pay */
+        paymentInstructions: string | null;
         leaderboardVisible: boolean;
       };
       /** @description Feature on and inside the window */
@@ -7498,6 +7701,8 @@ export interface components {
       teamRules: components['schemas']['TeamRuleInput'][];
       /** @description Short-lived link to the UPI QR image */
       paymentQrUrl: string | null;
+      /** @description Short-lived link to the payment instructions file (image or PDF) */
+      paymentInstructionsUrl: string | null;
     };
     MeInput: {
       /** Format: uuid */
@@ -7678,6 +7883,11 @@ export interface components {
     };
     /** @enum {string} */
     PaymentMode: 'none' | 'at_registration' | 'after_shortlist';
+    /**
+     * @description per_person: the fee × team members; per_team: the fee once per team
+     * @enum {string}
+     */
+    FeeBasis: 'per_person' | 'per_team';
     PortalPaths: {
       register: string;
       staff: string;
@@ -7704,10 +7914,14 @@ export interface components {
       paymentMode: components['schemas']['PaymentMode'];
       /** @description In paise */
       registrationFee: number | null;
+      feeBasis: components['schemas']['FeeBasis'];
       currency: string | null;
       /** @description After shortlist only: receipts cannot be uploaded after this */
       paymentDeadline: string | null;
+      /** @description How to pay (bank details, UPI ID, steps), shown before the receipt upload */
+      paymentInstructions: string | null;
       hasPaymentQr: boolean;
+      hasPaymentInstructionsFile: boolean;
       /** @description The event portal's address; registration and staff links are built on it */
       portalUrl: string | null;
       portalPaths: components['schemas']['PortalPaths'];
@@ -8089,10 +8303,13 @@ export interface components {
         /** @description Of max participants, counting confirmed people */
         placesLeft: number;
         paymentMode: components['schemas']['PaymentMode'];
-        /** @description Per person, in paise */
+        /** @description In paise: per person or per team, see feeBasis */
         registrationFee: number | null;
+        feeBasis: components['schemas']['FeeBasis'];
         currency: string | null;
         paymentDeadline: string | null;
+        /** @description How to pay */
+        paymentInstructions: string | null;
         leaderboardVisible: boolean;
       };
       /** @description Feature on and inside the window */
@@ -8103,6 +8320,8 @@ export interface components {
       teamRules: components['schemas']['TeamRule'][];
       /** @description Short-lived link to the UPI QR image */
       paymentQrUrl: string | null;
+      /** @description Short-lived link to the payment instructions file (image or PDF) */
+      paymentInstructionsUrl: string | null;
     };
     Me: {
       /** Format: uuid */
