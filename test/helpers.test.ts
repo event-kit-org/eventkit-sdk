@@ -134,7 +134,7 @@ describe('fields and rules', () => {
       minCount: 2,
       description: 'At least 2 members with Dept: CSE',
     };
-    const asha = { name: 'Asha', email: 'a@x.co', phone: '+91 9', answers: { dept: 'CSE' } };
+    const asha = { name: 'Asha', email: 'a@x.co', answers: { dept: 'CSE' } };
     const blocked = checkRegistration(
       {
         team: { name: ' ' },
@@ -148,7 +148,7 @@ describe('fields and rules', () => {
     expect(blocked.reasons).toEqual([
       'Give the team a name.',
       'A team needs 3–4 members; this one has 2.',
-      'Member 2: name, email and phone are needed.',
+      'Member 2: name and email are needed.',
       'a@x.co appears twice.',
       'At least 2 members with Dept: CSE (has 1).',
       'Missing details: Title; Asha: Age; Member 2: Age.',

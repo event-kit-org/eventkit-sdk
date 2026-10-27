@@ -68,7 +68,7 @@ export function portalApi(t: Transport, session: Session) {
     unrsvp: () => call(api.POST('/v1/portal/me/unrsvp')),
     /**
      * Cancel your registration (a leader cancels the whole team). `confirm`:
-     * the email or phone number you registered with.
+     * the email you registered with, or a phone number you gave.
      */
     cancel: (confirm: string) => call(api.POST('/v1/portal/me/cancel', { body: { confirm } })),
     team: {
@@ -81,7 +81,7 @@ export function portalApi(t: Transport, session: Session) {
         );
         return call(api.POST('/v1/portal/me/team/payment-proofs', { body: { receiptKey } }));
       },
-      /** Leader: hand the team to another member. `confirm`: your email or phone. */
+      /** Leader: hand the team to another member. `confirm`: your email, or a phone number you gave. */
       handOver: (registrationId: string, confirm: string) =>
         call(api.POST('/v1/portal/me/team/leader', { body: { registrationId, confirm } })),
       /** Leader: a new personal link for a teammate whose link leaked or was lost. */
@@ -149,7 +149,7 @@ export function portalApi(t: Transport, session: Session) {
     async register(input: {
       linkToken: string;
       team: { name: string; answers?: AnswersInput };
-      members: { name: string; email: string; phone: string; answers?: AnswersInput }[];
+      members: { name: string; email: string; answers?: AnswersInput }[];
       /** Which member leads (default 0, the first). */
       leaderIndex?: number;
       receipt?: Blob;

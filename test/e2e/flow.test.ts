@@ -71,8 +71,8 @@ describe('an event, end to end through the devkit', () => {
       linkToken: regLink.token,
       team: { name: `Byte ${randomUUID().slice(0, 6)}` },
       members: [
-        { name: 'Asha', email: `${randomUUID()}@e2e.test`, phone: '+91 98450 00001' },
-        { name: 'Ravi', email: `${randomUUID()}@e2e.test`, phone: '+91 98450 00002' },
+        { name: 'Asha', email: `${randomUUID()}@e2e.test` },
+        { name: 'Ravi', email: `${randomUUID()}@e2e.test` },
       ],
     };
     expect(isEventKitError(await fails(site.portal.register(team)), 'RECEIPT_REQUIRED')).toBe(true);
@@ -113,7 +113,7 @@ describe('an event, end to end through the devkit', () => {
     expect((await leader.portal.me.rsvp()).status).toBe('attending');
     expect((await leader.portal.me.team.get()).members).toHaveLength(2);
 
-    // Cancelling asks for the registered email or phone.
+    // Cancelling asks for the registered email.
     expect(
       isEventKitError(
         await fails(mate.portal.me.cancel('wrong@e2e.test')),

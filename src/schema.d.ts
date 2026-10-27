@@ -386,7 +386,6 @@ export interface paths {
               name: string;
               /** Format: email */
               email: string;
-              phone: string;
               answers?: components['schemas']['AnswersBodyInput'];
             }[];
             /** @description Default 0: the first member */
@@ -6787,7 +6786,7 @@ export interface paths {
             /** @enum {string} */
             scope: 'team' | 'member';
             /** @enum {string} */
-            type: 'short_text' | 'long_text' | 'number' | 'choice';
+            type: 'short_text' | 'long_text' | 'number' | 'choice' | 'phone';
           };
         };
       };
@@ -7383,7 +7382,7 @@ export interface components {
       label: string;
       help: string | null;
       /** @enum {string} */
-      type: 'short_text' | 'long_text' | 'number' | 'choice';
+      type: 'short_text' | 'long_text' | 'number' | 'choice' | 'phone';
       /** @description Choices, for type choice */
       options: string[];
       required: boolean;
@@ -7510,7 +7509,7 @@ export interface components {
         registrationId: string;
         name: string;
         email: string;
-        phone: string;
+        phone: string | null;
       };
       status: components['schemas']['RegistrationStatusInput'];
       memberCount: number;
@@ -7709,7 +7708,8 @@ export interface components {
       registrationId: string;
       name: string;
       email: string;
-      phone: string;
+      /** @description Only for registrations made before phone became a form field */
+      phone: string | null;
       participantCode: string;
       /** @description Show as a QR code at the entry and checkpoints */
       qrToken: string;
@@ -8002,7 +8002,7 @@ export interface components {
       label: string;
       help: string | null;
       /** @enum {string} */
-      type: 'short_text' | 'long_text' | 'number' | 'choice';
+      type: 'short_text' | 'long_text' | 'number' | 'choice' | 'phone';
       /** @description Choices, for type choice */
       options: string[];
       required: boolean;
@@ -8129,7 +8129,7 @@ export interface components {
         registrationId: string;
         name: string;
         email: string;
-        phone: string;
+        phone: string | null;
       };
       status: components['schemas']['RegistrationStatus'];
       memberCount: number;
@@ -8328,7 +8328,8 @@ export interface components {
       registrationId: string;
       name: string;
       email: string;
-      phone: string;
+      /** @description Only for registrations made before phone became a form field */
+      phone: string | null;
       participantCode: string;
       /** @description Show as a QR code at the entry and checkpoints */
       qrToken: string;

@@ -255,7 +255,7 @@ describe('the portal', () => {
       ),
     );
     mock.on('PUT /k', () => new Response(null));
-    const members = [{ name: 'Asha', email: 'a@x.co', phone: '+91 98' }];
+    const members = [{ name: 'Asha', email: 'a@x.co' }];
     await ek.portal.register({ linkToken: 'reg', team: { name: 'T' }, members, receipt: png(20) });
     const [ticket, , submit] = mock.calls;
     expect(ticket!.body).toEqual({ linkToken: 'reg', contentType: 'image/png', size: 20 });

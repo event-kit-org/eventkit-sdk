@@ -49,8 +49,8 @@ function Home() {
   );
 }
 
-type Member = { name: string; email: string; phone: string; answers: Draft };
-const blank = (): Member => ({ name: '', email: '', phone: '', answers: {} });
+type Member = { name: string; email: string; answers: Draft };
+const blank = (): Member => ({ name: '', email: '', answers: {} });
 
 /** The leader registers the whole team at once. No accounts. */
 function Register({ linkToken }: { linkToken: string }) {
@@ -125,11 +125,6 @@ function Register({ linkToken }: { linkToken: string }) {
             onChange={(e) => set(i, { email: e.target.value })}
             placeholder="Email"
           />
-          <input
-            value={m.phone}
-            onChange={(e) => set(i, { phone: e.target.value })}
-            placeholder="Phone"
-          />
           <FieldInputs
             fields={memberFields(fields)}
             value={m.answers}
@@ -175,7 +170,14 @@ function FieldInputs(props: { fields: Field[]; value: Draft; onChange: (d: Draft
         ))}
       </select>
     ) : (
-      <input key={f.id} value={v} onChange={(e) => change(e.target.value)} placeholder={f.label} />
+      <input
+        key={f.id}
+        type={f.type === 'phone' ? 'tel' : 'text'}
+        inputMode={f.type === 'number' ? 'numeric' : undefined}
+        value={v}
+        onChange={(e) => change(e.target.value)}
+        placeholder={f.label}
+      />
     );
   });
 }

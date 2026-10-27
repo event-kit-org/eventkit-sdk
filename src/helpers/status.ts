@@ -25,7 +25,7 @@ export function teamDisplayStatus(team: Schemas['Team']): DisplayStatus {
 /** What a registration form holds before it is sent (`portal.register`'s input). */
 export interface RegistrationDraft {
   team: { name: string; answers?: Answers };
-  members: { name: string; email: string; phone: string; answers?: Answers }[];
+  members: { name: string; email: string; answers?: Answers }[];
 }
 
 export interface RegistrationCheck {
@@ -56,8 +56,8 @@ export function checkRegistration(
     );
   }
   for (const [i, m] of draft.members.entries()) {
-    if (!m.name.trim() || !m.email.trim() || !m.phone.trim()) {
-      reasons.push(`Member ${i + 1}: name, email and phone are needed.`);
+    if (!m.name.trim() || !m.email.trim()) {
+      reasons.push(`Member ${i + 1}: name and email are needed.`);
     }
   }
   const emails = draft.members.map((m) => m.email.trim().toLowerCase()).filter(Boolean);
