@@ -221,6 +221,18 @@ export function portalApi(t: Transport, session: Session) {
       return res;
     },
 
+    /**
+     * Staff (and the owner or co-admins) change their password. Every other
+     * session ends; this device stays signed in.
+     */
+    async changePassword(currentPassword: string, newPassword: string) {
+      const res = await call(
+        api.POST('/v1/auth/password', { body: { currentPassword, newPassword } }),
+      );
+      session.set(res.token.accessToken);
+      return res;
+    },
+
     /** Forgets the session on this device. */
     logout(): void {
       session.set(null);

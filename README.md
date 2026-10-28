@@ -113,6 +113,14 @@ it can use. You can also write the Mustache yourself (`{{team.name}}`,
 `{{#members}}…{{/members}}`); `{{{raw}}}` is refused. The email holds no QR
 codes: each member's QR appears on their dashboard once the team is confirmed.
 
+## Accounts
+
+`ek.console.auth.changePassword(current, next)` (and `ek.portal.changePassword` for staff)
+ends every other session and keeps this one signed in. `forgotPassword(email)` emails a
+reset link to the console; `resetPassword(token, next)` sets the new password from it
+and signs in. `deleteAccount(password)` deletes an eventKit account (refused with
+`OWNS_EVENTS` while it owns events) and signs out.
+
 ## Also
 
 - Errors throw `EventKitError` with the API's `code`: `isEventKitError(e, 'LINK_NOT_FOUND')`.

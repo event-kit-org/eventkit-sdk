@@ -37,6 +37,10 @@ describe('every API operation is reachable through the devkit', () => {
     await ek.console.auth.signup({ email: 'a@b.co', name: 'A', password: 'password1' });
     await ek.console.auth.login({ email: 'a@b.co', password: 'password1' });
     await ek.console.auth.me();
+    await ek.console.auth.changePassword('password1', 'password2');
+    await ek.console.auth.forgotPassword('a@b.co');
+    await ek.console.auth.resetPassword('tok', 'password3');
+    await ek.console.auth.deleteAccount('password3');
     await ek.console.events.create({} as never);
     await ek.console.events.mine();
     await ek.push.config();
@@ -202,6 +206,6 @@ describe('every API operation is reachable through the devkit', () => {
     );
     const missing = all.filter((op) => !reached.has(op) && !NOT_FOR_FRONT_ENDS.includes(op));
     expect(missing).toEqual([]);
-    expect(all.length - NOT_FOR_FRONT_ENDS.length).toBe(109);
+    expect(all.length - NOT_FOR_FRONT_ENDS.length).toBe(113);
   });
 });

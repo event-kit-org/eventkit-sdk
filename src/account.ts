@@ -29,6 +29,40 @@ export function authApi(t: Transport, session: Session) {
     },
     /** The signed-in client (or staff member, on a portal). */
     me: () => t.call(t.api.GET('/v1/auth/me')),
+    /**
+     * Changes the password. Every other session ends; this device stays signed
+     * in with a fresh token. WRONG_PASSWORD, SAME_PASSWORD on mistakes.
+     */
+    async changePassword(currentPassword: string, newPassword: string) {
+      const res = await t.call(
+        t.api.POST('/v1/auth/password', { body: { currentPassword, newPassword } }),
+      );
+      session.set(res.token.accessToken);
+      return res;
+    },
+    /**
+     * Emails a link to choose a new password (valid an hour, works once). Says
+     * nothing about whether the account exists. RESET_UNAVAILABLE if the server
+     * has no email set up.
+     */
+    forgotPassword: (email: string) =>
+      t.call(t.api.POST('/v1/auth/password/forgot', { body: { email } })),
+    /** Sets a new password from the emailed link's token, and signs in. RESET_LINK_INVALID otherwise. */
+    async resetPassword(token: string, newPassword: string) {
+      const res = await t.call(
+        t.api.POST('/v1/auth/password/reset', { body: { token, newPassword } }),
+      );
+      session.set(res.token.accessToken);
+      return res;
+    },
+    /**
+     * Deletes the account, confirmed with its password, and signs out.
+     * OWNS_EVENTS (details: the events) while it owns any: delete those first.
+     */
+    async deleteAccount(password: string) {
+      await t.call(t.api.DELETE('/v1/auth/me', { body: { password } }));
+      session.set(null);
+    },
   };
 }
 

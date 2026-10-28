@@ -185,6 +185,19 @@ describe('sessions', () => {
     expect(seen).toEqual([true, false]);
   });
 
+  it('changing or resetting a password keeps the fresh token; deleting the account signs out', async () => {
+    const { ek, mock } = client();
+    mock.on('POST /v1/auth/password', () => ({ user: {}, token: { accessToken: 'changed' } }));
+    mock.on('POST /v1/auth/password/reset', () => ({ user: {}, token: { accessToken: 'reset' } }));
+    mock.on('DELETE /v1/auth/me', () => new Response(null, { status: 204 }));
+    await ek.portal.changePassword('old-password', 'new-password');
+    expect(ek.session.token).toBe('changed');
+    await ek.console.auth.resetPassword('tok', 'newer-password');
+    expect(ek.session.token).toBe('reset');
+    await ek.console.auth.deleteAccount('newer-password');
+    expect(ek.session.token).toBeNull();
+  });
+
   it('localStorageSession persists, and falls back to memory without storage', () => {
     const store = new Map<string, string>();
     vi.stubGlobal('localStorage', {
