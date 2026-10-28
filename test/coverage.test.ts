@@ -136,6 +136,7 @@ describe('every API operation is reachable through the devkit', () => {
     await e.inviteLinks.list();
     await e.inviteLinks.revoke(ID);
     await e.members.list();
+    await e.members.add('a@b.co', 'reviewer');
     await e.members.changeRole(ID, 'judge');
     await e.members.remove(ID);
     await e.fields.list();
@@ -201,6 +202,6 @@ describe('every API operation is reachable through the devkit', () => {
     );
     const missing = all.filter((op) => !reached.has(op) && !NOT_FOR_FRONT_ENDS.includes(op));
     expect(missing).toEqual([]);
-    expect(all.length - NOT_FOR_FRONT_ENDS.length).toBe(108);
+    expect(all.length - NOT_FOR_FRONT_ENDS.length).toBe(109);
   });
 });

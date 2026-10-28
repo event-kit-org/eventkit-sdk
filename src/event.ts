@@ -165,12 +165,26 @@ export function eventApi(t: Transport, eventId: string) {
             params: { path: { eventId }, query: role ? { role } : {} },
           }),
         ),
-      /** Switch a staff member between volunteer and judge. */
-      changeRole: (userId: string, role: 'volunteer' | 'judge') =>
+      /**
+       * Owner: add a co-admin (`admin`: everything but deleting the event,
+       * billing, API keys and organisers) or a `reviewer` (teams and payments
+       * only), by the email of their eventKit account. ACCOUNT_NOT_FOUND if they
+       * haven't signed up yet.
+       */
+      add: (email: string, role: 'admin' | 'reviewer') =>
+        call(api.POST('/v1/events/{eventId}/members', { ...at(), body: { email, role } })),
+      /**
+       * Switch staff between volunteer and judge, or (owner only) an organiser
+       * between admin and reviewer.
+       */
+      changeRole: (userId: string, role: 'volunteer' | 'judge' | 'admin' | 'reviewer') =>
         call(
           api.PATCH('/v1/events/{eventId}/members/{userId}', { ...at({ userId }), body: { role } }),
         ),
-      /** Remove a volunteer or judge (the owner can't be removed). */
+      /**
+       * Remove someone: admins remove staff, the owner removes organisers, and
+       * anyone but the owner can remove themselves (leave the event).
+       */
       remove: (userId: string) =>
         call(api.DELETE('/v1/events/{eventId}/members/{userId}', at({ userId }))),
     },

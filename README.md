@@ -11,11 +11,12 @@ npm install @eventkit/sdk
 
 ## Who uses what
 
-| Who                    | Where                                      | How they identify                                                                                                    |
-| ---------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| The organiser (client) | the eventKit console, and their own portal | an eventKit account                                                                                                  |
-| Volunteers, judges     | the portal                                 | a portal account for that event, made through a password-protected staff link                                        |
-| Participants           | the portal                                 | **no account**: the team leader registers everyone; each member gets a participant ID, a QR code and a personal link |
+| Who                    | Where                                            | How they identify                                                                                                    |
+| ---------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| The organiser (client) | the eventKit console, and their own portal       | an eventKit account                                                                                                  |
+| Co-admins, reviewers   | the eventKit console (co-admins also the portal) | an eventKit account the owner added by email (`event.members.add`)                                                   |
+| Volunteers, judges     | the portal                                       | a portal account for that event, made through a password-protected staff link                                        |
+| Participants           | the portal                                       | **no account**: the team leader registers everyone; each member gets a participant ID, a QR code and a personal link |
 
 ## The portal
 
