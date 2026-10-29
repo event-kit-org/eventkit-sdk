@@ -94,7 +94,7 @@ export interface PushDevice {
  * Urgent notifications as web push, for whoever is signed in: `register` and
  * `unregister` say where the device is stored (a staff or client account, or a
  * participant's registration). Needs a service worker on your site that shows
- * them: see `@eventkit/sdk/sw`.
+ * them: see `@eventkit-sdk/client/sw`.
  */
 export function pushApi(
   t: Transport,

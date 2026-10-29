@@ -1,5 +1,5 @@
 {
-  "name": "@eventkit/sdk",
+  "name": "@eventkit-sdk/client",
   "version": "0.1.0",
   "description": "Build your own front end on eventKit: registrations, teams, payments, QR check-in, polls, notifications and judging.",
   "license": "MIT",

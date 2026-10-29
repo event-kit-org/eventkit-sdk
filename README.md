@@ -1,4 +1,4 @@
-# @eventkit/sdk
+# @eventkit-sdk/client
 
 Build your event's own site (its **portal**) on eventKit: team registration
 with UPI receipts, personal links with QR codes, RSVP, check-in scanning,
@@ -6,7 +6,7 @@ polls, notifications with web push, and judging. Every API operation is a
 typed function here.
 
 ```bash
-npm install @eventkit/sdk
+npm install @eventkit-sdk/client
 ```
 
 ## Who uses what
@@ -21,7 +21,7 @@ npm install @eventkit/sdk
 ## The portal
 
 ```ts
-import { createEventKit, localStorageSession, isEventKitError } from '@eventkit/sdk';
+import { createEventKit, localStorageSession, isEventKitError } from '@eventkit-sdk/client';
 
 const ek = createEventKit({
   apiUrl: 'https://api.your-eventkit.example',
@@ -88,7 +88,7 @@ Mail apps run no scripts, so buttons are links; the helpers put the right link
 in each one.
 
 ```ts
-import { registrationEmail as t } from '@eventkit/sdk';
+import { registrationEmail as t } from '@eventkit-sdk/client';
 
 const html = `<!doctype html><html><body style="background:#1a1b2f;color:#ebe5f6">
   <h1>${t.team.name} is registered for ${t.event.name}</h1>
@@ -126,10 +126,10 @@ and signs in. `deleteAccount(password)` deletes an eventKit account (refused wit
 - Errors throw `EventKitError` with the API's `code`: `isEventKitError(e, 'LINK_NOT_FOUND')`.
 - `session.who` (`decodeSession(token)`): whether the session is a participant, staff or client one.
 - `parseLink(url, paths)` tells registration, staff and personal links apart; `portalUrl(base, path, token)` builds one.
-- `@eventkit/sdk/react`: `<EventKitProvider>`, `usePortalInfo()`, `useSecretLink()`, `useMe()`,
+- `@eventkit-sdk/client/react`: `<EventKitProvider>`, `usePortalInfo()`, `useSecretLink()`, `useMe()`,
   `useMyTeam()`, `useMyPolls()`, `useMyNotifications()`, `usePortalMutation()`, `useScanner()`,
   and the event hooks (`useEvent()`, `useEventMutation()`, …). TanStack Query v5.
-- `@eventkit/sdk/sw`: `registerPushHandlers(self, { urlFor })` for urgent notifications;
+- `@eventkit-sdk/client/sw`: `registerPushHandlers(self, { urlFor })` for urgent notifications;
   participants enable push with `ek.portal.me.push.enable()`, staff with `ek.push.enable()`.
 - Helpers: `checkRegistration` (team size, details and team rules before sending; the API checks
   again), `formatIST`, `formatMoney`, `teamDisplayStatus`.

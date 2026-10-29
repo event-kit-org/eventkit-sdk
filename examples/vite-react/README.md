@@ -1,4 +1,4 @@
-# Example: a club's event portal on @eventkit/sdk
+# Example: a club's event portal on @eventkit-sdk/client
 
 The portal a club builds for its event (say machzero.vercel.app). Participants
 have no accounts:

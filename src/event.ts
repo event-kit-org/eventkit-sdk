@@ -84,7 +84,7 @@ export function eventApi(t: Transport, eventId: string) {
     /**
      * Admin: the emails eventKit sends, written your way. A template is a whole
      * HTML document with Mustache variables; build it with `registrationEmail`
-     * (from '@eventkit/sdk') or write the `{{…}}` yourself. eventKit fills and
+     * (from '@eventkit-sdk/client') or write the `{{…}}` yourself. eventKit fills and
      * escapes it when it sends. Buttons are links: mail apps run no scripts.
      */
     emails: {
