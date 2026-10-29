@@ -1,5 +1,5 @@
 ---
-'@eventkit-sdk/client': minor
+'@eventkit/sdk': minor
 ---
 
 More organisers per event: `event.members.add(email, 'admin' | 'reviewer')`

@@ -1,5 +1,5 @@
 ---
-'@eventkit-sdk/client': minor
+'@eventkit/sdk': minor
 ---
 
 Per-team fees and payment instructions: `amountDue` honours `feeBasis`, a new

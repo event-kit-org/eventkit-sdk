@@ -1,5 +1,5 @@
 ---
-'@eventkit-sdk/client': minor
+'@eventkit/sdk': minor
 ---
 
 Account settings: `console.auth.changePassword`, `forgotPassword`,

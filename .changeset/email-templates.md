@@ -1,5 +1,5 @@
 ---
-'@eventkit-sdk/client': minor
+'@eventkit/sdk': minor
 ---
 
 Your own registration email: `event.emails.get`, `save`, `reset`, `preview`

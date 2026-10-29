@@ -1,5 +1,5 @@
-import { createEventKit, localStorageSession } from '@eventkit-sdk/client';
-import { EventKitProvider } from '@eventkit-sdk/client/react';
+import { createEventKit, localStorageSession } from '@eventkit/sdk';
+import { EventKitProvider } from '@eventkit/sdk/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';

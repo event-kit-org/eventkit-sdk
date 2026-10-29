@@ -9,13 +9,13 @@ import {
   parseLink,
   teamFields,
   toAnswers,
-} from '@eventkit-sdk/client';
-import { useMe, usePortalInfo, usePortalMutation, useSecretLink } from '@eventkit-sdk/client/react';
+} from '@eventkit/sdk';
+import { useMe, usePortalInfo, usePortalMutation, useSecretLink } from '@eventkit/sdk/react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useState } from 'react';
 
 /**
- * A club's own event portal in about 200 lines, on @eventkit-sdk/client. No router:
+ * A club's own event portal in about 200 lines, on @eventkit/sdk. No router:
  * the address decides the page (/register/{token}, /me/{token}, or /me after
  * the personal link was opened).
  */

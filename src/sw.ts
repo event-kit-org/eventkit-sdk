@@ -23,7 +23,7 @@ export interface PushHandlerOptions {
  * Shows eventKit's urgent notifications and opens your page when one is
  * clicked. In your service worker:
  *
- *   import { registerPushHandlers } from '@eventkit-sdk/client/sw';
+ *   import { registerPushHandlers } from '@eventkit/sdk/sw';
  *   registerPushHandlers(self, { urlFor: (p) => `/updates#${p.notificationId}` });
  */
 export function registerPushHandlers(

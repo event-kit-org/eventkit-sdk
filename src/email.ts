@@ -8,7 +8,7 @@
  * variable in its `href` (`member.dashboardUrl`, `links.portal`).
  *
  * ```ts
- * import { registrationEmail as t } from '@eventkit-sdk/client';
+ * import { registrationEmail as t } from '@eventkit/sdk';
  *
  * const html = `<!doctype html><html><body>
  *   <h1>${t.team.name} is in!</h1>
