@@ -67,7 +67,7 @@ export function eventApi(t: Transport, eventId: string) {
     paymentInstructionsFile: () =>
       call(api.GET('/v1/events/{eventId}/payment-instructions-file', at())),
     /**
-     * Admin: upload a payment instructions file (JPG, PNG, WebP or PDF, up to
+     * Admin: upload a payment instructions file (JPG, PNG or WebP, up to
      * 5 MB), e.g. bank details. Written instructions go in `update({ paymentInstructions })`.
      */
     async setPaymentInstructionsFile(file: Blob) {

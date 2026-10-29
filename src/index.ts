@@ -16,7 +16,7 @@ export {
   type ScannerOptions,
   type ScanResult,
 } from './scanner';
-export { MAX_UPLOAD_BYTES, UPLOAD_TYPES, type UploadPurpose } from './uploads';
+export { MAX_UPLOAD_BYTES, toWebp, UPLOAD_TYPES, type UploadPurpose } from './uploads';
 export type {
   Body,
   components,

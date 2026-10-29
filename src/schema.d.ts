@@ -267,7 +267,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** A presigned link to upload the payment receipt before registering (allowed by the registration link). JPG/PNG/WebP/PDF, at most 5 MB. */
+    /** A presigned link to upload the payment receipt before registering (allowed by the registration link). JPG/PNG/WebP, at most 5 MB. */
     post: {
       parameters: {
         query?: never;
@@ -280,7 +280,7 @@ export interface paths {
           'application/json': {
             linkToken: string;
             /** @enum {string} */
-            contentType: 'image/jpeg' | 'image/png' | 'image/webp' | 'application/pdf';
+            contentType: 'image/jpeg' | 'image/png' | 'image/webp';
             size: number;
           };
         };
@@ -1066,7 +1066,7 @@ export interface paths {
         content: {
           'application/json': {
             /** @enum {string} */
-            contentType: 'image/jpeg' | 'image/png' | 'image/webp' | 'application/pdf';
+            contentType: 'image/jpeg' | 'image/png' | 'image/webp';
             size: number;
           };
         };
@@ -2844,7 +2844,7 @@ export interface paths {
         };
       };
     };
-    /** Set the payment instructions file to an uploaded file (purpose payment_instructions in /uploads; JPG/PNG/WebP/PDF) */
+    /** Set the payment instructions file to an uploaded file (purpose payment_instructions in /uploads; JPG/PNG/WebP) */
     put: {
       parameters: {
         query?: never;
@@ -5772,7 +5772,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Get a presigned upload link (admins). payment_qr: the UPI QR (JPG/PNG/WebP). payment_instructions: how to pay (JPG/PNG/WebP/PDF). receipt: a team's receipt (JPG/PNG/WebP/PDF), with teamId. At most 5 MB. Participants upload through the portal (/v1/portal/uploads, /v1/portal/me/uploads). */
+    /** Get a presigned upload link (admins). payment_qr: the UPI QR (JPG/PNG/WebP). payment_instructions: how to pay (JPG/PNG/WebP). receipt: a team's receipt (JPG/PNG/WebP), with teamId. At most 5 MB. Participants upload through the portal (/v1/portal/uploads, /v1/portal/me/uploads). */
     post: {
       parameters: {
         query?: never;
@@ -5788,7 +5788,7 @@ export interface paths {
             /** @enum {string} */
             purpose: 'receipt' | 'payment_qr' | 'payment_instructions';
             /** @enum {string} */
-            contentType: 'image/jpeg' | 'image/png' | 'image/webp' | 'application/pdf';
+            contentType: 'image/jpeg' | 'image/png' | 'image/webp';
             size: number;
             /**
              * Format: uuid
