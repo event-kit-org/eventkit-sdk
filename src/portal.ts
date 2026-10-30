@@ -4,7 +4,7 @@ import type { Session } from './session';
 import type { Body, Query, Schemas } from './types';
 import { putFile } from './uploads';
 
-type AnswersInput = Record<string, string | number | null>;
+type AnswersInput = Record<string, string | number | string[] | null>;
 type Me = '/v1/portal/me';
 
 /** Paths on the portal; the API's defaults, which an event can override. */

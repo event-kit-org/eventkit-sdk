@@ -21,6 +21,8 @@ import {
   teamFields,
   toAnswers,
   toDraft,
+  toggleOption,
+  answerText,
 } from '../src';
 
 const field = (over: Partial<Schemas['EventField']>): Schemas['EventField'] =>
@@ -111,6 +113,31 @@ describe('fields and rules', () => {
     expect(toDraft({ age: 19 })).toEqual({ age: '19' });
     expect(toDraft(undefined)).toEqual({});
     expect(missingRequired(fields, { title: ' ' }).map((f) => f.id)).toEqual(['title', 'age']);
+  });
+  it('handles multi-selects and date-times', () => {
+    const more = [
+      field({ id: 'stack', type: 'multi_choice', options: ['A', 'B'], required: true }),
+      field({ id: 'at', type: 'datetime' }),
+    ];
+    expect(toAnswers(more, { stack: ['B'], at: '2026-10-31T09:30' })).toEqual({
+      stack: ['B'],
+      at: '2026-10-31T09:30+05:30',
+    });
+    expect(toAnswers(more, { stack: [], at: ' ' })).toEqual({ stack: null, at: null });
+    expect(toAnswers(more, { at: '2026-10-31T09:30:00Z' })).toEqual({ at: '2026-10-31T09:30:00Z' });
+    expect(toDraft({ stack: ['A'], at: '2026-10-31T09:30+05:30', n: 'x' }, more)).toEqual({
+      stack: ['A'],
+      at: '2026-10-31T09:30',
+      n: 'x',
+    });
+    expect(missingRequired(more, { stack: [] }).map((f) => f.id)).toEqual(['stack']);
+    expect(missingRequired(more, { stack: ['A'] })).toEqual([]);
+    expect(toggleOption(undefined, 'A')).toEqual(['A']);
+    expect(toggleOption(['A', 'B'], 'A')).toEqual(['B']);
+    expect(toggleOption('A', 'B')).toEqual(['B']);
+    expect(answerText(['A', 'B'])).toBe('A, B');
+    expect(answerText(3)).toBe('3');
+    expect(answerText(undefined)).toBe('');
   });
   it('checks team rules', () => {
     const rule = {

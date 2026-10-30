@@ -37,6 +37,7 @@ export {
 export { formatDateIST, formatIST, fromISTInput, toISTInput } from './helpers/datetime';
 export { amountDue, describeFee, formatMoney, paiseToRupees, rupeesToPaise } from './helpers/money';
 export {
+  answerText,
   checkTeamRules,
   type Answers,
   type Draft,
@@ -48,6 +49,7 @@ export {
   type TeamRule,
   toAnswers,
   toDraft,
+  toggleOption,
 } from './helpers/fields';
 export {
   checkRegistration,
