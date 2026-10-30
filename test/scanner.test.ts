@@ -101,6 +101,14 @@ describe('scanner', () => {
     expect(scans()).toHaveLength(1);
   });
 
+  it('lets someone through without an RSVP, without marking attendance', async () => {
+    const { mock, scanner, scans } = setup();
+    mock.on('POST /v1/events/:id/scans', () => result());
+    await scanner.allowWithoutRsvp('qr-2');
+    expect(mock.calls.some((c) => c.path.endsWith('/attendance'))).toBe(false);
+    expect((scans()[0]!.body as { allowWithoutRsvp?: boolean }).allowWithoutRsvp).toBe(true);
+  });
+
   it('pings /health to know it is online, and follows the browser online events', async () => {
     vi.useFakeTimers();
     const events = new Map<string, () => void>();
@@ -150,7 +158,7 @@ describe('scanner', () => {
     expect(rejected('duplicate')).toBe('Already scanned here');
     expect(rejected('not_open')).toBe('This checkpoint is not open yet');
     expect(rejected('closed')).toBe('This checkpoint has closed');
-    expect(rejected('not_attending')).toBe('Has not confirmed attendance (RSVP) yet');
+    expect(rejected('not_attending')).toBe("Not RSVP'd");
     expect(rejected('not_checked_in')).toBe('Not checked in at the entry yet');
     expect(rejected('cancelled')).toBe('Registration is cancelled');
     expect(rejected(null)).toBe('Refused');

@@ -103,6 +103,8 @@ describe('every API operation is reachable through the devkit', () => {
     await p.me.polls.vote(ID, ID);
     await p.me.notifications.feed();
     await p.me.leaderboard();
+    await p.me.submissions.list();
+    await p.me.submissions.saveEntry(ID, {});
     await p.me.pushDevice.put({ endpoint: 'https://p.test', keys: { p256dh: 'p', auth: 'a' } });
     await p.me.pushDevice.remove('https://p.test');
     await p.staff.signup({
@@ -190,6 +192,20 @@ describe('every API operation is reachable through the devkit', () => {
     await e.judging.teams();
     await e.judging.saveScores(ID, []);
     await e.leaderboard();
+    await e.rounds.list();
+    await e.rounds.create({} as never);
+    await e.rounds.update(ID, {});
+    await e.rounds.remove(ID);
+    await e.rounds.duplicateCriteria(ID, ID);
+    await e.submissions.list(ID);
+    await e.submissions.create({} as never);
+    await e.submissions.update(ID, {});
+    await e.submissions.remove(ID);
+    await e.submissions.duplicate(ID);
+    await e.submissions.entries(ID);
+    await e.submissions.fields.add(ID, {} as never);
+    await e.submissions.fields.update(ID, ID, {});
+    await e.submissions.fields.remove(ID, ID);
 
     const toTemplate = (method: string, path: string) =>
       Object.keys(spec.paths).find((p) => {
@@ -206,6 +222,6 @@ describe('every API operation is reachable through the devkit', () => {
     );
     const missing = all.filter((op) => !reached.has(op) && !NOT_FOR_FRONT_ENDS.includes(op));
     expect(missing).toEqual([]);
-    expect(all.length - NOT_FOR_FRONT_ENDS.length).toBe(113);
+    expect(all.length - NOT_FOR_FRONT_ENDS.length).toBe(129);
   });
 });

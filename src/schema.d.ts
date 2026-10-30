@@ -366,7 +366,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Register a whole team at once through a registration link (no accounts). Returns each member's participant ID, QR token and personal secret link: show them now, they are not shown again. */
+    /** Register a whole team at once through a registration link (no accounts). Returns each member's participant ID and QR token, and the leader's own personal secret link (shown once). Each member gets their own link by email, when mailing is on. */
     post: {
       parameters: {
         query?: never;
@@ -1322,7 +1322,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Leader: a new personal link for a teammate (theirs leaked or was lost) */
+    /** Leader: a new personal link for a teammate (theirs leaked or was lost), emailed to them; the leader never sees it. Refused with MAILING_OFF when the event has no mail (the old link keeps working); the organiser can issue one instead. */
     post: {
       parameters: {
         query?: never;
@@ -1340,7 +1340,7 @@ export interface paths {
             [name: string]: unknown;
           };
           content: {
-            'application/json': components['schemas']['PersonalLink'];
+            'application/json': components['schemas']['LinkSent'];
           };
         };
         /** @description Default Response */
@@ -1363,6 +1363,15 @@ export interface paths {
         };
         /** @description Default Response */
         404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
           headers: {
             [name: string]: unknown;
           };
@@ -1587,10 +1596,13 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Team totals, ranked, once the organiser shows the leaderboard */
+    /** A round's team totals, ranked, once the organiser shows the leaderboard (released and closed rounds only) */
     get: {
       parameters: {
-        query?: never;
+        query?: {
+          /** @description The round. Default: the latest released or closed round (for admins and judges, the first round until one is released). */
+          roundId?: string;
+        };
         header?: never;
         path?: never;
         cookie?: never;
@@ -1624,9 +1636,152 @@ export interface paths {
             'application/json': components['schemas']['Error'];
           };
         };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
       };
     };
     put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/portal/me/submissions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Submission forms of released and closed rounds, with your team's entries */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['PortalSubmission'][];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/portal/me/submissions/{submissionId}/entry': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Save your team's entry (any active member; replaces earlier answers). Only while the round is released. */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          submissionId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            answers: components['schemas']['AnswersBodyInput'];
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['PortalSubmission'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
     post?: never;
     delete?: never;
     options?: never;
@@ -1681,6 +1836,15 @@ export interface paths {
         };
         /** @description Default Response */
         401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
           headers: {
             [name: string]: unknown;
           };
@@ -2236,6 +2400,11 @@ export interface paths {
             discoverable?: boolean;
             /** @default false */
             leaderboardVisible?: boolean;
+            /**
+             * @description Off: confirming also marks people attending; turning it off moves everyone confirmed to attending
+             * @default true
+             */
+            rsvpEnabled?: boolean;
             portalUrl?: string | null;
             /** @default {} */
             portalPaths?: {
@@ -2370,6 +2539,15 @@ export interface paths {
         };
         /** @description Default Response */
         401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
           headers: {
             [name: string]: unknown;
           };
@@ -2588,6 +2766,8 @@ export interface paths {
             paymentDeadline?: string | null;
             discoverable?: boolean;
             leaderboardVisible?: boolean;
+            /** @description Off: confirming also marks people attending; turning it off moves everyone confirmed to attending */
+            rsvpEnabled?: boolean;
             portalUrl?: string | null;
             portalPaths?: {
               register?: string;
@@ -5607,6 +5787,8 @@ export interface paths {
             checkpointId: string;
             /** @description The QR token, or the participant ID typed by hand */
             qrToken: string;
+            /** @description Entry checkpoints: check in a confirmed person who has not RSVPed. Default false (refused as not_attending). */
+            allowWithoutRsvp?: boolean;
           };
         };
       };
@@ -6992,10 +7174,12 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** The rubric, in order */
+    /** The rubric, in order: one round's (?roundId) or every round's */
     get: {
       parameters: {
-        query?: never;
+        query?: {
+          roundId?: string;
+        };
         header?: never;
         path: {
           eventId: string;
@@ -7043,7 +7227,7 @@ export interface paths {
       };
     };
     put?: never;
-    /** Add a criterion */
+    /** Add a criterion to a round */
     post: {
       parameters: {
         query?: never;
@@ -7060,6 +7244,8 @@ export interface paths {
             description: string;
             maxScore: number;
             position?: number;
+            /** Format: uuid */
+            roundId: string;
           };
         };
       };
@@ -7274,10 +7460,13 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Teams to judge (at least one member checked in), with your own scores */
+    /** Teams to judge (at least one member checked in), with your own scores in the round */
     get: {
       parameters: {
-        query?: never;
+        query?: {
+          /** @description The round. Default: the latest released or closed round (for admins and judges, the first round until one is released). */
+          roundId?: string;
+        };
         header?: never;
         path: {
           eventId: string;
@@ -7340,10 +7529,13 @@ export interface paths {
       cookie?: never;
     };
     get?: never;
-    /** Save your scores for a team (each 0 to the criterion's maximum) */
+    /** Save your scores for a team (each 0 to the criterion's maximum). Judges and admins; an admin scores as one more judge. */
     put: {
       parameters: {
-        query?: never;
+        query?: {
+          /** @description The round. Default: the latest released or closed round (for admins and judges, the first round until one is released). */
+          roundId?: string;
+        };
         header?: never;
         path: {
           eventId: string;
@@ -7434,10 +7626,13 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Team totals, ranked. Admins and judges always; everyone when the admin shows it. */
+    /** A round's team totals, ranked. Admins and judges always; everyone when the admin shows it (released and closed rounds only). */
     get: {
       parameters: {
-        query?: never;
+        query?: {
+          /** @description The round. Default: the latest released or closed round (for admins and judges, the first round until one is released). */
+          roundId?: string;
+        };
         header?: never;
         path: {
           eventId: string;
@@ -7490,6 +7685,1001 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/rounds': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Judging rounds, in order (drafts only for admins and judges) */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Round'][];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    /** Add a round (a draft unless a phase is given) */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            name: string;
+            position?: number;
+            phase?: components['schemas']['RoundPhaseInput'];
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Round'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/rounds/{roundId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete a round with its criteria and submissions, if nobody scored or submitted */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          roundId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    /** Rename, reorder, or release or close a round */
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          roundId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            name?: string;
+            position?: number;
+            phase?: components['schemas']['RoundPhaseInput'];
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Round'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    trace?: never;
+  };
+  '/v1/events/{eventId}/rounds/{roundId}/criteria/duplicate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Copy another round's criteria to the end of this round's rubric */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          roundId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            /** Format: uuid */
+            fromRoundId: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Criterion'][];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/submissions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Submission forms with their fields, in round order (?roundId for one round) */
+    get: {
+      parameters: {
+        query?: {
+          roundId?: string;
+        };
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Submission'][];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    /** Add a submission form to a round */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            title: string;
+            description?: string;
+            position?: number;
+            /** Format: uuid */
+            roundId: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Submission'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/submissions/{submissionId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete a submission form no team has submitted */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          submissionId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    /** Edit a submission form (its round is fixed) */
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          submissionId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            title?: string;
+            description?: string;
+            position?: number;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Submission'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    trace?: never;
+  };
+  '/v1/events/{eventId}/submissions/{submissionId}/duplicate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Copy a submission form and its fields in the same round, titled "… (copy)" */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          submissionId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Submission'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/submissions/{submissionId}/entries': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Every team's entry, by team name */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          submissionId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['SubmissionEntry'][];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/submissions/{submissionId}/fields': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Add a field to a submission form */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          submissionId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            label: string;
+            help?: string | null;
+            options?: string[];
+            required?: boolean;
+            unique?: boolean;
+            pattern?: string | null;
+            position?: number;
+            /** @enum {string} */
+            type: 'short_text' | 'long_text' | 'number' | 'choice' | 'phone';
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['SubmissionField'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/submissions/{submissionId}/fields/{fieldId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete a submission field (teams' answers to it are no longer shown) */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          submissionId: string;
+          fieldId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    /** Edit a submission field (its type is fixed) */
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          submissionId: string;
+          fieldId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            label?: string;
+            help?: string | null;
+            options?: string[];
+            required?: boolean;
+            unique?: boolean;
+            pattern?: string | null;
+            position?: number;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['SubmissionField'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
     trace?: never;
   };
   '/v1/events/{eventId}/fields': {
@@ -8092,10 +9282,12 @@ export interface components {
       /** @description The event portal's address; registration and staff links are built on it */
       portalUrl: string | null;
       portalPaths: components['schemas']['PortalPathsInput'];
-      /** @description Participant IDs look like <prefix>-0042 */
+      /** @description New participant IDs look like <prefix>-a7Kx9Q (older ones <prefix>-0042) */
       participantPrefix: string;
       discoverable: boolean;
       leaderboardVisible: boolean;
+      /** @description Off: confirmed registrations go straight to attending (no RSVP step) */
+      rsvpEnabled: boolean;
       /** Format: date-time */
       createdAt: string;
     };
@@ -8428,9 +9620,33 @@ export interface components {
         name: string;
       }[];
     };
+    /**
+     * @description draft: admins and judges only. released: everyone sees it; teams submit. closed: everyone sees it; submissions are locked.
+     * @enum {string}
+     */
+    RoundPhaseInput: 'draft' | 'released' | 'closed';
+    RoundInput: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      position: number;
+      phase: components['schemas']['RoundPhaseInput'];
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    RoundRefInput: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      phase: components['schemas']['RoundPhaseInput'];
+    };
     CriterionInput: {
       /** Format: uuid */
       id: string;
+      /** Format: uuid */
+      roundId: string;
       name: string;
       description: string;
       maxScore: number;
@@ -8454,6 +9670,8 @@ export interface components {
     };
     LeaderboardInput: {
       visibleToEveryone: boolean;
+      /** @description The round ranked; null when no round is shown yet */
+      round: components['schemas']['RoundRefInput'] | null;
       entries: {
         rank: number;
         team: {
@@ -8471,6 +9689,72 @@ export interface components {
           average: number | null;
         }[];
       }[];
+    };
+    SubmissionFieldInput: {
+      /** Format: uuid */
+      id: string;
+      label: string;
+      help: string | null;
+      /** @enum {string} */
+      type: 'short_text' | 'long_text' | 'number' | 'choice' | 'phone';
+      /** @description Choices, for type choice */
+      options: string[];
+      required: boolean;
+      /** @description No two teams' answers may match (case-insensitive) */
+      unique: boolean;
+      /** @description Regular expression a text answer must match in full */
+      pattern: string | null;
+      position: number;
+    };
+    SubmissionInput: {
+      /** Format: uuid */
+      id: string;
+      round: components['schemas']['RoundRefInput'];
+      title: string;
+      description: string;
+      position: number;
+      fields: components['schemas']['SubmissionFieldInput'][];
+      /** @description Teams that have submitted */
+      entryCount: number;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    SubmissionEntryInput: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      submissionId: string;
+      team: {
+        /** Format: uuid */
+        id: string;
+        name: string;
+      };
+      answers: components['schemas']['AnswersInput'];
+      /** @description The member who saved it last */
+      submittedBy: {
+        /** Format: uuid */
+        registrationId: string;
+        name: string;
+      } | null;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    PortalSubmissionInput: {
+      /** Format: uuid */
+      id: string;
+      round: components['schemas']['RoundRefInput'];
+      title: string;
+      description: string;
+      position: number;
+      fields: components['schemas']['SubmissionFieldInput'][];
+      /** @description Whether your team can still save (round released) */
+      open: boolean;
+      /** @description Your team's entry, if any */
+      entry: components['schemas']['SubmissionEntryInput'] | null;
     };
     UploadTicketInput: {
       /** @description Pass this back to the API once the upload is done */
@@ -8522,6 +9806,8 @@ export interface components {
         /** @description How to pay */
         paymentInstructions: string | null;
         leaderboardVisible: boolean;
+        /** @description False: no RSVP step (hide the RSVP buttons); confirmed means attending */
+        rsvpEnabled: boolean;
       };
       /** @description Feature on and inside the window */
       registrationOpen: boolean;
@@ -8564,6 +9850,8 @@ export interface components {
        * @description The link and its sessions stop working then
        */
       accessEndsAt: string;
+      /** @description The event's RSVP setting. False: hide the RSVP buttons */
+      rsvpEnabled: boolean;
     };
     ParticipantSessionInput: {
       session: components['schemas']['AccessTokenInput'];
@@ -8624,7 +9912,8 @@ export interface components {
         participantCode: string;
         qrToken: string;
         isLeader: boolean;
-        link: components['schemas']['PersonalLinkInput'];
+        /** @description The leader's own link only; null for teammates (their links go to them by email) */
+        link: components['schemas']['PersonalLinkInput'] | null;
       }[];
       payment: {
         mode: components['schemas']['PaymentModeInput'];
@@ -8638,6 +9927,10 @@ export interface components {
       /** @enum {string} */
       role: 'admin' | 'volunteer' | 'judge';
       token: components['schemas']['AccessTokenInput'];
+    };
+    LinkSentInput: {
+      /** @constant */
+      sent: true;
     };
     Error: {
       error: {
@@ -8756,10 +10049,12 @@ export interface components {
       /** @description The event portal's address; registration and staff links are built on it */
       portalUrl: string | null;
       portalPaths: components['schemas']['PortalPaths'];
-      /** @description Participant IDs look like <prefix>-0042 */
+      /** @description New participant IDs look like <prefix>-a7Kx9Q (older ones <prefix>-0042) */
       participantPrefix: string;
       discoverable: boolean;
       leaderboardVisible: boolean;
+      /** @description Off: confirmed registrations go straight to attending (no RSVP step) */
+      rsvpEnabled: boolean;
       /** Format: date-time */
       createdAt: string;
     };
@@ -9092,9 +10387,33 @@ export interface components {
         name: string;
       }[];
     };
+    /**
+     * @description draft: admins and judges only. released: everyone sees it; teams submit. closed: everyone sees it; submissions are locked.
+     * @enum {string}
+     */
+    RoundPhase: 'draft' | 'released' | 'closed';
+    Round: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      position: number;
+      phase: components['schemas']['RoundPhase'];
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    RoundRef: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      phase: components['schemas']['RoundPhase'];
+    };
     Criterion: {
       /** Format: uuid */
       id: string;
+      /** Format: uuid */
+      roundId: string;
       name: string;
       description: string;
       maxScore: number;
@@ -9118,6 +10437,8 @@ export interface components {
     };
     Leaderboard: {
       visibleToEveryone: boolean;
+      /** @description The round ranked; null when no round is shown yet */
+      round: components['schemas']['RoundRef'] | null;
       entries: {
         rank: number;
         team: {
@@ -9135,6 +10456,72 @@ export interface components {
           average: number | null;
         }[];
       }[];
+    };
+    SubmissionField: {
+      /** Format: uuid */
+      id: string;
+      label: string;
+      help: string | null;
+      /** @enum {string} */
+      type: 'short_text' | 'long_text' | 'number' | 'choice' | 'phone';
+      /** @description Choices, for type choice */
+      options: string[];
+      required: boolean;
+      /** @description No two teams' answers may match (case-insensitive) */
+      unique: boolean;
+      /** @description Regular expression a text answer must match in full */
+      pattern: string | null;
+      position: number;
+    };
+    Submission: {
+      /** Format: uuid */
+      id: string;
+      round: components['schemas']['RoundRef'];
+      title: string;
+      description: string;
+      position: number;
+      fields: components['schemas']['SubmissionField'][];
+      /** @description Teams that have submitted */
+      entryCount: number;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    SubmissionEntry: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      submissionId: string;
+      team: {
+        /** Format: uuid */
+        id: string;
+        name: string;
+      };
+      answers: components['schemas']['Answers'];
+      /** @description The member who saved it last */
+      submittedBy: {
+        /** Format: uuid */
+        registrationId: string;
+        name: string;
+      } | null;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    PortalSubmission: {
+      /** Format: uuid */
+      id: string;
+      round: components['schemas']['RoundRef'];
+      title: string;
+      description: string;
+      position: number;
+      fields: components['schemas']['SubmissionField'][];
+      /** @description Whether your team can still save (round released) */
+      open: boolean;
+      /** @description Your team's entry, if any */
+      entry: components['schemas']['SubmissionEntry'] | null;
     };
     UploadTicket: {
       /** @description Pass this back to the API once the upload is done */
@@ -9186,6 +10573,8 @@ export interface components {
         /** @description How to pay */
         paymentInstructions: string | null;
         leaderboardVisible: boolean;
+        /** @description False: no RSVP step (hide the RSVP buttons); confirmed means attending */
+        rsvpEnabled: boolean;
       };
       /** @description Feature on and inside the window */
       registrationOpen: boolean;
@@ -9228,6 +10617,8 @@ export interface components {
        * @description The link and its sessions stop working then
        */
       accessEndsAt: string;
+      /** @description The event's RSVP setting. False: hide the RSVP buttons */
+      rsvpEnabled: boolean;
     };
     ParticipantSession: {
       session: components['schemas']['AccessToken'];
@@ -9288,7 +10679,8 @@ export interface components {
         participantCode: string;
         qrToken: string;
         isLeader: boolean;
-        link: components['schemas']['PersonalLink'];
+        /** @description The leader's own link only; null for teammates (their links go to them by email) */
+        link: components['schemas']['PersonalLink'] | null;
       }[];
       payment: {
         mode: components['schemas']['PaymentMode'];
@@ -9302,6 +10694,10 @@ export interface components {
       /** @enum {string} */
       role: 'admin' | 'volunteer' | 'judge';
       token: components['schemas']['AccessToken'];
+    };
+    LinkSent: {
+      /** @constant */
+      sent: true;
     };
   };
   responses: never;

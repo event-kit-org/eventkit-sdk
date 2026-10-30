@@ -68,11 +68,17 @@ export function useEventQuery<T>(
   name: string,
   fn: (event: EventApi) => Promise<T>,
   options: Opts<T> & { eventId?: string } = {},
+  /** Extra key parts (a round id, say). */
+  keyParts: unknown[] = [],
 ) {
   const ek = useEventKit();
   const { eventId, ...rest } = options;
   const event = ek.event(eventId);
-  return useQuery({ queryKey: eventKeys.of(event.id, name), queryFn: () => fn(event), ...rest });
+  return useQuery({
+    queryKey: eventKeys.of(event.id, name, ...keyParts),
+    queryFn: () => fn(event),
+    ...rest,
+  });
 }
 
 /** Runs a devkit call, then refreshes everything cached for the event. */
@@ -98,8 +104,22 @@ export const useTeamRules = (o: EventOpt = {}) =>
 export const usePolls = (o: EventOpt = {}) => useEventQuery('polls', (e) => e.polls.list(), o);
 export const useCheckpoints = (o: EventOpt = {}) =>
   useEventQuery('checkpoints', (e) => e.checkpoints.list(), o);
-export const useLeaderboard = (o: EventOpt = {}) =>
-  useEventQuery('leaderboard', (e) => e.leaderboard(), o);
+export const useRounds = (o: EventOpt = {}) => useEventQuery('rounds', (e) => e.rounds.list(), o);
+export const useCriteria = (roundId?: string, o: EventOpt = {}) =>
+  useEventQuery('criteria', (e) => e.criteria.list(roundId), o, [roundId]);
+/** Judges: the teams to score, with your scores, for a round. */
+export const useJudgingTeams = (roundId?: string, o: EventOpt = {}) =>
+  useEventQuery('judging-teams', (e) => e.judging.teams(roundId), o, [roundId]);
+/** Admin: a round's submission forms (all rounds without `roundId`). */
+export const useSubmissions = (roundId?: string, o: EventOpt = {}) =>
+  useEventQuery('submissions', (e) => e.submissions.list(roundId), o, [roundId]);
+/** Admin: what teams handed in for one submission. */
+export const useSubmissionEntries = (submissionId: string, o: EventOpt = {}) =>
+  useEventQuery('submission-entries', (e) => e.submissions.entries(submissionId), o, [
+    submissionId,
+  ]);
+export const useLeaderboard = (roundId?: string, o: EventOpt = {}) =>
+  useEventQuery('leaderboard', (e) => e.leaderboard(roundId), o, [roundId]);
 /** The notification feed, refreshed every 30 s. */
 export const useNotifications = (o: EventOpt & { refetchIntervalMs?: number } = {}) =>
   useEventQuery('notifications', (e) => e.notifications.feed(), {
@@ -177,6 +197,23 @@ export function useMyTeam() {
 export function useMyPolls() {
   const ek = useEventKit();
   return useQuery({ queryKey: portalKeys.of('polls'), queryFn: () => ek.portal.me.polls.list() });
+}
+/** The participant's submission forms per round, with their team's entry. */
+export function useMySubmissions() {
+  const ek = useEventKit();
+  return useQuery({
+    queryKey: portalKeys.of('submissions'),
+    queryFn: () => ek.portal.me.submissions.list(),
+  });
+}
+/** Team totals for a round (when the organiser shows the leaderboard). */
+export function useMyLeaderboard(roundId?: string) {
+  const ek = useEventKit();
+  return useQuery({
+    queryKey: [...portalKeys.of('leaderboard'), roundId ?? null],
+    queryFn: () => ek.portal.me.leaderboard(roundId),
+    refetchInterval: 30_000,
+  });
 }
 /** The participant's notification feed, refreshed every 30 s. */
 export function useMyNotifications(refetchIntervalMs = 30_000) {

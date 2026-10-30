@@ -126,7 +126,27 @@ export function portalApi(t: Transport, session: Session) {
       },
     },
     /** Team totals, once the organiser shows the leaderboard. */
-    leaderboard: () => call(api.GET('/v1/portal/me/leaderboard')),
+    leaderboard: (roundId?: string) =>
+      call(
+        api.GET('/v1/portal/me/leaderboard', {
+          params: { query: { ...(roundId ? { roundId } : {}) } as never },
+        }),
+      ),
+    submissions: {
+      /** Each round's forms: `{round, fields, open, entry}`. */
+      list: () => call(api.GET('/v1/portal/me/submissions')),
+      /** Save your team's answers (while the submission is open). */
+      saveEntry: (
+        submissionId: string,
+        answers: Body<`${Me}/submissions/{submissionId}/entry`, 'put'>['answers'],
+      ) =>
+        call(
+          api.PUT('/v1/portal/me/submissions/{submissionId}/entry', {
+            ...at({ submissionId }),
+            body: { answers },
+          }),
+        ),
+    },
     /** Low level: register or remove this device for urgent push (see push.enable). */
     pushDevice: {
       put: (body: Body<`${Me}/push`, 'put'>) => call(api.PUT('/v1/portal/me/push', { body })),

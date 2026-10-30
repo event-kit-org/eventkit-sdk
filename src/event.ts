@@ -312,7 +312,7 @@ export function eventApi(t: Transport, eventId: string) {
      * retries; `qrToken` may also be a participant ID typed by hand. Prefer
      * createScanner(), which does that for you.
      */
-    scan: (input: { id: string; checkpointId: string; qrToken: string }) =>
+    scan: (input: Body<`${E}/scans`, 'post'>) =>
       call(api.POST('/v1/events/{eventId}/scans', { ...at(), body: input })),
     attendance: {
       /** Staff at the gate: mark someone attending (or not) by their QR code or participant ID. */
@@ -427,8 +427,95 @@ export function eventApi(t: Transport, eventId: string) {
     },
 
     // ------------------------------------------------------------ judging
+    rounds: {
+      list: () => call(api.GET('/v1/events/{eventId}/rounds', at())),
+      create: (input: Body<`${E}/rounds`, 'post'>) =>
+        call(api.POST('/v1/events/{eventId}/rounds', { ...at(), body: input })),
+      update: (roundId: string, patch: Body<`${E}/rounds/{roundId}`, 'patch'>) =>
+        call(
+          api.PATCH('/v1/events/{eventId}/rounds/{roundId}', { ...at({ roundId }), body: patch }),
+        ),
+      remove: (roundId: string) =>
+        call(api.DELETE('/v1/events/{eventId}/rounds/{roundId}', at({ roundId }))),
+      /** Copy the criteria of another round into this one. */
+      duplicateCriteria: (roundId: string, fromRoundId: string) =>
+        call(
+          api.POST('/v1/events/{eventId}/rounds/{roundId}/criteria/duplicate', {
+            ...at({ roundId }),
+            body: { fromRoundId },
+          }),
+        ),
+    },
+    submissions: {
+      list: (roundId?: string) =>
+        call(
+          api.GET('/v1/events/{eventId}/submissions', {
+            params: { path: { eventId }, query: { ...(roundId ? { roundId } : {}) } as never },
+          }),
+        ),
+      create: (input: Body<`${E}/submissions`, 'post'>) =>
+        call(api.POST('/v1/events/{eventId}/submissions', { ...at(), body: input })),
+      update: (submissionId: string, patch: Body<`${E}/submissions/{submissionId}`, 'patch'>) =>
+        call(
+          api.PATCH('/v1/events/{eventId}/submissions/{submissionId}', {
+            ...at({ submissionId }),
+            body: patch,
+          }),
+        ),
+      remove: (submissionId: string) =>
+        call(api.DELETE('/v1/events/{eventId}/submissions/{submissionId}', at({ submissionId }))),
+      duplicate: (submissionId: string) =>
+        call(
+          api.POST(
+            '/v1/events/{eventId}/submissions/{submissionId}/duplicate',
+            at({ submissionId }),
+          ),
+        ),
+      /** What teams handed in. */
+      entries: (submissionId: string) =>
+        call(
+          api.GET('/v1/events/{eventId}/submissions/{submissionId}/entries', at({ submissionId })),
+        ),
+      fields: {
+        add: (
+          submissionId: string,
+          input: Body<`${E}/submissions/{submissionId}/fields`, 'post'>,
+        ) =>
+          call(
+            api.POST('/v1/events/{eventId}/submissions/{submissionId}/fields', {
+              ...at({ submissionId }),
+              body: input,
+            }),
+          ),
+        update: (
+          submissionId: string,
+          fieldId: string,
+          patch: Body<`${E}/submissions/{submissionId}/fields/{fieldId}`, 'patch'>,
+        ) =>
+          call(
+            api.PATCH('/v1/events/{eventId}/submissions/{submissionId}/fields/{fieldId}', {
+              ...at({ submissionId, fieldId }),
+              body: patch,
+            }),
+          ),
+        remove: (submissionId: string, fieldId: string) =>
+          call(
+            api.DELETE(
+              '/v1/events/{eventId}/submissions/{submissionId}/fields/{fieldId}',
+              at({ submissionId, fieldId }),
+            ),
+          ),
+      },
+    },
     criteria: {
-      list: () => call(api.GET('/v1/events/{eventId}/criteria', at())),
+      /** `roundId`: the criteria of one round. */
+      list: (roundId?: string) =>
+        call(
+          api.GET('/v1/events/{eventId}/criteria', {
+            params: { path: { eventId }, query: { ...(roundId ? { roundId } : {}) } as never },
+          }),
+        ),
+      /** `roundId` is required in the input. */
       create: (input: Body<`${E}/criteria`, 'post'>) =>
         call(api.POST('/v1/events/{eventId}/criteria', { ...at(), body: input })),
       update: (criterionId: string, patch: Body<`${E}/criteria/{criterionId}`, 'patch'>) =>
@@ -442,22 +529,36 @@ export function eventApi(t: Transport, eventId: string) {
         call(api.DELETE('/v1/events/{eventId}/criteria/{criterionId}', at({ criterionId }))),
     },
     judging: {
-      /** Judges: teams with at least one member checked in, with your own scores. */
-      teams: () => call(api.GET('/v1/events/{eventId}/judging/teams', at())),
-      /** Each score from 0 to the criterion's maximum. */
+      /** Judges: teams with at least one member checked in, with your own scores (for a round). */
+      teams: (roundId?: string) =>
+        call(
+          api.GET('/v1/events/{eventId}/judging/teams', {
+            params: { path: { eventId }, query: { ...(roundId ? { roundId } : {}) } as never },
+          }),
+        ),
+      /** Each score from 0 to the criterion's maximum. Judges and admins. */
       saveScores: (
         teamId: string,
         scores: { criterionId: string; value: number; comment?: string | null }[],
+        roundId?: string,
       ) =>
         call(
           api.PUT('/v1/events/{eventId}/judging/teams/{teamId}/scores', {
-            ...at({ teamId }),
+            params: {
+              path: { eventId, teamId },
+              query: { ...(roundId ? { roundId } : {}) } as never,
+            },
             body: { scores },
           }),
         ),
     },
     /** Admins and judges always; everyone once the admin shows it (`leaderboardVisible`). */
-    leaderboard: () => call(api.GET('/v1/events/{eventId}/leaderboard', at())),
+    leaderboard: (roundId?: string) =>
+      call(
+        api.GET('/v1/events/{eventId}/leaderboard', {
+          params: { path: { eventId }, query: { ...(roundId ? { roundId } : {}) } as never },
+        }),
+      ),
 
     // ------------------------------------------------------------ files
     uploads: {

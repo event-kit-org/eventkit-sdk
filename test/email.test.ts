@@ -6,31 +6,30 @@ describe('registrationEmail', () => {
     expect(`${t.event.name}: ${t.team.name} is registered`).toBe(
       '{{event.name}}: {{team.name}} is registered',
     );
-    expect(t.leader.dashboardUrl).toBe('{{leader.linkUrl}}');
+    expect(t.member.dashboardUrl).toBe('{{member.linkUrl}}');
+    expect(t.linkReplaced).toBe('{{linkReplaced}}');
     expect(t.links.portal).toBe('{{event.portalUrl}}');
   });
 
   it('repeats a block per member, with conditions', () => {
     const html = t.eachMember(
       (m) =>
-        `<p>${m.name}${t.when(m.isLeader, ' (leader)')}</p>${t.unless(m.dashboardUrl, 'Ask the organisers')}`,
+        `<p>${m.name}${t.when(m.isLeader, ' (leader)')}</p>${t.unless(t.member.dashboardUrl, 'Ask the organisers')}`,
     );
     expect(html).toBe(
-      '{{#members}}<p>{{name}}{{#isLeader}} (leader){{/isLeader}}</p>{{^linkUrl}}Ask the organisers{{/linkUrl}}{{/members}}',
+      '{{#members}}<p>{{name}}{{#isLeader}} (leader){{/isLeader}}</p>{{^member.linkUrl}}Ask the organisers{{/member.linkUrl}}{{/members}}',
     );
   });
 
   it('makes a link button, escaping its text but keeping variables', () => {
-    const html = t.eachMember((m) =>
-      t.button({
-        href: m.dashboardUrl,
-        label: `Open ${m.name}'s "dashboard" & more`,
-        background: '#a78bfa',
-      }),
-    );
-    expect(html).toContain('<a href="{{linkUrl}}" target="_blank"');
+    const html = t.button({
+      href: t.member.dashboardUrl,
+      label: `Open ${t.member.name}'s "dashboard" & more`,
+      background: '#a78bfa',
+    });
+    expect(html).toContain('<a href="{{member.linkUrl}}" target="_blank"');
     expect(html).toContain('background:#a78bfa');
-    expect(html).toContain(">Open {{name}}'s &quot;dashboard&quot; &amp; more</a>");
+    expect(html).toContain(">Open {{member.name}}'s &quot;dashboard&quot; &amp; more</a>");
   });
 
   it('refuses something that is not a variable', () => {

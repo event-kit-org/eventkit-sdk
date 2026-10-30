@@ -12,8 +12,13 @@ import {
   useEventMutation,
   useFeatures,
   useFields,
+  useJudgingTeams,
   useLeaderboard,
   useMe,
+  useMySubmissions,
+  useRounds,
+  useSubmissionEntries,
+  useSubmissions,
   useMyNotifications,
   useMyPolls,
   useMyTeam,
@@ -78,6 +83,23 @@ describe('react', () => {
     );
     await waitFor(() => expect(other.current.isSuccess).toBe(true));
     expect(mock.calls.some((c) => c.path === '/v1/events/other/notifications')).toBe(true);
+  });
+
+  it('round and submission hooks load', async () => {
+    const { ek, mock } = client();
+    const w = wrap(ek);
+    for (const hook of [
+      (): { isSuccess: boolean } => useRounds(),
+      () => useSubmissions('r1'),
+      () => useSubmissionEntries('s1'),
+      () => useJudgingTeams('r1'),
+      () => useLeaderboard('r1'),
+      () => useMySubmissions(),
+    ]) {
+      const { result } = renderHook(hook, { wrapper: w });
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    }
+    expect(mock.calls.some((c) => c.url.includes('/leaderboard?roundId=r1'))).toBe(true);
   });
 
   it("mutations refresh the event's queries", async () => {

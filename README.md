@@ -95,8 +95,9 @@ const html = `<!doctype html><html><body style="background:#1a1b2f;color:#ebe5f6
   ${t.eachMember(
     (m) => `
     <p>${m.name}${t.when(m.isLeader, ' (leader)')} · ${m.participantCode}</p>
-    ${t.when(m.dashboardUrl, t.button({ href: m.dashboardUrl, label: 'Open dashboard', background: '#a78bfa' }))}`,
+`,
   )}
+  ${t.when(t.member.dashboardUrl, t.button({ href: t.member.dashboardUrl, label: 'Open dashboard', background: '#a78bfa' }))}
   ${t.when(t.links.portal, `<a href="${t.links.portal}">Event site</a>`)}
 </body></html>`;
 

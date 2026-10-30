@@ -83,7 +83,7 @@ describe('an event, end to end through the devkit', () => {
       (typeof registered.members)[0],
     ];
     expect(asha.participantCode).toMatch(/^[A-Z0-9]+-\d{4}$/);
-    expect(asha.link.url).toBe(`${PORTAL}/p/${asha.link.token}`);
+    expect(asha.link!.url).toBe(`${PORTAL}/p/${asha.link!.token}`);
 
     // Each opens their personal link on their own phone.
     const leader = portal(clubKey, event.id);
@@ -99,13 +99,13 @@ describe('an event, end to end through the devkit', () => {
       (
         await leader.portal.openSecretLink(undefined, {
           paths,
-          location: at(`/p/${asha.link.token}`),
+          location: at(`/p/${asha.link!.token}`),
           history: fakeHistory,
         })
       ).isLeader,
     ).toBe(true);
     expect(replaced).toEqual(['/p']);
-    await mate.portal.openSecretLink(ravi.link.token);
+    await mate.portal.openSecretLink(ravi.link!.token);
 
     // The client approves the receipt; Asha RSVPs.
     const [proof] = await ev.payments.list('pending');
@@ -148,12 +148,12 @@ describe('an event, end to end through the devkit', () => {
 
     // A leaked link: Ravi resets it; the old link and its sessions stop working.
     const otherPhone = portal(clubKey, event.id);
-    await otherPhone.portal.openSecretLink(ravi.link.token);
+    await otherPhone.portal.openSecretLink(ravi.link!.token);
     const fresh = await mate.portal.me.resetLink();
-    expect(fresh.token).not.toBe(ravi.link.token);
+    expect(fresh.token).not.toBe(ravi.link!.token);
     expect(await fails(otherPhone.portal.me.get())).toMatchObject({ status: 401 });
     expect(
-      await fails(portal(clubKey, event.id).portal.openSecretLink(ravi.link.token)),
+      await fails(portal(clubKey, event.id).portal.openSecretLink(ravi.link!.token)),
     ).toMatchObject({ code: 'LINK_NOT_FOUND' });
     expect((await mate.portal.me.get()).name).toBe('Ravi');
 
@@ -195,7 +195,13 @@ describe('an event, end to end through the devkit', () => {
       email: `${randomUUID()}@e2e.test`,
       password: 'password123',
     });
-    const idea = await ev.criteria.create({ name: 'Idea', description: '', maxScore: 10 });
+    const round = await ev.rounds.create({ name: 'Final' } as never);
+    const idea = await ev.criteria.create({
+      roundId: round.id,
+      name: 'Idea',
+      description: '',
+      maxScore: 10,
+    });
     const [toJudge] = await judge.event().judging.teams();
     await judge.event().judging.saveScores(toJudge!.id, [{ criterionId: idea.id, value: 8 }]);
     const board = await ev.leaderboard();

@@ -20,7 +20,7 @@ export function describeScan(r: ScanResult): string {
     case 'closed':
       return 'This checkpoint has closed';
     case 'not_attending':
-      return 'Has not confirmed attendance (RSVP) yet';
+      return "Not RSVP'd";
     case 'not_checked_in':
       return 'Not checked in at the entry yet';
     case 'cancelled':
@@ -93,7 +93,10 @@ export function createScanner(
    * Scans a code. Returns null when the same code was just scanned (camera
    * repeat); pass `{ force: true }` for codes typed by hand.
    */
-  async function scan(code: string, opts: { force?: boolean } = {}): Promise<ScanResult | null> {
+  async function scan(
+    code: string,
+    opts: { force?: boolean; allowWithoutRsvp?: boolean } = {},
+  ): Promise<ScanResult | null> {
     if (!online) {
       throw new EventKitError(
         0,
@@ -112,7 +115,12 @@ export function createScanner(
         : uuid();
     for (let attempt = 0; ; attempt++) {
       try {
-        const result = await event.scan({ id, checkpointId, qrToken: code });
+        const result = await event.scan({
+          id,
+          checkpointId,
+          qrToken: code,
+          ...(opts.allowWithoutRsvp ? { allowWithoutRsvp: true } : {}),
+        });
         unanswered = null;
         return result;
       } catch (e) {
@@ -140,6 +148,10 @@ export function createScanner(
     async markAttendingAndScan(code: string): Promise<ScanResult> {
       await event.attendance.mark(code, true);
       return (await scan(code, { force: true }))!;
+    },
+    /** At the gate: let someone through who has not RSVP'd, without marking them attending. */
+    async allowWithoutRsvp(code: string): Promise<ScanResult> {
+      return (await scan(code, { force: true, allowWithoutRsvp: true }))!;
     },
     describe: describeScan,
     get online() {

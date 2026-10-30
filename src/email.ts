@@ -5,7 +5,7 @@
  * stays plain HTML with no build step. eventKit escapes every value.
  *
  * Mail apps run no scripts, so a button in an email is a link: put a link
- * variable in its `href` (`member.dashboardUrl`, `links.portal`).
+ * variable in its `href` (`member.dashboardUrl` (the recipient's own link), `links.portal`).
  *
  * ```ts
  * import { registrationEmail as t } from '@eventkit/sdk';
@@ -14,8 +14,8 @@
  *   <h1>${t.team.name} is in!</h1>
  *   ${t.eachMember((m) => `
  *     <p>${m.name}${t.when(m.isLeader, ' (leader)')} · ${m.participantCode}</p>
- *     ${t.when(m.dashboardUrl, t.button({ href: m.dashboardUrl, label: 'Open dashboard' }))}
- *   `)}
+ *     `)}
+ *   ${t.when(t.member.dashboardUrl, t.button({ href: t.member.dashboardUrl, label: 'Open dashboard' }))}
  * </body></html>`;
  * await ek.event(id).emails.save('registration', {
  *   subject: `${t.event.name}: ${t.team.name} is registered`,
@@ -43,16 +43,27 @@ export interface MemberVariables {
   participantCode: TemplateVariable;
   /** Set for the leader: use with `when` / `unless`. */
   isLeader: TemplateVariable;
-  /** The member's personal link to their dashboard; empty when the event has no portal URL. */
+}
+
+/** The recipient of this email (one email goes to each member): `registrationEmail.member`. */
+export interface RecipientVariables extends MemberVariables {
+  /** The recipient's own personal link to their dashboard; empty without a portal URL. */
   dashboardUrl: TemplateVariable;
 }
 
-const member: MemberVariables = {
+const eachMemberVars: MemberVariables = {
   name: v('name'),
   email: v('email'),
   participantCode: v('participantCode'),
   isLeader: v('isLeader'),
-  dashboardUrl: v('linkUrl'),
+};
+
+const recipient: RecipientVariables = {
+  name: v('member.name'),
+  email: v('member.email'),
+  participantCode: v('member.participantCode'),
+  isLeader: v('member.isLeader'),
+  dashboardUrl: v('member.linkUrl'),
 };
 
 const escapeHtml = (s: string) =>
@@ -71,7 +82,7 @@ export interface ButtonOptions {
   radius?: string;
 }
 
-/** The registration email (sent to the team leader once the team registers). */
+/** The registration email (each member gets their own once the team registers). */
 export const registrationEmail = {
   event: {
     name: v('event.name'),
@@ -85,25 +96,27 @@ export const registrationEmail = {
   team: { name: v('team.name') },
   /** How many people registered. */
   memberCount: v('memberCount'),
-  /** The leader, who receives the email. */
+  /** Whoever this email is addressed to (each member gets their own, with only their own link). */
+  member: recipient,
+  /** True when this email carries a replacement link (the old one stopped working). Use with `when`. */
+  linkReplaced: v('linkReplaced'),
+  /** The team's leader. */
   leader: {
     name: v('leader.name'),
     email: v('leader.email'),
     participantCode: v('leader.participantCode'),
-    /** The leader's personal link to their dashboard; empty without a portal URL. */
-    dashboardUrl: v('leader.linkUrl'),
   },
   /** Links for buttons. Each is empty when the event has no portal URL: wrap buttons in `when`. */
   links: {
     /** The event's portal (its home page). */
     portal: v('event.portalUrl'),
-    /** The leader's dashboard. Inside `eachMember`, use the member's `dashboardUrl`. */
-    leaderDashboard: v('leader.linkUrl'),
+    /** The recipient's own dashboard link (same as `member.dashboardUrl`). */
+    dashboard: v('member.linkUrl'),
   },
 
-  /** Repeats `render` for every member, the leader included, in form order. */
+  /** Repeats `render` for every member, the leader included, in form order (no links: those are the recipient's alone). */
   eachMember(render: (m: MemberVariables) => string): string {
-    return `{{#members}}${render(member)}{{/members}}`;
+    return `{{#members}}${render(eachMemberVars)}{{/members}}`;
   },
 
   /** `html` only when the variable is set (a link exists, the member is the leader, …). */
