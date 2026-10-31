@@ -1,9 +1,10 @@
 /**
  * Several API addresses, primary first: the eventKit API on its own server and
  * the same API on Vercel share one database, so either can answer any request.
- * Requests go to the first address that isn't marked down; when it can't be
- * reached they move to the next one and stay there for a minute, then try the
- * primary again.
+ * Requests go to the first address that works. When one can't be reached it is
+ * marked down and requests move to the next; while it is marked down, every
+ * request first checks its /health (uncached, one check shared for a few
+ * seconds) and goes back to it as soon as it answers.
  *
  * The eventkit-console keeps a copy of this file (src/api/failover.ts): change both.
  */
@@ -11,11 +12,13 @@
 export interface FailoverOptions {
   /** Default: the global fetch, resolved per request. */
   fetch?: (request: Request) => Promise<Response>;
-  /** How long an address that failed is skipped. Default 60 s. */
+  /** A down mark's longest life; after it, the address is used again without a check. Default 60 s. */
   downMs?: number;
+  /** How long one /health check of a down address is reused. Default 5 s. */
+  recheckMs?: number;
   /** GET and HEAD give up on an address after this long. Default 10 s. */
   timeoutMs?: number;
-  /** Before resending a POST, PATCH, PUT or DELETE, the failed address's /health gets this long. Default 3 s. */
+  /** A /health check gets this long. Default 3 s. */
   healthTimeoutMs?: number;
   /** Where down marks are shared across reloads and tabs. Default: localStorage when there is one. */
   storage?: Pick<Storage, 'getItem' | 'setItem'> | null;
@@ -53,12 +56,15 @@ function defaultStorage(): FailoverOptions['storage'] {
 
 export function createFailoverFetch(urls: string[], options: FailoverOptions = {}) {
   const downMs = options.downMs ?? 60_000;
+  const recheckMs = options.recheckMs ?? 5_000;
   const timeoutMs = options.timeoutMs ?? 10_000;
   const healthTimeoutMs = options.healthTimeoutMs ?? 3_000;
   const now = options.now ?? Date.now;
   const storage = options.storage === undefined ? defaultStorage() : options.storage;
   const send = options.fetch ?? ((r: Request) => globalThis.fetch(r));
   const downUntil = new Map<string, number>();
+  const checked = new Map<string, { at: number; ok: boolean }>();
+  const checking = new Map<string, Promise<boolean>>();
 
   function stored(): Record<string, number> {
     try {
@@ -69,6 +75,14 @@ export function createFailoverFetch(urls: string[], options: FailoverOptions = {
     }
   }
 
+  function save(marks: Record<string, number>) {
+    try {
+      storage?.setItem(STORAGE_KEY, JSON.stringify(marks));
+    } catch {
+      // Storage full or blocked: this tab still remembers.
+    }
+  }
+
   function isDown(url: string): boolean {
     return Math.max(downUntil.get(url) ?? 0, stored()[url] ?? 0) > now();
   }
@@ -76,19 +90,20 @@ export function createFailoverFetch(urls: string[], options: FailoverOptions = {
   function markDown(url: string) {
     const until = now() + downMs;
     downUntil.set(url, until);
-    try {
-      storage?.setItem(STORAGE_KEY, JSON.stringify({ ...stored(), [url]: until }));
-    } catch {
-      // Storage full or blocked: this tab still remembers.
-    }
+    checked.set(url, { at: now(), ok: false });
+    save({ ...stored(), [url]: until });
   }
 
-  /** The address requests go to now. With every one marked down, the primary. */
-  function activeUrl(): string {
-    return urls.find((u) => !isDown(u)) ?? urls[0]!;
+  function markUp(url: string) {
+    downUntil.delete(url);
+    const marks = stored();
+    delete marks[url];
+    save(marks);
   }
 
-  async function reachable(url: string): Promise<boolean> {
+  /** GET <url>/health, never from a cache. Records the answer. */
+  async function probe(url: string): Promise<boolean> {
+    let ok: boolean;
     try {
       const res = await send(
         new Request(`${url}/health`, {
@@ -96,10 +111,43 @@ export function createFailoverFetch(urls: string[], options: FailoverOptions = {
           signal: AbortSignal.timeout(healthTimeoutMs),
         }),
       );
-      return res.ok;
+      ok = res.ok;
     } catch {
-      return false;
+      ok = false;
     }
+    checked.set(url, { at: now(), ok });
+    if (ok) markUp(url);
+    return ok;
+  }
+
+  /** Whether a down address is back: a recent check's answer, or a new check (one at a time). */
+  function isBack(url: string): Promise<boolean> {
+    const last = checked.get(url);
+    if (last && now() - last.at < recheckMs) return Promise.resolve(last.ok);
+    let pending = checking.get(url);
+    if (!pending) {
+      pending = probe(url).finally(() => checking.delete(url));
+      checking.set(url, pending);
+    }
+    return pending;
+  }
+
+  /**
+   * The addresses to try, in order: every one that isn't marked down, and a
+   * down one that answers its check. A down address is only checked while
+   * nothing before it works, so the primary is checked and later ones aren't.
+   */
+  async function usable(): Promise<string[]> {
+    const order: string[] = [];
+    for (const url of urls) {
+      if (!isDown(url) || (order.length === 0 && (await isBack(url)))) order.push(url);
+    }
+    return order.length > 0 ? order : urls;
+  }
+
+  /** The address requests go to now, as far as is known without a check. */
+  function activeUrl(): string {
+    return urls.find((u) => !isDown(u)) ?? urls[0]!;
   }
 
   async function failoverFetch(request: Request): Promise<Response> {
@@ -108,8 +156,7 @@ export function createFailoverFetch(urls: string[], options: FailoverOptions = {
     const path = request.url.slice(base.length);
     const safe = SAFE.has(request.method);
     const body = safe ? undefined : await request.clone().arrayBuffer();
-    const candidates = urls.filter((u) => !isDown(u));
-    const order = candidates.length > 0 ? candidates : urls;
+    const order = await usable();
 
     for (let i = 0; i < order.length; i++) {
       const url = order[i]!;
@@ -134,7 +181,7 @@ export function createFailoverFetch(urls: string[], options: FailoverOptions = {
         failure = err;
       }
       // A write may already have been handled: resend it only if the address is really down.
-      if (!safe && (await reachable(url))) {
+      if (!safe && (await probe(url))) {
         if (failure instanceof Response) return failure;
         throw failure;
       }

@@ -168,13 +168,14 @@ describe('createFailoverFetch', () => {
     expect(none.f.activeUrl()).toBe(VERCEL);
   });
 
-  it('with every address marked down, tries them all again from the primary', async () => {
-    const { f, storage, hosts } = setup({ [SERVER]: () => ok(), [VERCEL]: () => ok() });
+  it('with every address marked down, checks the primary first and uses it once it answers', async () => {
+    const { f, storage, seen } = setup({ [SERVER]: () => ok(), [VERCEL]: () => ok() });
     const later = Date.now() + 60_000;
     storage.setItem('eventkit:api-down', JSON.stringify({ [SERVER]: later, [VERCEL]: later }));
     expect(f.activeUrl()).toBe(SERVER);
     await f.fetch(new Request(`${SERVER}/x`));
-    expect(hosts()).toEqual([SERVER]);
+    expect(seen.map((r) => r.url)).toEqual([`${SERVER}/health`, `${SERVER}/x`]);
+    expect(JSON.parse(storage.getItem('eventkit:api-down')!)).toEqual({ [VERCEL]: later });
   });
 
   it('passes on a request the caller cancelled', async () => {
@@ -196,7 +197,55 @@ describe('createFailoverFetch', () => {
     expect(hosts()).toEqual(['https://bucket.test']);
   });
 
-  it('shares the down mark through storage, and tries the primary again after a minute', async () => {
+  it('goes back to the primary as soon as its /health answers, checking at most every 5 s', async () => {
+    let t = 1_000_000;
+    let serverUp = false;
+    const net = network({
+      [SERVER]: (req) => {
+        if (!serverUp) throw new TypeError('Failed to fetch');
+        return ok({ from: 'server', path: new URL(req.url).pathname });
+      },
+      [VERCEL]: () => ok({ from: 'vercel' }),
+    });
+    const f = createFailoverFetch([SERVER, VERCEL], {
+      fetch: net.fetch,
+      storage: memoryStorage(),
+      now: () => t,
+    });
+    const from = async () =>
+      ((await (await f.fetch(new Request(`${SERVER}/x`))).json()) as { from: string }).from;
+
+    expect(await from()).toBe('vercel'); // server tried, failed, marked down
+    t += 1_000;
+    expect(await from()).toBe('vercel'); // the failure is a fresh check: no /health yet
+    t += 5_000;
+    expect(await from()).toBe('vercel'); // checked /health: still down
+    expect(net.seen.filter((r) => r.url === `${SERVER}/health`)).toHaveLength(1);
+
+    serverUp = true;
+    expect(await from()).toBe('vercel'); // within 5 s of that check: not asked again
+    t += 5_000;
+    expect(await from()).toBe('server'); // checked, back: straight to the server
+    expect(f.activeUrl()).toBe(SERVER);
+    expect(await from()).toBe('server');
+    expect(net.seen.filter((r) => r.url === `${SERVER}/health`)).toHaveLength(2);
+  });
+
+  it('shares one check between requests sent together', async () => {
+    let t = 1_000_000;
+    const net = network({ [SERVER]: down, [VERCEL]: () => ok() });
+    const f = createFailoverFetch([SERVER, VERCEL], {
+      fetch: net.fetch,
+      storage: null,
+      now: () => t,
+    });
+    await f.fetch(new Request(`${SERVER}/x`));
+    t += 10_000;
+    await Promise.all([1, 2, 3].map(() => f.fetch(new Request(`${SERVER}/x`))));
+    expect(net.seen.filter((r) => r.url === `${SERVER}/health`)).toHaveLength(1);
+  });
+
+  it('shares the down mark through storage, and uses the primary unchecked once the mark expires', async () => {
     let t = 1_000_000;
     const now = () => t;
     const net = network({ [SERVER]: down, [VERCEL]: () => ok() });
@@ -204,9 +253,12 @@ describe('createFailoverFetch', () => {
     const first = createFailoverFetch([SERVER, VERCEL], { fetch: net.fetch, storage, now });
     await first.fetch(new Request(`${SERVER}/x`));
 
-    // Another tab, or the page after a reload.
+    // Another tab, or the page after a reload: it checks before using the server.
     const second = createFailoverFetch([SERVER, VERCEL], { fetch: net.fetch, storage, now });
     expect(second.activeUrl()).toBe(VERCEL);
+    await second.fetch(new Request(`${SERVER}/x`));
+    expect(net.seen.at(-2)!.url).toBe(`${SERVER}/health`);
+    expect(net.seen.at(-1)!.url).toBe(`${VERCEL}/x`);
     t += 60_001;
     expect(second.activeUrl()).toBe(SERVER);
   });

@@ -36,9 +36,10 @@ const info = await ek.portal.info(); // event, form fields, team rules, paths, p
 `apiUrl` may list several addresses, primary first, separated by commas
 (`'https://api.example,https://api-backup.example'`). Requests go to the first
 that answers. When it can't be reached, reads move to the next at once, and
-writes move only after its `/health` also fails, so nothing is sent twice. A
-failed address is skipped for a minute (shared across tabs through
-`localStorage`), then tried again. `createFailoverFetch` gives the same
+writes move only after its `/health` also fails, so nothing is sent twice.
+While an address is marked down (shared across tabs through `localStorage`),
+each request first checks its `/health` (uncached; one check reused for 5 s)
+and goes back to it as soon as it answers. `createFailoverFetch` gives the same
 behaviour to apps with their own HTTP client.
 
 ```ts
