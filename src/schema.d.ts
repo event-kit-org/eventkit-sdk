@@ -1394,7 +1394,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Polls for participants, with your vote (none before the event day) */
+    /** Polls for participants, with your vote */
     get: {
       parameters: {
         query?: never;
@@ -1440,7 +1440,7 @@ export interface paths {
       cookie?: never;
     };
     get?: never;
-    /** Vote, or change your vote, until the poll closes (from the event day: NOT_EVENT_DAY before) */
+    /** Vote, or change your vote, until the poll closes */
     put: {
       parameters: {
         query?: never;
@@ -9905,7 +9905,7 @@ export interface components {
         rsvpEnabled: boolean;
         /**
          * Format: date-time
-         * @description Polls, submissions and the leaderboard reach participants from then on: 00:00 IST on the start date
+         * @description Submissions and the leaderboard reach participants from then on: 00:00 IST on the start date. Polls are not held back
          */
         activitiesFrom: string;
       };
@@ -9954,7 +9954,7 @@ export interface components {
       rsvpEnabled: boolean;
       /**
        * Format: date-time
-       * @description Polls, submissions and the leaderboard open then (00:00 IST on the start date); hide them before
+       * @description Submissions and the leaderboard open then (00:00 IST on the start date); hide them before. Polls are not held back
        */
       activitiesFrom: string;
       /** @description Whether activitiesFrom has passed */
@@ -10722,7 +10722,7 @@ export interface components {
         rsvpEnabled: boolean;
         /**
          * Format: date-time
-         * @description Polls, submissions and the leaderboard reach participants from then on: 00:00 IST on the start date
+         * @description Submissions and the leaderboard reach participants from then on: 00:00 IST on the start date. Polls are not held back
          */
         activitiesFrom: string;
       };
@@ -10771,7 +10771,7 @@ export interface components {
       rsvpEnabled: boolean;
       /**
        * Format: date-time
-       * @description Polls, submissions and the leaderboard open then (00:00 IST on the start date); hide them before
+       * @description Submissions and the leaderboard open then (00:00 IST on the start date); hide them before. Polls are not held back
        */
       activitiesFrom: string;
       /** @description Whether activitiesFrom has passed */
