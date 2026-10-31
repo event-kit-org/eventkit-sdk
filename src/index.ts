@@ -2,6 +2,12 @@ export { createEventKit, type EventKit, type EventKitOptions } from './client';
 export type { EventApi } from './event';
 export { EventKitError, isEventKitError, fieldErrors, type ErrorCode } from './errors';
 export {
+  createFailoverFetch,
+  type FailoverOptions,
+  isProxyFailure,
+  splitApiUrls,
+} from './failover';
+export {
   decodeSession,
   localStorageSession,
   memorySession,

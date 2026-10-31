@@ -31,7 +31,17 @@ const ek = createEventKit({
 });
 
 const info = await ek.portal.info(); // event, form fields, team rules, paths, payment QR
+```
 
+`apiUrl` may list several addresses, primary first, separated by commas
+(`'https://api.example,https://api-backup.example'`). Requests go to the first
+that answers. When it can't be reached, reads move to the next at once, and
+writes move only after its `/health` also fails, so nothing is sent twice. A
+failed address is skipped for a minute (shared across tabs through
+`localStorage`), then tried again. `createFailoverFetch` gives the same
+behaviour to apps with their own HTTP client.
+
+```ts
 // /register/{token}: the leader registers the whole team (receipt uploaded first).
 const { members } = await ek.portal.register({
   linkToken,

@@ -7,7 +7,11 @@ import { createScanner, type ScannerOptions } from './scanner';
 import { memorySession, Session, type SessionStore } from './session';
 
 export interface EventKitOptions {
-  /** Base URL of the eventKit API, e.g. https://api.eventkit.example */
+  /**
+   * Base URL of the eventKit API, e.g. https://api.eventkit.example. Several,
+   * comma-separated, primary first: requests move to the next one while the
+   * primary can't be reached.
+   */
   apiUrl: string;
   /**
    * Your event's API key (console → API keys). It says which event your portal

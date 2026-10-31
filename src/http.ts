@@ -1,9 +1,11 @@
 import createClient from 'openapi-fetch';
 import { EventKitError } from './errors';
+import { createFailoverFetch, splitApiUrls } from './failover';
 import type { paths } from './schema';
 import type { Session } from './session';
 
 export interface TransportOptions {
+  /** One API address, or several separated by commas: the first that answers is used. */
   apiUrl: string;
   apiKey: string;
   session: Session;
@@ -23,9 +25,11 @@ export function createTransport(options: TransportOptions) {
   const { session } = options;
   // Resolved per request, so test doubles and late polyfills apply.
   const doFetch: typeof fetch = (input, init) => (options.fetch ?? globalThis.fetch)(input, init);
+  const urls = splitApiUrls(options.apiUrl);
+  const failover = urls.length > 1 ? createFailoverFetch(urls, { fetch: (r) => doFetch(r) }) : null;
   const api = createClient<paths>({
-    baseUrl: options.apiUrl.replace(/\/+$/, ''),
-    fetch: (request: Request) => doFetch(request),
+    baseUrl: urls[0] ?? '',
+    fetch: failover ? failover.fetch : (request: Request) => doFetch(request),
   });
   api.use({
     onRequest({ request }) {
@@ -61,7 +65,15 @@ export function createTransport(options: TransportOptions) {
     );
   }
 
-  return { api, call, fetch: doFetch, apiUrl: options.apiUrl.replace(/\/+$/, '') };
+  return {
+    api,
+    call,
+    fetch: doFetch,
+    /** The address requests go to now (the next one while the primary is down). */
+    get apiUrl() {
+      return failover ? failover.activeUrl() : (urls[0] ?? '');
+    },
+  };
 }
 
 export type Transport = ReturnType<typeof createTransport>;
