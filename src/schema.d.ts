@@ -1394,7 +1394,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Polls for participants, with your vote */
+    /** Polls for participants, with your vote (none until your team is confirmed) */
     get: {
       parameters: {
         query?: never;
@@ -1440,7 +1440,7 @@ export interface paths {
       cookie?: never;
     };
     get?: never;
-    /** Vote, or change your vote, until the poll closes */
+    /** Vote, or change your vote, until the poll closes (NOT_CONFIRMED until your team is confirmed) */
     put: {
       parameters: {
         query?: never;
@@ -1529,7 +1529,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Notifications for participants, newest first (page with ?before=<sentAt>) */
+    /** Notifications for participants, newest first (page with ?before=<sentAt>; none until your team is confirmed) */
     get: {
       parameters: {
         query?: {
@@ -1596,7 +1596,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** A round's team totals, ranked, once the organiser shows the leaderboard (released and closed rounds only), from the event day */
+    /** A round's team totals, ranked, once the organiser shows the leaderboard (released and closed rounds only), from the event day, once your team is confirmed */
     get: {
       parameters: {
         query?: {
@@ -1662,7 +1662,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Submission forms of released and closed rounds, with your team's entries (none before the event day) */
+    /** Submission forms of released and closed rounds, with your team's entries (none before the event day or until your team is confirmed) */
     get: {
       parameters: {
         query?: never;
@@ -1708,7 +1708,7 @@ export interface paths {
       cookie?: never;
     };
     get?: never;
-    /** Save your team's entry (any active member; replaces earlier answers). Only while the round is released, from the event day. After the deadline it is saved and marked late. */
+    /** Save your team's entry (any active member; replaces earlier answers). Only while the round is released, from the event day, once your team is confirmed (NOT_CONFIRMED before). After the deadline it is saved and marked late. */
     put: {
       parameters: {
         query?: never;
@@ -1797,7 +1797,7 @@ export interface paths {
       cookie?: never;
     };
     get?: never;
-    /** Get urgent notifications on this device (the browser PushSubscription) */
+    /** Get urgent notifications on this device (the browser PushSubscription; NOT_CONFIRMED until your team is confirmed) */
     put: {
       parameters: {
         query?: never;
@@ -1836,6 +1836,15 @@ export interface paths {
         };
         /** @description Default Response */
         401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
           headers: {
             [name: string]: unknown;
           };
@@ -9959,6 +9968,8 @@ export interface components {
       activitiesFrom: string;
       /** @description Whether activitiesFrom has passed */
       activitiesOpen: boolean;
+      /** @description Whether your team's place is confirmed. False: polls, notifications, submissions and the leaderboard are closed to you (hide them) */
+      confirmed: boolean;
     };
     ParticipantSessionInput: {
       session: components['schemas']['AccessTokenInput'];
@@ -10776,6 +10787,8 @@ export interface components {
       activitiesFrom: string;
       /** @description Whether activitiesFrom has passed */
       activitiesOpen: boolean;
+      /** @description Whether your team's place is confirmed. False: polls, notifications, submissions and the leaderboard are closed to you (hide them) */
+      confirmed: boolean;
     };
     ParticipantSession: {
       session: components['schemas']['AccessToken'];
