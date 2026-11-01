@@ -101,7 +101,7 @@ export function createScanner(
   health: () => Promise<unknown>,
   options: ScannerOptions,
 ) {
-  const now = options.now ?? Date.now;
+  const now = options.now ?? (() => Date.now());
   const uuid = options.uuid ?? (() => crypto.randomUUID());
   const cooldown = options.cooldownMs ?? 3000;
   const pause = options.pauseMs ?? 1200;
