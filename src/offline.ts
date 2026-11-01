@@ -107,14 +107,9 @@ export async function findInRoster(
   );
 }
 
-/** Whether an entry scan is a re-entry: outside after an exit paired with this checkpoint. */
-export function isReentry(roster: ScanRoster, person: RosterPerson): boolean {
-  if (roster.checkpoint.type !== 'entry' || !person.outsideSince || !person.outsideCheckpointId) {
-    return false;
-  }
-  const exit = roster.exits.find((e) => e.id === person.outsideCheckpointId);
-  return !exit?.linkedCheckpointId || exit.linkedCheckpointId === roster.checkpoint.id;
-}
+/** At a gate: whether this scan lets someone out (else back in). */
+export const isLeaving = (roster: ScanRoster, person: RosterPerson): boolean =>
+  roster.checkpoint.type === 'gate' && !person.outsideSince;
 
 /**
  * The server's decision, made on this device from the cached roster (see
@@ -133,13 +128,8 @@ export function decideOffline(
   if (cp.closesAt && now > new Date(cp.closesAt)) return 'closed';
   const last = person.lastAcceptedAt ? new Date(person.lastAcceptedAt) : null;
   if (last && Math.abs(now.getTime() - last.getTime()) < SAME_SIGHTING_MS) return 'duplicate';
-  if (cp.type === 'exit') {
-    if (status !== 'checked_in') return 'not_checked_in';
-    if (person.outsideSince) return 'not_inside';
-    return null;
-  }
+  if (cp.type === 'gate') return status === 'checked_in' ? null : 'not_checked_in';
   if (cp.type === 'entry') {
-    if (isReentry(roster, person) && status === 'checked_in') return null;
     const rsvpSkipped = allowWithoutRsvp && status === 'confirmed';
     if (status !== 'attending' && status !== 'checked_in' && !rsvpSkipped) return 'not_attending';
   } else if (status !== 'checked_in') {
@@ -152,18 +142,14 @@ export function decideOffline(
 /** The roster after an accepted offline scan, so the next offline scan sees it. */
 export function applyAccepted(roster: ScanRoster, person: RosterPerson, at: Date): void {
   const iso = at.toISOString();
-  const reentry = isReentry(roster, person);
   person.lastAcceptedAt = iso;
   if (roster.checkpoint.type === 'entry' && person.status !== 'checked_in') {
     person.status = 'checked_in';
   }
-  if (roster.checkpoint.type === 'exit') {
-    person.outsideSince = iso;
-    person.outsideCheckpointId = roster.checkpoint.id;
-  }
-  if (reentry) {
-    person.outsideSince = null;
-    person.outsideCheckpointId = null;
+  if (roster.checkpoint.type === 'gate') {
+    const out = isLeaving(roster, person);
+    person.outsideSince = out ? iso : null;
+    person.outsideCheckpointId = out ? roster.checkpoint.id : null;
   }
 }
 
@@ -175,7 +161,7 @@ export function offlineResult(
   at: Date,
   reason: RejectReason | null,
   reentry: boolean,
-  exitReason: string | undefined,
+  exitReason: string | null,
 ): ScanResult {
   return {
     id,
@@ -197,7 +183,7 @@ export function offlineResult(
       status: person.status,
     },
     reentry,
-    exitReason: roster.checkpoint.type === 'exit' ? (exitReason ?? null) : null,
+    exitReason,
     offline: true,
   };
 }

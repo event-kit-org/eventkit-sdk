@@ -1,6 +1,13 @@
 export { createEventKit, type EventKit, type EventKitOptions } from './client';
 export type { EventApi } from './event';
-export { EventKitError, isEventKitError, fieldErrors, type ErrorCode } from './errors';
+export {
+  EventKitError,
+  isEventKitError,
+  fieldErrors,
+  type ErrorCode,
+  type Leaving,
+  leavingFrom,
+} from './errors';
 export {
   createFailoverFetch,
   type FailoverOptions,

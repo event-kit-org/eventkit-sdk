@@ -6,7 +6,7 @@ import {
   decideOffline,
   findInRoster,
   indexedDbStorage,
-  isReentry,
+  isLeaving,
   type LocalLogEntry,
   logEntry,
   memoryStorage,
@@ -22,7 +22,7 @@ export type ScanResult = Schemas['ScanResult'];
 /** What the volunteer reads after a scan (the meal to hand over is in `result.meal`). */
 export function describeScan(r: ScanResult): string {
   if (r.result === 'accepted') {
-    if (r.checkpoint.type === 'exit') return r.exitReason ? `Left: ${r.exitReason}` : 'Left';
+    if (r.exitReason) return `Out: ${r.exitReason}`;
     if (r.reentry) return 'Back in';
     return r.checkpoint.type === 'entry' ? 'Checked in' : 'OK — hand it over';
   }
@@ -39,8 +39,6 @@ export function describeScan(r: ScanResult): string {
       return "Not RSVP'd";
     case 'not_checked_in':
       return 'Not checked in at the entry yet';
-    case 'not_inside':
-      return 'Already marked outside: scan them back in at the entry';
     case 'cancelled':
       return 'Registration is cancelled';
     default:
@@ -270,14 +268,22 @@ export function createScanner(
     if (!person) {
       throw new EventKitError(404, 'UNKNOWN_QR', 'Not on the offline list for this event.');
     }
-    if (r.checkpoint.type === 'exit' && !opts.exitReason?.trim()) {
-      throw new EventKitError(400, 'EXIT_REASON_REQUIRED', 'Say why they are leaving.');
+    const out = isLeaving(r, person);
+    if (out && person.status === 'checked_in' && !opts.exitReason?.trim()) {
+      throw new EventKitError(400, 'EXIT_REASON_REQUIRED', 'Choose why they are leaving.', {
+        participant: {
+          name: person.name,
+          participantCode: person.participantCode,
+          teamName: person.teamName,
+        },
+      });
     }
     const at = new Date(now());
     const reason = decideOffline(r, person, at, opts.allowWithoutRsvp ?? false);
-    const reentry = !reason && isReentry(r, person);
+    const reentry = !reason && r.checkpoint.type === 'gate' && !out;
     if (!reason) applyAccepted(r, person, at);
-    const result = offlineResult(r, person, id, at, reason, reentry, opts.exitReason);
+    const exitReason = !reason && out ? opts.exitReason! : null;
+    const result = offlineResult(r, person, id, at, reason, reentry, exitReason);
     queue.push({
       id,
       checkpointId: r.checkpoint.id,
@@ -299,7 +305,9 @@ export function createScanner(
   /**
    * Scans a code. Returns null when the same code was just scanned, or another
    * result came in under `pauseMs` ago (camera repeats); pass `{ force: true }`
-   * for codes typed by hand. Exit checkpoints need `exitReason`.
+   * for codes typed by hand. At a gate, someone going out needs `exitReason`:
+   * without it this throws EXIT_REASON_REQUIRED (see `leavingFrom`) and records
+   * nothing; ask the volunteer, then scan again with it.
    */
   async function scan(
     code: string,

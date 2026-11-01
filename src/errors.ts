@@ -56,6 +56,7 @@ export type ErrorCode =
   | 'UPLOAD_FAILED'
   // on-site, polls, notifications, judging
   | 'UNKNOWN_QR'
+  | 'EXIT_REASON_REQUIRED'
   | 'CANNOT_SEND_TO_CHANNEL'
   | 'LEADERBOARD_HIDDEN'
   | 'VALIDATION_ERROR'
@@ -138,4 +139,22 @@ export function fieldErrors(e: unknown, prefix = ''): Record<string, string> {
     else if (d.path.startsWith(`${prefix}/`)) out[d.path.slice(prefix.length + 1)] = d.message;
   }
   return out;
+}
+
+/** Who is leaving, from an EXIT_REASON_REQUIRED refusal at a gate checkpoint. */
+export interface Leaving {
+  name: string;
+  participantCode: string;
+  teamName: string;
+}
+
+/**
+ * At a gate checkpoint, someone inside is going out: the scan was refused until
+ * a reason is chosen. Returns who it is (to show while the volunteer picks one),
+ * or null for any other error. Send the scan again with `exitReason`.
+ */
+export function leavingFrom(e: unknown): Leaving | null {
+  if (!isEventKitError(e, 'EXIT_REASON_REQUIRED')) return null;
+  const p = (e.details as { participant?: Leaving } | undefined)?.participant;
+  return p ?? { name: 'This person', participantCode: '', teamName: '' };
 }

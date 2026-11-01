@@ -6,6 +6,7 @@ import {
   type ScannerOptions,
   type ScanResult,
   type ScanRoster,
+  leavingFrom,
   sha256Hex,
 } from '../src';
 import { apiError, client } from './mock';
@@ -199,7 +200,7 @@ describe('pause between scans', () => {
 
 describe('offline scanning', () => {
   const QR = 'qr-asha';
-  async function roster(over: Record<string, unknown> = {}) {
+  async function roster(over: Record<string, unknown> = {}, who: Record<string, unknown> = {}) {
     return {
       generatedAt: '2026-10-31T04:00:00.000Z',
       checkpoint: {
@@ -210,7 +211,6 @@ describe('offline scanning', () => {
         closesAt: null,
         allowRepeat: false,
         poll: null,
-        linkedCheckpointId: null,
         createdAt: '2026-10-01T00:00:00.000Z',
         ...over,
       },
@@ -225,15 +225,19 @@ describe('offline scanning', () => {
           outsideSince: null,
           outsideCheckpointId: null,
           lastAcceptedAt: null,
+          ...who,
         },
       ],
-      exits: [],
     };
   }
 
-  async function offlineSetup(t: { now: number }, over: Record<string, unknown> = {}) {
+  async function offlineSetup(
+    t: { now: number },
+    over: Record<string, unknown> = {},
+    who: Record<string, unknown> = {},
+  ) {
     const ctx = setup({ offline: memoryStorage(), now: () => t.now });
-    const r = await roster(over);
+    const r = await roster(over, who);
     ctx.mock.on('GET /v1/events/:id/scans/roster', () => r);
     let down = false;
     ctx.mock.on('GET /health', () => {
@@ -328,28 +332,38 @@ describe('offline scanning', () => {
     expect(scanner.online).toBe(false);
   });
 
-  it('exits need a reason, and re-entry follows a paired exit (as the server decides)', async () => {
-    const at = new Date('2026-10-31T05:00:00Z');
-    const r = (await roster({
-      id: 'out',
-      type: 'exit',
-      linkedCheckpointId: 'gate',
-    })) as unknown as ScanRoster;
-    r.exits = [{ id: 'out', linkedCheckpointId: 'gate' }];
-    const person: ScanRoster['people'][number] = { ...r.people[0]!, status: 'checked_in' };
-    expect(decideOffline(r, person, at)).toBeNull();
-    person.outsideSince = at.toISOString();
-    person.outsideCheckpointId = 'out';
-    expect(decideOffline(r, person, at)).toBe('not_inside');
+  it('at a gate: out needs a reason (saying who), then the same gate lets them back in', async () => {
+    const t = { now: Date.parse('2026-10-31T05:00:00Z') };
+    const { scanner, goDown } = await offlineSetup(t, { type: 'gate' }, { status: 'checked_in' });
+    goDown();
+    await scanner.check();
+    expect(scanner.offlineReady).toBe(true);
+    await expect(scanner.scan(QR)).rejects.toSatisfy(
+      (e) =>
+        leavingFrom(e)?.name === 'Asha' && (e as { code: string }).code === 'EXIT_REASON_REQUIRED',
+    );
+    expect(scanner.pendingCount).toBe(0); // nothing recorded without a reason
+    const out = await scanner.scan(QR, { force: true, exitReason: 'Bathroom' });
+    expect(out).toMatchObject({ result: 'accepted', exitReason: 'Bathroom', reentry: false });
+    t.now += 60_000;
+    const back = await scanner.scan(QR, { force: true });
+    expect(back).toMatchObject({ result: 'accepted', exitReason: null, reentry: true });
+    expect(scanner.pendingCount).toBe(2);
+  });
 
-    const gate = (await roster()) as unknown as ScanRoster;
-    gate.exits = r.exits;
-    const back = { ...person, lastAcceptedAt: '2026-10-31T04:00:00.000Z' };
-    expect(decideOffline(gate, back, at)).toBeNull(); // re-entry, not a duplicate
-    expect(decideOffline(gate, { ...back, outsideSince: null }, at)).toBe('duplicate');
-    expect(decideOffline(gate, { ...back, lastAcceptedAt: '2026-10-31T04:59:58.000Z' }, at)).toBe(
+  it('decides gates as the server does', async () => {
+    const at = new Date('2026-10-31T05:00:00Z');
+    const gate = (await roster({ type: 'gate' })) as unknown as ScanRoster;
+    const person: ScanRoster['people'][number] = { ...gate.people[0]!, status: 'checked_in' };
+    expect(decideOffline(gate, person, at)).toBeNull();
+    expect(decideOffline(gate, { ...person, status: 'attending' }, at)).toBe('not_checked_in');
+    expect(decideOffline(gate, { ...person, lastAcceptedAt: '2026-10-31T04:59:58.000Z' }, at)).toBe(
       'duplicate',
     ); // same sighting
+    const entry = (await roster()) as unknown as ScanRoster;
+    expect(
+      decideOffline(entry, { ...person, lastAcceptedAt: '2026-10-31T04:00:00.000Z' }, at),
+    ).toBe('duplicate'); // check-in once
   });
 
   it('without a cached roster, offline scans are refused', async () => {
