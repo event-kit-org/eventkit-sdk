@@ -156,6 +156,7 @@ describe('every API operation is reachable through the devkit', () => {
     await e.teams.get(ID);
     await e.teams.shortlist(ID);
     await e.teams.confirm(ID);
+    await e.teams.release({ stage: 'all' });
     await e.registrations.cancel(ID);
     await e.registrations.restore(ID);
     await e.registrations.reissueLink(ID);
@@ -169,6 +170,10 @@ describe('every API operation is reachable through the devkit', () => {
     await e.checkpoints.update(ID, {});
     await e.checkpoints.remove(ID);
     await e.scan({ id: ID, checkpointId: ID, qrToken: 'q' });
+    await e.scans.list({ checkpointId: ID });
+    await e.scans.roster(ID);
+    await e.scans.batch([{ id: ID, checkpointId: ID, qrToken: 'q', offline: true }]);
+    await e.scans.outside();
     await e.attendance.mark('q');
     await e.polls.list();
     await e.polls.get(ID);
@@ -222,6 +227,6 @@ describe('every API operation is reachable through the devkit', () => {
     );
     const missing = all.filter((op) => !reached.has(op) && !NOT_FOR_FRONT_ENDS.includes(op));
     expect(missing).toEqual([]);
-    expect(all.length - NOT_FOR_FRONT_ENDS.length).toBe(129);
+    expect(all.length - NOT_FOR_FRONT_ENDS.length).toBe(134);
   });
 });

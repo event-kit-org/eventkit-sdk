@@ -18,6 +18,7 @@ import { DEFAULT_PORTAL_PATHS, parseLink } from '../portal';
 import { decodeSession, type SessionInfo } from '../session';
 import type { Schemas } from '../types';
 import type { EventApi } from '../event';
+import type { LocalLogEntry } from '../offline';
 import type { Scanner, ScannerOptions } from '../scanner';
 
 const Ctx = createContext<EventKit | null>(null);
@@ -241,13 +242,27 @@ export function usePortalMutation<TVars, TData>(
  * A scanner for a checkpoint, with its online state. The scanner is rebuilt
  * when the event or checkpoint changes, and stopped on unmount.
  */
-export function useScanner(options: ScannerOptions & { eventId?: string }): {
+export interface ScannerState {
   scanner: Scanner | null;
   online: boolean;
-} {
+  /** A roster is cached: scanning goes on without a connection. */
+  offlineReady: boolean;
+  /** Offline scans waiting to be sent. */
+  pendingCount: number;
+  /** This device's scan log for the checkpoint, newest first. */
+  log: LocalLogEntry[];
+}
+
+/** A scanner for one checkpoint, with its online and offline state as React state. */
+export function useScanner(options: ScannerOptions & { eventId?: string }): ScannerState {
   const ek = useEventKit();
   const [scanner, setScanner] = useState<Scanner | null>(null);
-  const [online, setOnline] = useState(true);
+  const [state, setState] = useState<Omit<ScannerState, 'scanner'>>({
+    online: true,
+    offlineReady: false,
+    pendingCount: 0,
+    log: [],
+  });
   const { eventId, checkpointId, pingIntervalMs } = options;
   useEffect(() => {
     const s = ek.createScanner({
@@ -255,9 +270,16 @@ export function useScanner(options: ScannerOptions & { eventId?: string }): {
       ...(eventId ? { eventId } : {}),
       checkpointId,
     });
+    const read = () =>
+      setState({
+        online: s.online,
+        offlineReady: s.offlineReady,
+        pendingCount: s.pendingCount,
+        log: s.log,
+      });
     setScanner(s);
-    setOnline(s.online);
-    const off = s.onOnlineChange(setOnline);
+    read();
+    const off = s.onChange(read);
     void s.check();
     return () => {
       off();
@@ -265,8 +287,76 @@ export function useScanner(options: ScannerOptions & { eventId?: string }): {
     };
     // Rebuilt only when what identifies the scanner changes.
   }, [ek, eventId, checkpointId, pingIntervalMs]); // eslint-disable-line
-  return { scanner, online };
+  return { scanner, ...state };
 }
+
+/** One row of the scan log: the server's scans merged with this device's unsent ones. */
+export interface ScanLogRow {
+  id: string;
+  scannedAt: string;
+  participantCode: string;
+  name: string;
+  teamName: string;
+  result: 'accepted' | 'rejected';
+  reason: Schemas['ScanResult']['reason'];
+  exitReason: string | null;
+  reentry: boolean;
+  offline: boolean;
+  /** pending: decided offline, not sent; conflict: the server decided differently. */
+  sync: 'pending' | 'synced' | 'conflict';
+  serverNote?: string;
+}
+
+/**
+ * The scan log under a scanner: the checkpoint's recent scans from the server
+ * (refreshed every 5 s while online) with this device's offline scans on top.
+ */
+export function useScanLog(
+  state: Pick<ScannerState, 'online' | 'log'>,
+  checkpointId: string | null,
+  o: EventOpt & { limit?: number; refetchIntervalMs?: number } = {},
+): { rows: ScanLogRow[]; isPending: boolean } {
+  const event = useEventKit().event(o.eventId);
+  const q = useQuery({
+    queryKey: eventKeys.of(event.id, 'scans', checkpointId, o.limit ?? 25),
+    queryFn: () => event.scans.list({ checkpointId: checkpointId!, limit: o.limit ?? 25 }),
+    enabled: !!checkpointId && state.online,
+    refetchInterval: o.refetchIntervalMs ?? 5000,
+  });
+  const local = new Map(state.log.map((e) => [e.id, e]));
+  const server: ScanLogRow[] = (q.data ?? []).map((s) => {
+    const mine = local.get(s.id);
+    return {
+      id: s.id,
+      scannedAt: s.scannedAt,
+      participantCode: s.participant.participantCode,
+      name: s.participant.name,
+      teamName: s.participant.teamName,
+      result: s.result,
+      reason: s.reason,
+      exitReason: s.exitReason,
+      reentry: mine?.reentry ?? false,
+      offline: s.offline,
+      sync: mine?.sync === 'conflict' ? 'conflict' : 'synced',
+      ...(mine?.serverNote ? { serverNote: mine.serverNote } : {}),
+    };
+  });
+  const seen = new Set(server.map((r) => r.id));
+  const mine: ScanLogRow[] = state.log
+    .filter((e) => !seen.has(e.id))
+    .map((e) => ({ ...e, offline: e.sync !== 'synced' }));
+  const rows = [...mine, ...server]
+    .sort((a, b) => b.scannedAt.localeCompare(a.scannedAt))
+    .slice(0, Math.max(o.limit ?? 25, mine.length));
+  return { rows, isPending: q.isPending && state.online && !!checkpointId };
+}
+
+/** Everyone who left through an exit and has not come back, refreshed every 15 s. */
+export const useOutside = (o: EventOpt & { refetchIntervalMs?: number } = {}) =>
+  useEventQuery('outside', (e) => e.scans.outside(), {
+    refetchInterval: o.refetchIntervalMs ?? 15_000,
+    ...(o.eventId ? { eventId: o.eventId } : {}),
+  });
 
 /** Whether the API is reachable (pings /health). */
 export function useOnlineStatus(intervalMs = 5000): boolean {

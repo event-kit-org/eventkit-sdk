@@ -220,6 +220,12 @@ export function eventApi(t: Transport, eventId: string) {
       confirm: (teamId: string) =>
         call(api.POST('/v1/events/{eventId}/teams/{teamId}/confirm', at({ teamId }))),
       /**
+       * Staged release: show participants the shortlists and/or confirmations
+       * made so far, for these teams (or every team).
+       */
+      release: (input: Body<`${E}/teams/release`, 'post'> = {}) =>
+        call(api.POST('/v1/events/{eventId}/teams/release', { ...at(), body: input })),
+      /**
        * Admin: delete the team for good (registrations, check-ins, votes,
        * receipts, scores) and free its places. Cancelling keeps a record instead.
        */
@@ -314,6 +320,23 @@ export function eventApi(t: Transport, eventId: string) {
      */
     scan: (input: Body<`${E}/scans`, 'post'>) =>
       call(api.POST('/v1/events/{eventId}/scans', { ...at(), body: input })),
+    scans: {
+      /** Recent scans, newest first: the scan log. */
+      list: (query: Query<`${E}/scans`, 'get'> = {}) =>
+        call(api.GET('/v1/events/{eventId}/scans', { params: { path: { eventId }, query } })),
+      /** What a scanner needs to keep deciding scans offline at one checkpoint. */
+      roster: (checkpointId: string) =>
+        call(
+          api.GET('/v1/events/{eventId}/scans/roster', {
+            params: { path: { eventId }, query: { checkpointId } },
+          }),
+        ),
+      /** Send scans made offline (up to 200), once back online. */
+      batch: (scans: Body<`${E}/scans/batch`, 'post'>['scans']) =>
+        call(api.POST('/v1/events/{eventId}/scans/batch', { ...at(), body: { scans } })),
+      /** Everyone who left through an exit and has not scanned back in. */
+      outside: () => call(api.GET('/v1/events/{eventId}/scans/outside', at())),
+    },
     attendance: {
       /** Staff at the gate: mark someone attending (or not) by their QR code or participant ID. */
       mark: (qrToken: string, attending = true) =>

@@ -19,9 +19,22 @@ export {
   createScanner,
   describeScan,
   type Scanner,
+  type ScannerApi,
   type ScannerOptions,
   type ScanResult,
 } from './scanner';
+export {
+  decideOffline,
+  findInRoster,
+  indexedDbStorage,
+  type LocalLogEntry,
+  memoryStorage,
+  type OfflineStorage,
+  type QueuedScan,
+  type ScanRoster,
+  SAME_SIGHTING_MS,
+  sha256Hex,
+} from './offline';
 export { MAX_UPLOAD_BYTES, toWebp, UPLOAD_TYPES, type UploadPurpose } from './uploads';
 export type {
   Body,

@@ -1109,6 +1109,15 @@ export interface paths {
           };
         };
         /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
         413: {
           headers: {
             [name: string]: unknown;
@@ -2414,6 +2423,9 @@ export interface paths {
              * @default true
              */
             rsvpEnabled?: boolean;
+            /** @default false */
+            stagedRelease?: boolean;
+            exitReasons?: string[];
             portalUrl?: string | null;
             /** @default {} */
             portalPaths?: {
@@ -2777,6 +2789,9 @@ export interface paths {
             leaderboardVisible?: boolean;
             /** @description Off: confirming also marks people attending; turning it off moves everyone confirmed to attending */
             rsvpEnabled?: boolean;
+            /** @description On: shortlists and confirmations stay hidden from participants until released; turning it off releases everything */
+            stagedRelease?: boolean;
+            exitReasons?: string[];
             portalUrl?: string | null;
             portalPaths?: {
               register?: string;
@@ -4841,6 +4856,91 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/events/{eventId}/teams/release': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Staged release: show participants the shortlists and/or confirmations made so far, for the given teams or every team */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            /**
+             * @default all
+             * @enum {string}
+             */
+            stage?: 'shortlisted' | 'confirmed' | 'all';
+            teamIds?: string[];
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ReleaseResult'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/events/{eventId}/registrations/{registrationId}/cancel': {
     parameters: {
       query?: never;
@@ -5550,6 +5650,7 @@ export interface paths {
             closesAt?: string | null;
             allowRepeat?: boolean;
             pollId?: string | null;
+            linkedCheckpointId?: string | null;
           };
         };
       };
@@ -5706,6 +5807,7 @@ export interface paths {
             closesAt?: string | null;
             allowRepeat?: boolean;
             pollId?: string | null;
+            linkedCheckpointId?: string | null;
           };
         };
       };
@@ -5775,7 +5877,69 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    /** Recent scans, newest first (page with ?before=<scannedAt>) */
+    get: {
+      parameters: {
+        query?: {
+          checkpointId?: string;
+          before?: string;
+          limit?: number;
+        };
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ScanLogEntry'][];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
     put?: never;
     /** Scan a participant's QR at a checkpoint. Generate `id` on the device and reuse it on retries: a repeated id returns the original result and never counts twice. */
     post: {
@@ -5798,6 +5962,15 @@ export interface paths {
             qrToken: string;
             /** @description Entry checkpoints: check in a confirmed person who has not RSVPed. Default false (refused as not_attending). */
             allowWithoutRsvp?: boolean;
+            /** @description Exit checkpoints (required there): why they are leaving */
+            exitReason?: string;
+            /** @description Scanned without a connection */
+            offline?: boolean;
+            /**
+             * Format: date-time
+             * @description Offline scans: when the device scanned it (capped at the server's now)
+             */
+            clientScannedAt?: string;
           };
         };
       };
@@ -5858,6 +6031,245 @@ export interface paths {
         };
       };
     };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/scans/batch': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Send scans made offline, once back online. Each is checked in device-time order; ids already recorded return their first result. */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            scans: {
+              /** Format: uuid */
+              id: string;
+              /** Format: uuid */
+              checkpointId: string;
+              /** @description The QR token, or the participant ID typed by hand */
+              qrToken: string;
+              /** @description Entry checkpoints: check in a confirmed person who has not RSVPed. Default false (refused as not_attending). */
+              allowWithoutRsvp?: boolean;
+              /** @description Exit checkpoints (required there): why they are leaving */
+              exitReason?: string;
+              /** @description Scanned without a connection */
+              offline?: boolean;
+              /**
+               * Format: date-time
+               * @description Offline scans: when the device scanned it (capped at the server's now)
+               */
+              clientScannedAt?: string;
+            }[];
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ScanBatchResult'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/scans/roster': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Everything a scanner needs to keep scanning offline at one checkpoint. QR tokens come hashed (SHA-256 hex): hash the scanned code to look it up. */
+    get: {
+      parameters: {
+        query: {
+          checkpointId: string;
+        };
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ScanRoster'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/scans/outside': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Everyone who left through an exit and has not scanned back in, longest out first */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['OutsidePerson'][];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -9354,6 +9766,10 @@ export interface components {
       leaderboardVisible: boolean;
       /** @description Off: confirmed registrations go straight to attending (no RSVP step) */
       rsvpEnabled: boolean;
+      /** @description On: participants see shortlists and confirmations only once an organiser releases them */
+      stagedRelease: boolean;
+      /** @description Quick reasons offered when someone leaves through an exit checkpoint */
+      exitReasons: string[];
       /** Format: date-time */
       createdAt: string;
     };
@@ -9398,7 +9814,7 @@ export interface components {
       updatedAt: string;
     };
     /** @enum {string} */
-    CheckpointTypeInput: 'entry' | 'meal' | 'swag' | 'session';
+    CheckpointTypeInput: 'entry' | 'meal' | 'swag' | 'session' | 'exit';
     CheckpointInput: {
       /** Format: uuid */
       id: string;
@@ -9413,6 +9829,8 @@ export interface components {
         id: string;
         question: string;
       } | null;
+      /** @description Exit checkpoints only: the entry checkpoint people scan at to come back in */
+      linkedCheckpointId: string | null;
       /** Format: date-time */
       createdAt: string;
     };
@@ -9536,6 +9954,14 @@ export interface components {
       status: components['schemas']['RegistrationStatusInput'];
       /** @description Cancellations left the team below the minimum size */
       belowMinimum: boolean;
+      /** @description Staged release (organisers only) */
+      release: {
+        /** @description What participants are shown */
+        status: components['schemas']['RegistrationStatusInput'];
+        at: string | null;
+        /** @description A decision not shown to participants yet */
+        pending: boolean;
+      } | null;
       /** @description Team field answers */
       answers: components['schemas']['AnswersInput'];
       members: {
@@ -9615,6 +10041,12 @@ export interface components {
       /** @description Who confirmed it */
       confirmedBy: string | null;
       memberCount: number;
+      /** @description Members who RSVPed (attending or checked in) */
+      attendingCount: number;
+      /** @description Staged release: what participants are shown (registered, shortlisted or confirmed) */
+      releasedStatus: components['schemas']['RegistrationStatusInput'];
+      /** @description Staged release: a decision participants have not been shown yet */
+      pendingRelease: boolean;
       belowMinimum: boolean;
       latestProofStatus: ('pending' | 'approved' | 'rejected') | null;
       /** Format: date-time */
@@ -9981,7 +10413,15 @@ export interface components {
       /** @enum {string} */
       result: 'accepted' | 'rejected';
       reason:
-        | ('duplicate' | 'not_open' | 'closed' | 'not_attending' | 'not_checked_in' | 'cancelled')
+        | (
+            | 'duplicate'
+            | 'not_open'
+            | 'closed'
+            | 'not_attending'
+            | 'not_checked_in'
+            | 'cancelled'
+            | 'not_inside'
+          )
         | null;
       /** Format: date-time */
       scannedAt: string;
@@ -10007,6 +10447,83 @@ export interface components {
         teamName: string;
         status: components['schemas']['RegistrationStatusInput'];
       };
+      /** @description Entry: back in after leaving through an exit */
+      reentry: boolean;
+      /** @description Exit checkpoints: why they left */
+      exitReason: string | null;
+      /** @description Scanned offline and sent later */
+      offline: boolean;
+    };
+    ScanLogEntryInput: {
+      /** Format: uuid */
+      id: string;
+      /** Format: date-time */
+      scannedAt: string;
+      /** @enum {string} */
+      result: 'accepted' | 'rejected';
+      reason:
+        | (
+            | 'duplicate'
+            | 'not_open'
+            | 'closed'
+            | 'not_attending'
+            | 'not_checked_in'
+            | 'cancelled'
+            | 'not_inside'
+          )
+        | null;
+      exitReason: string | null;
+      offline: boolean;
+      checkpoint: {
+        /** Format: uuid */
+        id: string;
+        name: string;
+        type: components['schemas']['CheckpointTypeInput'];
+      };
+      participant: {
+        name: string;
+        participantCode: string;
+        teamName: string;
+      };
+    };
+    ScanRosterInput: {
+      /** Format: date-time */
+      generatedAt: string;
+      checkpoint: components['schemas']['CheckpointInput'];
+      people: {
+        /** Format: uuid */
+        registrationId: string;
+        /** @description SHA-256 (hex) of the QR token */
+        qrHash: string;
+        participantCode: string;
+        name: string;
+        teamName: string;
+        status: components['schemas']['RegistrationStatusInput'];
+        outsideSince: string | null;
+        outsideCheckpointId: string | null;
+        /** @description Their latest accepted scan at this checkpoint */
+        lastAcceptedAt: string | null;
+      }[];
+      /** @description The event's exit checkpoints and the entry each pairs with */
+      exits: {
+        /** Format: uuid */
+        id: string;
+        linkedCheckpointId: string | null;
+      }[];
+    };
+    OutsidePersonInput: {
+      /** Format: uuid */
+      registrationId: string;
+      participantCode: string;
+      name: string;
+      teamName: string;
+      /** @description From the registration, when it has one */
+      phone: string | null;
+      /** Format: date-time */
+      outsideSince: string;
+      reason: string | null;
+      /** @description The exit they left through */
+      checkpointName: string | null;
     };
     LinkPreviewInput: {
       /** @enum {string} */
@@ -10049,6 +10566,21 @@ export interface components {
     LinkSentInput: {
       /** @constant */
       sent: true;
+    };
+    ReleaseResultInput: {
+      released: number;
+    };
+    ScanBatchResultInput: {
+      results: {
+        /** Format: uuid */
+        id: string;
+        scan: components['schemas']['ScanResultInput'] | null;
+        /** @description Refused without being stored, e.g. UNKNOWN_QR */
+        error: {
+          code: string;
+          message: string;
+        } | null;
+      }[];
     };
     Error: {
       error: {
@@ -10173,6 +10705,10 @@ export interface components {
       leaderboardVisible: boolean;
       /** @description Off: confirmed registrations go straight to attending (no RSVP step) */
       rsvpEnabled: boolean;
+      /** @description On: participants see shortlists and confirmations only once an organiser releases them */
+      stagedRelease: boolean;
+      /** @description Quick reasons offered when someone leaves through an exit checkpoint */
+      exitReasons: string[];
       /** Format: date-time */
       createdAt: string;
     };
@@ -10217,7 +10753,7 @@ export interface components {
       updatedAt: string;
     };
     /** @enum {string} */
-    CheckpointType: 'entry' | 'meal' | 'swag' | 'session';
+    CheckpointType: 'entry' | 'meal' | 'swag' | 'session' | 'exit';
     Checkpoint: {
       /** Format: uuid */
       id: string;
@@ -10232,6 +10768,8 @@ export interface components {
         id: string;
         question: string;
       } | null;
+      /** @description Exit checkpoints only: the entry checkpoint people scan at to come back in */
+      linkedCheckpointId: string | null;
       /** Format: date-time */
       createdAt: string;
     };
@@ -10355,6 +10893,14 @@ export interface components {
       status: components['schemas']['RegistrationStatus'];
       /** @description Cancellations left the team below the minimum size */
       belowMinimum: boolean;
+      /** @description Staged release (organisers only) */
+      release: {
+        /** @description What participants are shown */
+        status: components['schemas']['RegistrationStatus'];
+        at: string | null;
+        /** @description A decision not shown to participants yet */
+        pending: boolean;
+      } | null;
       /** @description Team field answers */
       answers: components['schemas']['Answers'];
       members: {
@@ -10434,6 +10980,12 @@ export interface components {
       /** @description Who confirmed it */
       confirmedBy: string | null;
       memberCount: number;
+      /** @description Members who RSVPed (attending or checked in) */
+      attendingCount: number;
+      /** @description Staged release: what participants are shown (registered, shortlisted or confirmed) */
+      releasedStatus: components['schemas']['RegistrationStatus'];
+      /** @description Staged release: a decision participants have not been shown yet */
+      pendingRelease: boolean;
       belowMinimum: boolean;
       latestProofStatus: ('pending' | 'approved' | 'rejected') | null;
       /** Format: date-time */
@@ -10800,7 +11352,15 @@ export interface components {
       /** @enum {string} */
       result: 'accepted' | 'rejected';
       reason:
-        | ('duplicate' | 'not_open' | 'closed' | 'not_attending' | 'not_checked_in' | 'cancelled')
+        | (
+            | 'duplicate'
+            | 'not_open'
+            | 'closed'
+            | 'not_attending'
+            | 'not_checked_in'
+            | 'cancelled'
+            | 'not_inside'
+          )
         | null;
       /** Format: date-time */
       scannedAt: string;
@@ -10826,6 +11386,83 @@ export interface components {
         teamName: string;
         status: components['schemas']['RegistrationStatus'];
       };
+      /** @description Entry: back in after leaving through an exit */
+      reentry: boolean;
+      /** @description Exit checkpoints: why they left */
+      exitReason: string | null;
+      /** @description Scanned offline and sent later */
+      offline: boolean;
+    };
+    ScanLogEntry: {
+      /** Format: uuid */
+      id: string;
+      /** Format: date-time */
+      scannedAt: string;
+      /** @enum {string} */
+      result: 'accepted' | 'rejected';
+      reason:
+        | (
+            | 'duplicate'
+            | 'not_open'
+            | 'closed'
+            | 'not_attending'
+            | 'not_checked_in'
+            | 'cancelled'
+            | 'not_inside'
+          )
+        | null;
+      exitReason: string | null;
+      offline: boolean;
+      checkpoint: {
+        /** Format: uuid */
+        id: string;
+        name: string;
+        type: components['schemas']['CheckpointType'];
+      };
+      participant: {
+        name: string;
+        participantCode: string;
+        teamName: string;
+      };
+    };
+    ScanRoster: {
+      /** Format: date-time */
+      generatedAt: string;
+      checkpoint: components['schemas']['Checkpoint'];
+      people: {
+        /** Format: uuid */
+        registrationId: string;
+        /** @description SHA-256 (hex) of the QR token */
+        qrHash: string;
+        participantCode: string;
+        name: string;
+        teamName: string;
+        status: components['schemas']['RegistrationStatus'];
+        outsideSince: string | null;
+        outsideCheckpointId: string | null;
+        /** @description Their latest accepted scan at this checkpoint */
+        lastAcceptedAt: string | null;
+      }[];
+      /** @description The event's exit checkpoints and the entry each pairs with */
+      exits: {
+        /** Format: uuid */
+        id: string;
+        linkedCheckpointId: string | null;
+      }[];
+    };
+    OutsidePerson: {
+      /** Format: uuid */
+      registrationId: string;
+      participantCode: string;
+      name: string;
+      teamName: string;
+      /** @description From the registration, when it has one */
+      phone: string | null;
+      /** Format: date-time */
+      outsideSince: string;
+      reason: string | null;
+      /** @description The exit they left through */
+      checkpointName: string | null;
     };
     LinkPreview: {
       /** @enum {string} */
@@ -10868,6 +11505,21 @@ export interface components {
     LinkSent: {
       /** @constant */
       sent: true;
+    };
+    ReleaseResult: {
+      released: number;
+    };
+    ScanBatchResult: {
+      results: {
+        /** Format: uuid */
+        id: string;
+        scan: components['schemas']['ScanResult'] | null;
+        /** @description Refused without being stored, e.g. UNKNOWN_QR */
+        error: {
+          code: string;
+          message: string;
+        } | null;
+      }[];
     };
   };
   responses: never;

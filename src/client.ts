@@ -92,9 +92,11 @@ export function createEventKit(options: EventKitOptions) {
 
     /** Everything inside one event, for its owner and staff (the configured one by default). */
     event,
-    /** Online-only scanning for volunteers and admins at a checkpoint. */
-    createScanner: (opts: ScannerOptions & { eventId?: string }) =>
-      createScanner(event(opts.eventId), health, opts),
+    /** Scanning for volunteers and admins at a checkpoint, offline too (see createScanner). */
+    createScanner: (opts: ScannerOptions & { eventId?: string }) => {
+      const e = event(opts.eventId);
+      return createScanner(e, health, { storageKey: e.id, ...opts });
+    },
     /** The typed HTTP client underneath, for anything not wrapped yet. */
     raw: t.api,
   };
