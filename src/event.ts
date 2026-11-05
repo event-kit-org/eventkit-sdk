@@ -25,7 +25,7 @@ export function eventApi(t: Transport, eventId: string) {
     // ------------------------------------------------------------ event
     /** The event and your role in it. */
     get: () => call(api.GET('/v1/events/{eventId}', at())),
-    /** Admin. Payment mode, fee and currency lock once anyone has registered. */
+    /** Admin. Payment mode, fee basis and currency lock once anyone has registered; the fee can change. */
     update: (patch: Body<E, 'patch'>) =>
       call(api.PATCH('/v1/events/{eventId}', { ...at(), body: patch })),
     /**

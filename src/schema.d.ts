@@ -9979,6 +9979,10 @@ export interface components {
         mode: components['schemas']['PaymentModeInput'];
         /** @description In paise; null for unpaid events */
         amountDue: number | null;
+        /** @description In paise: the approved receipt's amount; null until one is approved */
+        paidAmount: number | null;
+        /** @description In paise: what the event's current fee asks minus paidAmount. Positive: the team owes extra; negative: it is owed a refund. Null until a receipt is approved */
+        balance: number | null;
         currency: string | null;
         /** @description After shortlist: receipts must be uploaded before this */
         deadline: string | null;
@@ -10045,6 +10049,12 @@ export interface components {
       pendingRelease: boolean;
       belowMinimum: boolean;
       latestProofStatus: ('pending' | 'approved' | 'rejected') | null;
+      /** @description In paise: the approved receipt's amount */
+      paidAmount: number | null;
+      /** @description Members the approved receipt covered; null until one is approved */
+      paidMembers: number | null;
+      /** @description In paise: the current fee minus paidAmount; positive the team owes extra, negative a refund; null until a receipt is approved */
+      balance: number | null;
       /** Format: date-time */
       createdAt: string;
     };
@@ -10894,6 +10904,10 @@ export interface components {
         mode: components['schemas']['PaymentMode'];
         /** @description In paise; null for unpaid events */
         amountDue: number | null;
+        /** @description In paise: the approved receipt's amount; null until one is approved */
+        paidAmount: number | null;
+        /** @description In paise: what the event's current fee asks minus paidAmount. Positive: the team owes extra; negative: it is owed a refund. Null until a receipt is approved */
+        balance: number | null;
         currency: string | null;
         /** @description After shortlist: receipts must be uploaded before this */
         deadline: string | null;
@@ -10960,6 +10974,12 @@ export interface components {
       pendingRelease: boolean;
       belowMinimum: boolean;
       latestProofStatus: ('pending' | 'approved' | 'rejected') | null;
+      /** @description In paise: the approved receipt's amount */
+      paidAmount: number | null;
+      /** @description Members the approved receipt covered; null until one is approved */
+      paidMembers: number | null;
+      /** @description In paise: the current fee minus paidAmount; positive the team owes extra, negative a refund; null until a receipt is approved */
+      balance: number | null;
       /** Format: date-time */
       createdAt: string;
     };
