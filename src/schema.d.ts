@@ -9653,6 +9653,1356 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/events/{eventId}/insights/registrations': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Teams and people registered per day (IST), with running totals */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['RegistrationDay'][];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/insights/attendance': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Checked in, inside and out through a gate, at the end of each time slot from the first scan */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Minutes per slot: 15, 30 or 60 */
+          bucket?: number;
+        };
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['AttendancePoint'][];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/insights/fields/{fieldId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Answer counts for a registration question (active teams and people only) */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          fieldId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['FieldCounts'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/insights/polls/{pollId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** A poll's votes per option, whoever it was for */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          pollId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['PollCounts'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/insights/dashboard': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** The overview's chart widgets, shared by the event's organisers */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['DashboardWidget'][];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    /** Replace the overview's chart widgets (admins) */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': components['schemas']['DashboardWidgetInput'][];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['DashboardWidget'][];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/assignment-lists': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Assignment lists with their options and how many teams have each */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['AssignmentList'][];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    /** Create a list, hidden from participants until released */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            name: string;
+            kind: components['schemas']['AssignmentKindInput'];
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['AssignmentList'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/assignment-lists/{listId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete a list and every team’s value on it */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          listId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    /** Rename or reorder a list; its kind changes only while nothing is assigned */
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          listId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            name?: string;
+            kind?: components['schemas']['AssignmentKindInput'];
+            position?: number;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['AssignmentList'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    trace?: never;
+  };
+  '/v1/events/{eventId}/assignment-lists/{listId}/release': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Show the list’s assignments to participants, all at once */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          listId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['AssignmentList'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/assignment-lists/{listId}/unrelease': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Hide the list’s assignments from participants again */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          listId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['AssignmentList'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/assignment-lists/{listId}/options': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Add an option to an options list */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          listId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            title: string;
+            description?: string | null;
+            capacity?: number | null;
+            position?: number;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['AssignmentList'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/assignment-lists/{listId}/options/{optionId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete an option; teams that had it are left without a value */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          listId: string;
+          optionId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['AssignmentList'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    /** Edit an option; its limit can’t go below the teams that have it */
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          listId: string;
+          optionId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            title?: string;
+            description?: string | null;
+            capacity?: number | null;
+            position?: number;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['AssignmentList'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    trace?: never;
+  };
+  '/v1/events/{eventId}/assignment-lists/{listId}/assignments': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Give several teams their value on the list at once, all or nothing (refused when an option would go over its limit) */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          listId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            items: {
+              /** Format: uuid */
+              teamId: string;
+              /**
+               * Format: uuid
+               * @description Options lists
+               */
+              optionId?: string;
+              /** @description Text lists */
+              text?: string;
+            }[];
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['AssignmentList'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/assignment-lists/{listId}/teams/{teamId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Give one team its value on the list (replaces any it had) */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          listId: string;
+          teamId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            /**
+             * Format: uuid
+             * @description Options lists
+             */
+            optionId?: string;
+            /** @description Text lists */
+            text?: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['AssignmentList'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    post?: never;
+    /** Clear a team’s value on the list */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          listId: string;
+          teamId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -9876,6 +11226,56 @@ export interface components {
       /** Format: date-time */
       joinedAt: string;
     };
+    /**
+     * @description options: each team gets one of the options. text: each team gets a typed value
+     * @enum {string}
+     */
+    AssignmentKindInput: 'options' | 'text';
+    AssignmentOptionInput: {
+      /** Format: uuid */
+      id: string;
+      title: string;
+      description: string | null;
+      /** @description Most teams it can go to; null: no limit */
+      capacity: number | null;
+      position: number;
+      /** @description Teams that have it */
+      teams: number;
+    };
+    AssignmentListInput: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      kind: components['schemas']['AssignmentKindInput'];
+      position: number;
+      /** @description When participants started seeing it; null while hidden */
+      releasedAt: string | null;
+      assignedTeams: number;
+      options: components['schemas']['AssignmentOptionInput'][];
+    };
+    TeamAssignmentInput: {
+      /** Format: uuid */
+      listId: string;
+      listName: string;
+      kind: components['schemas']['AssignmentKindInput'];
+      option: {
+        /** Format: uuid */
+        id: string;
+        title: string;
+        description: string | null;
+      } | null;
+      text: string | null;
+      /** @description Participants can see it */
+      released: boolean;
+      /** @description Organisers only */
+      assignedBy: {
+        /** Format: uuid */
+        userId: string;
+        name: string;
+      } | null;
+      /** Format: date-time */
+      assignedAt: string;
+    };
     EventFieldInput: {
       /** Format: uuid */
       id: string;
@@ -10009,6 +11409,8 @@ export interface components {
       shortlistedBy: components['schemas']['TeamDecisionInput'];
       /** @description The organiser who confirmed it, directly or by approving its receipt (organisers only) */
       confirmedBy: components['schemas']['TeamDecisionInput'];
+      /** @description Problem statement, table, mentor and the like. Participants see released lists only */
+      assignments: components['schemas']['TeamAssignmentInput'][];
     };
     PaymentProofForReviewInput: {
       /** Format: uuid */
@@ -10067,6 +11469,10 @@ export interface components {
       pendingRelease: boolean;
       belowMinimum: boolean;
       latestProofStatus: ('pending' | 'approved' | 'rejected') | null;
+      /** @description Each assignment list's value for the team, by list id */
+      assignments: {
+        [key: string]: string;
+      };
       /** @description In paise: what the approver entered from the receipt; null until approved */
       paidAmount: number | null;
       /** @description Members the approved receipt covered; null until one is approved */
@@ -10525,6 +11931,63 @@ export interface components {
       /** @description The gate they went out through */
       checkpointName: string | null;
     };
+    ChartBucketInput: {
+      label: string;
+      count: number;
+    };
+    FieldCountsInput: {
+      /** Format: uuid */
+      fieldId: string;
+      label: string;
+      /** @enum {string} */
+      type:
+        | 'short_text'
+        | 'long_text'
+        | 'number'
+        | 'choice'
+        | 'phone'
+        | 'multi_choice'
+        | 'datetime'
+        | 'dropdown';
+      /** @enum {string} */
+      scope: 'team' | 'member';
+      /** @description Active teams (team fields) or people (member fields) asked the question */
+      respondents: number;
+      answered: number;
+      /** @description Choice fields: each option in order, then answers no longer among them. Numbers: each value, or ranges. Text: the 10 most common answers */
+      buckets: components['schemas']['ChartBucketInput'][];
+    };
+    PollCountsInput: {
+      /** Format: uuid */
+      pollId: string;
+      question: string;
+      votes: number;
+      /** @description Each option's votes, in order */
+      buckets: components['schemas']['ChartBucketInput'][];
+    };
+    DashboardWidgetInput:
+      | {
+          /** @description Chosen by the client; unique in the list */
+          id: string;
+          /** @enum {string} */
+          chart: 'bar' | 'pie';
+          title?: string | null;
+          /** @constant */
+          kind: 'field';
+          /** Format: uuid */
+          fieldId: string;
+        }
+      | {
+          /** @description Chosen by the client; unique in the list */
+          id: string;
+          /** @enum {string} */
+          chart: 'bar' | 'pie';
+          title?: string | null;
+          /** @constant */
+          kind: 'poll';
+          /** Format: uuid */
+          pollId: string;
+        };
     LinkPreviewInput: {
       /** @enum {string} */
       kind: 'registration' | 'staff';
@@ -10581,6 +12044,21 @@ export interface components {
           message: string;
         } | null;
       }[];
+    };
+    RegistrationDayInput: {
+      /** @description YYYY-MM-DD, IST */
+      date: string;
+      teams: number;
+      people: number;
+      totalTeams: number;
+      totalPeople: number;
+    };
+    AttendancePointInput: {
+      /** @description The end of the slot */
+      at: string;
+      checkedIn: number;
+      inside: number;
+      outside: number;
     };
     Error: {
       error: {
@@ -10801,6 +12279,56 @@ export interface components {
       /** Format: date-time */
       joinedAt: string;
     };
+    /**
+     * @description options: each team gets one of the options. text: each team gets a typed value
+     * @enum {string}
+     */
+    AssignmentKind: 'options' | 'text';
+    AssignmentOption: {
+      /** Format: uuid */
+      id: string;
+      title: string;
+      description: string | null;
+      /** @description Most teams it can go to; null: no limit */
+      capacity: number | null;
+      position: number;
+      /** @description Teams that have it */
+      teams: number;
+    };
+    AssignmentList: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      kind: components['schemas']['AssignmentKind'];
+      position: number;
+      /** @description When participants started seeing it; null while hidden */
+      releasedAt: string | null;
+      assignedTeams: number;
+      options: components['schemas']['AssignmentOption'][];
+    };
+    TeamAssignment: {
+      /** Format: uuid */
+      listId: string;
+      listName: string;
+      kind: components['schemas']['AssignmentKind'];
+      option: {
+        /** Format: uuid */
+        id: string;
+        title: string;
+        description: string | null;
+      } | null;
+      text: string | null;
+      /** @description Participants can see it */
+      released: boolean;
+      /** @description Organisers only */
+      assignedBy: {
+        /** Format: uuid */
+        userId: string;
+        name: string;
+      } | null;
+      /** Format: date-time */
+      assignedAt: string;
+    };
     EventField: {
       /** Format: uuid */
       id: string;
@@ -10934,6 +12462,8 @@ export interface components {
       shortlistedBy: components['schemas']['TeamDecision'];
       /** @description The organiser who confirmed it, directly or by approving its receipt (organisers only) */
       confirmedBy: components['schemas']['TeamDecision'];
+      /** @description Problem statement, table, mentor and the like. Participants see released lists only */
+      assignments: components['schemas']['TeamAssignment'][];
     };
     PaymentProofForReview: {
       /** Format: uuid */
@@ -10992,6 +12522,10 @@ export interface components {
       pendingRelease: boolean;
       belowMinimum: boolean;
       latestProofStatus: ('pending' | 'approved' | 'rejected') | null;
+      /** @description Each assignment list's value for the team, by list id */
+      assignments: {
+        [key: string]: string;
+      };
       /** @description In paise: what the approver entered from the receipt; null until approved */
       paidAmount: number | null;
       /** @description Members the approved receipt covered; null until one is approved */
@@ -11450,6 +12984,63 @@ export interface components {
       /** @description The gate they went out through */
       checkpointName: string | null;
     };
+    ChartBucket: {
+      label: string;
+      count: number;
+    };
+    FieldCounts: {
+      /** Format: uuid */
+      fieldId: string;
+      label: string;
+      /** @enum {string} */
+      type:
+        | 'short_text'
+        | 'long_text'
+        | 'number'
+        | 'choice'
+        | 'phone'
+        | 'multi_choice'
+        | 'datetime'
+        | 'dropdown';
+      /** @enum {string} */
+      scope: 'team' | 'member';
+      /** @description Active teams (team fields) or people (member fields) asked the question */
+      respondents: number;
+      answered: number;
+      /** @description Choice fields: each option in order, then answers no longer among them. Numbers: each value, or ranges. Text: the 10 most common answers */
+      buckets: components['schemas']['ChartBucket'][];
+    };
+    PollCounts: {
+      /** Format: uuid */
+      pollId: string;
+      question: string;
+      votes: number;
+      /** @description Each option's votes, in order */
+      buckets: components['schemas']['ChartBucket'][];
+    };
+    DashboardWidget:
+      | {
+          /** @description Chosen by the client; unique in the list */
+          id: string;
+          /** @enum {string} */
+          chart: 'bar' | 'pie';
+          title?: string | null;
+          /** @constant */
+          kind: 'field';
+          /** Format: uuid */
+          fieldId: string;
+        }
+      | {
+          /** @description Chosen by the client; unique in the list */
+          id: string;
+          /** @enum {string} */
+          chart: 'bar' | 'pie';
+          title?: string | null;
+          /** @constant */
+          kind: 'poll';
+          /** Format: uuid */
+          pollId: string;
+        };
     LinkPreview: {
       /** @enum {string} */
       kind: 'registration' | 'staff';
@@ -11506,6 +13097,21 @@ export interface components {
           message: string;
         } | null;
       }[];
+    };
+    RegistrationDay: {
+      /** @description YYYY-MM-DD, IST */
+      date: string;
+      teams: number;
+      people: number;
+      totalTeams: number;
+      totalPeople: number;
+    };
+    AttendancePoint: {
+      /** @description The end of the slot */
+      at: string;
+      checkedIn: number;
+      inside: number;
+      outside: number;
     };
   };
   responses: never;

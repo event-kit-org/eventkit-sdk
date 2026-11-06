@@ -354,6 +354,102 @@ export function eventApi(t: Transport, eventId: string) {
     },
 
     // ------------------------------------------------------------ polls
+    insights: {
+      /** Teams and people registered per IST day, with running totals. */
+      registrations: () => call(api.GET('/v1/events/{eventId}/insights/registrations', at())),
+      /** Checked in, inside and out through a gate at the end of each 15/30/60-minute slot. */
+      attendance: (bucket?: 15 | 30 | 60) =>
+        call(
+          api.GET('/v1/events/{eventId}/insights/attendance', {
+            params: { path: { eventId }, query: bucket ? { bucket } : {} },
+          }),
+        ),
+      /** Answer counts for a registration question. */
+      field: (fieldId: string) =>
+        call(api.GET('/v1/events/{eventId}/insights/fields/{fieldId}', at({ fieldId }))),
+      /** A poll's votes per option. */
+      poll: (pollId: string) =>
+        call(api.GET('/v1/events/{eventId}/insights/polls/{pollId}', at({ pollId }))),
+      /** The overview's chart widgets, shared by the event's organisers. */
+      dashboard: () => call(api.GET('/v1/events/{eventId}/insights/dashboard', at())),
+      /** Admins: replace the widget list. */
+      saveDashboard: (widgets: Body<`${E}/insights/dashboard`, 'put'>) =>
+        call(api.PUT('/v1/events/{eventId}/insights/dashboard', { ...at(), body: widgets })),
+    },
+    /** Admins: problem statements, tables, mentors and the like, given to each team. */
+    assignments: {
+      lists: () => call(api.GET('/v1/events/{eventId}/assignment-lists', at())),
+      /** Hidden from participants until released. */
+      createList: (input: Body<`${E}/assignment-lists`, 'post'>) =>
+        call(api.POST('/v1/events/{eventId}/assignment-lists', { ...at(), body: input })),
+      /** The kind changes only while nothing is assigned. */
+      updateList: (listId: string, patch: Body<`${E}/assignment-lists/{listId}`, 'patch'>) =>
+        call(
+          api.PATCH('/v1/events/{eventId}/assignment-lists/{listId}', {
+            ...at({ listId }),
+            body: patch,
+          }),
+        ),
+      deleteList: (listId: string) =>
+        call(api.DELETE('/v1/events/{eventId}/assignment-lists/{listId}', at({ listId }))),
+      addOption: (listId: string, option: Body<`${E}/assignment-lists/{listId}/options`, 'post'>) =>
+        call(
+          api.POST('/v1/events/{eventId}/assignment-lists/{listId}/options', {
+            ...at({ listId }),
+            body: option,
+          }),
+        ),
+      updateOption: (
+        listId: string,
+        optionId: string,
+        patch: Body<`${E}/assignment-lists/{listId}/options/{optionId}`, 'patch'>,
+      ) =>
+        call(
+          api.PATCH('/v1/events/{eventId}/assignment-lists/{listId}/options/{optionId}', {
+            ...at({ listId, optionId }),
+            body: patch,
+          }),
+        ),
+      /** Teams that had the option are left without a value. */
+      deleteOption: (listId: string, optionId: string) =>
+        call(
+          api.DELETE(
+            '/v1/events/{eventId}/assignment-lists/{listId}/options/{optionId}',
+            at({ listId, optionId }),
+          ),
+        ),
+      /** One team: `{ optionId }` on an options list, `{ text }` on a text list. */
+      assign: (listId: string, teamId: string, value: { optionId: string } | { text: string }) =>
+        call(
+          api.PUT('/v1/events/{eventId}/assignment-lists/{listId}/teams/{teamId}', {
+            ...at({ listId, teamId }),
+            body: value,
+          }),
+        ),
+      unassign: (listId: string, teamId: string) =>
+        call(
+          api.DELETE(
+            '/v1/events/{eventId}/assignment-lists/{listId}/teams/{teamId}',
+            at({ listId, teamId }),
+          ),
+        ),
+      /** Many teams at once, all or nothing. */
+      assignMany: (
+        listId: string,
+        items: Body<`${E}/assignment-lists/{listId}/assignments`, 'put'>['items'],
+      ) =>
+        call(
+          api.PUT('/v1/events/{eventId}/assignment-lists/{listId}/assignments', {
+            ...at({ listId }),
+            body: { items },
+          }),
+        ),
+      /** Participants see the list's values, all teams at once. */
+      release: (listId: string) =>
+        call(api.POST('/v1/events/{eventId}/assignment-lists/{listId}/release', at({ listId }))),
+      unrelease: (listId: string) =>
+        call(api.POST('/v1/events/{eventId}/assignment-lists/{listId}/unrelease', at({ listId }))),
+    },
     polls: {
       list: () => call(api.GET('/v1/events/{eventId}/polls', at())),
       get: (pollId: string) => call(api.GET('/v1/events/{eventId}/polls/{pollId}', at({ pollId }))),
