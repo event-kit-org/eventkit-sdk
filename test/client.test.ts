@@ -320,14 +320,8 @@ describe('the portal', () => {
     ).rejects.toMatchObject({ code: 'LINK_NOT_FOUND' });
   });
 
-  it('resetting the link swaps the session; staff sign up and sign in; logout forgets', async () => {
+  it('staff sign up and sign in; logout forgets', async () => {
     const { ek, mock } = client();
-    mock.on('POST /v1/portal/me/access/reset', () => ({
-      link: { token: 'ek_new', url: null },
-      session: { accessToken: 'fresh' },
-    }));
-    expect(await ek.portal.me.resetLink()).toEqual({ token: 'ek_new', url: null });
-    expect(ek.session.token).toBe('fresh');
     mock.on('POST /v1/portal/staff/signup', () =>
       json({ user: {}, role: 'judge', token: { accessToken: 'staff' } }, 201),
     );

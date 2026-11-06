@@ -250,14 +250,16 @@ export function eventApi(t: Transport, eventId: string) {
         ),
       /**
        * A new personal link for someone whose link leaked or was lost (check
-       * who they are first). The old link and its sessions stop working.
+       * who they are first). The old link and its sessions stop working. Only
+       * organisers make new links; `emailLeader` also emails it to the team
+       * leader to pass on (saved only once the email went out).
        */
-      reissueLink: (registrationId: string) =>
+      reissueLink: (registrationId: string, options: { emailLeader?: boolean } = {}) =>
         call(
-          api.POST(
-            '/v1/events/{eventId}/registrations/{registrationId}/reissue-link',
-            at({ registrationId }),
-          ),
+          api.POST('/v1/events/{eventId}/registrations/{registrationId}/reissue-link', {
+            ...at({ registrationId }),
+            body: options,
+          }),
         ),
       /** A new QR code; the old one stops scanning. */
       rotateQr: (registrationId: string) =>

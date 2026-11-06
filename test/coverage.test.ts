@@ -8,7 +8,12 @@ const spec = JSON.parse(
   paths: Record<string, Record<string, unknown>>;
 };
 /** Server-to-server only: payment providers call it, never a front end. */
-const NOT_FOR_FRONT_ENDS = ['POST /v1/billing/webhooks/{provider}'];
+const NOT_FOR_FRONT_ENDS = [
+  'POST /v1/billing/webhooks/{provider}',
+  // Refused since core 0.20.1: only organisers make new links.
+  'POST /v1/portal/me/access/reset',
+  'POST /v1/portal/me/team/members/{registrationId}/reissue-link',
+];
 
 const ID = '33333333-3333-4333-8333-333333333333';
 
@@ -91,14 +96,12 @@ describe('every API operation is reachable through the devkit', () => {
     await p.register({ linkToken: 'tok', team: { name: 'T' }, members: [], receipt: png() });
     await p.openSecretLink('ek_x');
     await p.me.get();
-    await p.me.resetLink();
     await p.me.rsvp();
     await p.me.unrsvp();
     await p.me.cancel('a@b.co');
     await p.me.team.get();
     await p.me.team.payReceipt(png());
     await p.me.team.handOver(ID, 'a@b.co');
-    await p.me.team.reissueMemberLink(ID);
     await p.me.polls.list();
     await p.me.polls.vote(ID, ID);
     await p.me.notifications.feed();
@@ -246,6 +249,6 @@ describe('every API operation is reachable through the devkit', () => {
     );
     const missing = all.filter((op) => !reached.has(op) && !NOT_FOR_FRONT_ENDS.includes(op));
     expect(missing).toEqual([]);
-    expect(all.length - NOT_FOR_FRONT_ENDS.length).toBe(152);
+    expect(all.length - NOT_FOR_FRONT_ENDS.length).toBe(150);
   });
 });

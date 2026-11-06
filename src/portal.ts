@@ -53,15 +53,6 @@ export function portalApi(t: Transport, session: Session) {
   const me = {
     /** Your registration, team and QR token. */
     get: () => call(api.GET('/v1/portal/me')),
-    /**
-     * Replace your personal link (it leaked, say). The old link and every
-     * session made from it stop working; you stay signed in with the new one.
-     */
-    async resetLink() {
-      const res = await call(api.POST('/v1/portal/me/access/reset'));
-      session.set(res.session.accessToken);
-      return res.link;
-    },
     /** confirmed → attending. */
     rsvp: () => call(api.POST('/v1/portal/me/rsvp')),
     /** attending → confirmed, until check-in. */
@@ -84,14 +75,6 @@ export function portalApi(t: Transport, session: Session) {
       /** Leader: hand the team to another member. `confirm`: your email, or a phone number you gave. */
       handOver: (registrationId: string, confirm: string) =>
         call(api.POST('/v1/portal/me/team/leader', { body: { registrationId, confirm } })),
-      /** Leader: a new personal link for a teammate whose link leaked or was lost. */
-      reissueMemberLink: (registrationId: string) =>
-        call(
-          api.POST(
-            '/v1/portal/me/team/members/{registrationId}/reissue-link',
-            at({ registrationId }),
-          ),
-        ),
     },
     polls: {
       list: () => call(api.GET('/v1/portal/me/polls')),

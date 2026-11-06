@@ -783,7 +783,10 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Replace your personal link (e.g. it leaked). The old link and every session made from it stop working; this returns the new link and a new session. */
+    /**
+     * No longer available: only organisers issue new links (ASK_ORGANISERS). Kept so older portals get a clear answer.
+     * @deprecated
+     */
     post: {
       parameters: {
         query?: never;
@@ -794,19 +797,16 @@ export interface paths {
       requestBody?: never;
       responses: {
         /** @description Default Response */
-        200: {
+        401: {
           headers: {
             [name: string]: unknown;
           };
           content: {
-            'application/json': {
-              link: components['schemas']['PersonalLink'];
-              session: components['schemas']['AccessToken'];
-            };
+            'application/json': components['schemas']['Error'];
           };
         };
         /** @description Default Response */
-        401: {
+        403: {
           headers: {
             [name: string]: unknown;
           };
@@ -1333,7 +1333,10 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Leader: a new personal link for a teammate (theirs leaked or was lost), emailed to the leader to pass on (every eventKit email goes to the leader only). Refused with MAILING_OFF when the event has no mail (the old link keeps working); the organiser can issue one instead. */
+    /**
+     * No longer available: only organisers issue new links (ASK_ORGANISERS). Kept so older portals get a clear answer.
+     * @deprecated
+     */
     post: {
       parameters: {
         query?: never;
@@ -1346,15 +1349,6 @@ export interface paths {
       requestBody?: never;
       responses: {
         /** @description Default Response */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['LinkSent'];
-          };
-        };
-        /** @description Default Response */
         401: {
           headers: {
             [name: string]: unknown;
@@ -1365,24 +1359,6 @@ export interface paths {
         };
         /** @description Default Response */
         403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        404: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Error'];
-          };
-        };
-        /** @description Default Response */
-        409: {
           headers: {
             [name: string]: unknown;
           };
@@ -5108,7 +5084,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Issue a new personal secret link (e.g. it leaked or was lost). The old link and its sessions stop working. */
+    /** Issue a new personal secret link (e.g. it leaked or was lost). The old link and its sessions stop working. With emailLeader, it is also emailed to the team leader (MAILING_OFF without mail; MAIL_FAILED keeps the old link). */
     post: {
       parameters: {
         query?: never;
@@ -5119,7 +5095,14 @@ export interface paths {
         };
         cookie?: never;
       };
-      requestBody?: never;
+      requestBody: {
+        content: {
+          'application/json': {
+            /** @description Email the new link to the team leader to pass on */
+            emailLeader?: boolean;
+          } | null;
+        };
+      };
       responses: {
         /** @description Default Response */
         200: {
@@ -5127,7 +5110,16 @@ export interface paths {
             [name: string]: unknown;
           };
           content: {
-            'application/json': components['schemas']['SecretLink'];
+            'application/json': {
+              /** Format: uuid */
+              registrationId: string;
+              /** @description Shown once. Only its hash is stored. */
+              token: string;
+              /** @description The personal link on the event's portal (null until the portal URL is set) */
+              url: string | null;
+              /** @description The leader it was emailed to, if it was */
+              emailedTo: string | null;
+            };
           };
         };
         /** @description Default Response */
@@ -5150,6 +5142,15 @@ export interface paths {
         };
         /** @description Default Response */
         404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
           headers: {
             [name: string]: unknown;
           };
@@ -12033,10 +12034,6 @@ export interface components {
       role: 'admin' | 'volunteer' | 'judge';
       token: components['schemas']['AccessTokenInput'];
     };
-    LinkSentInput: {
-      /** @constant */
-      sent: true;
-    };
     ReleaseResultInput: {
       released: number;
     };
@@ -13090,10 +13087,6 @@ export interface components {
       /** @enum {string} */
       role: 'admin' | 'volunteer' | 'judge';
       token: components['schemas']['AccessToken'];
-    };
-    LinkSent: {
-      /** @constant */
-      sent: true;
     };
     ReleaseResult: {
       released: number;

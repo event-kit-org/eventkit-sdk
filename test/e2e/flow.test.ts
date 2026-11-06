@@ -146,15 +146,17 @@ describe('an event, end to end through the devkit', () => {
     scanner.destroy();
     expect((await mate.portal.me.get()).status).toBe('checked_in');
 
-    // A leaked link: Ravi resets it; the old link and its sessions stop working.
+    // A leaked link: an organiser replaces Ravi's, emailing it to the leader; the old link
+    // and its sessions stop working. Participants can't replace links themselves.
     const otherPhone = portal(clubKey, event.id);
     await otherPhone.portal.openSecretLink(ravi.link!.token);
-    const fresh = await mate.portal.me.resetLink();
+    const fresh = await ev.registrations.reissueLink(ravi.registrationId);
     expect(fresh.token).not.toBe(ravi.link!.token);
     expect(await fails(otherPhone.portal.me.get())).toMatchObject({ status: 401 });
     expect(
       await fails(portal(clubKey, event.id).portal.openSecretLink(ravi.link!.token)),
     ).toMatchObject({ code: 'LINK_NOT_FOUND' });
+    await mate.portal.openSecretLink(fresh.token);
     expect((await mate.portal.me.get()).name).toBe('Ravi');
 
     // Polls.
