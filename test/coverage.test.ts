@@ -163,7 +163,7 @@ describe('every API operation is reachable through the devkit', () => {
     await e.registrations.rotateQr(ID);
     await e.payments.list();
     await e.payments.attachReceipt(ID, png());
-    await e.payments.approve(ID);
+    await e.payments.approve(ID, 50000);
     await e.payments.reject(ID, 'blurry');
     await e.checkpoints.list();
     await e.checkpoints.create({} as never);

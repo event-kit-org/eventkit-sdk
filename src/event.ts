@@ -275,9 +275,17 @@ export function eventApi(t: Transport, eventId: string) {
             params: { path: { eventId }, query: status ? { status } : {} },
           }),
         ),
-      /** The team is confirmed (refused with NOT_ENOUGH_PLACES at capacity). */
-      approve: (proofId: string) =>
-        call(api.POST('/v1/events/{eventId}/payment-proofs/{proofId}/approve', at({ proofId }))),
+      /**
+       * The team is confirmed (refused with NOT_ENOUGH_PLACES at capacity). paidAmount
+       * (paise) is what the receipt shows the team paid; the balance follows it.
+       */
+      approve: (proofId: string, paidAmount: number) =>
+        call(
+          api.POST('/v1/events/{eventId}/payment-proofs/{proofId}/approve', {
+            ...at({ proofId }),
+            body: { paidAmount },
+          }),
+        ),
       /** Attach a receipt for a team (one it sent another way). Uploads, then hands it in. */
       async attachReceipt(teamId: string, receipt: Blob) {
         const receiptKey = await upload('receipt', receipt, teamId);

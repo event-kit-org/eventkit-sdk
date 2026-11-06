@@ -109,7 +109,7 @@ describe('an event, end to end through the devkit', () => {
 
     // The client approves the receipt; Asha RSVPs.
     const [proof] = await ev.payments.list('pending');
-    await ev.payments.approve(proof!.id);
+    await ev.payments.approve(proof!.id, proof!.amount);
     expect((await leader.portal.me.rsvp()).status).toBe('attending');
     expect((await leader.portal.me.team.get()).members).toHaveLength(2);
 
