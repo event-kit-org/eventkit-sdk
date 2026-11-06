@@ -11471,7 +11471,12 @@ export interface components {
       latestProofStatus: ('pending' | 'approved' | 'rejected') | null;
       /** @description Each assignment list's value for the team, by list id */
       assignments: {
-        [key: string]: string;
+        [key: string]: {
+          /** @description Options lists */
+          optionId: string | null;
+          /** @description The option's title, or the typed text */
+          label: string;
+        };
       };
       /** @description In paise: what the approver entered from the receipt; null until approved */
       paidAmount: number | null;
@@ -12524,7 +12529,12 @@ export interface components {
       latestProofStatus: ('pending' | 'approved' | 'rejected') | null;
       /** @description Each assignment list's value for the team, by list id */
       assignments: {
-        [key: string]: string;
+        [key: string]: {
+          /** @description Options lists */
+          optionId: string | null;
+          /** @description The option's title, or the typed text */
+          label: string;
+        };
       };
       /** @description In paise: what the approver entered from the receipt; null until approved */
       paidAmount: number | null;
