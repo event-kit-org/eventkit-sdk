@@ -9,6 +9,15 @@ describe('registrationEmail', () => {
     expect(t.member.dashboardUrl).toBe('{{member.linkUrl}}');
     expect(t.linkReplaced).toBe('{{linkReplaced}}');
     expect(t.links.portal).toBe('{{event.portalUrl}}');
+    expect(t.replaced.dashboardUrl).toBe('{{replaced.linkUrl}}');
+    expect(t.added.name).toBe('{{added.name}}');
+    expect(t.memberAdded).toBe('{{memberAdded}}');
+  });
+
+  it("gives each member's link inside the member list", () => {
+    expect(t.eachMember((m) => t.when(m.dashboardUrl, `<a href="${m.dashboardUrl}">x</a>`))).toBe(
+      '{{#members}}{{#linkUrl}}<a href="{{linkUrl}}">x</a>{{/linkUrl}}{{/members}}',
+    );
   });
 
   it('repeats a block per member, with conditions', () => {

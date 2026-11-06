@@ -11,7 +11,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Liveness (cheap; used by the scanner's online check) */
+    /** Liveness (cheap; used by the scanner's online check), with the core version */
     get: {
       parameters: {
         query?: never;
@@ -30,6 +30,8 @@ export interface paths {
             'application/json': {
               /** @enum {string} */
               status: 'ok';
+              /** @description eventkit-core version, e.g. 0.20.1 */
+              version: string;
             };
           };
         };
@@ -1331,7 +1333,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Leader: a new personal link for a teammate (theirs leaked or was lost), emailed to them; the leader never sees it. Refused with MAILING_OFF when the event has no mail (the old link keeps working); the organiser can issue one instead. */
+    /** Leader: a new personal link for a teammate (theirs leaked or was lost), emailed to the leader to pass on (every eventKit email goes to the leader only). Refused with MAILING_OFF when the event has no mail (the old link keeps working); the organiser can issue one instead. */
     post: {
       parameters: {
         query?: never;

@@ -5,7 +5,13 @@
  * stays plain HTML with no build step. eventKit escapes every value.
  *
  * Mail apps run no scripts, so a button in an email is a link: put a link
- * variable in its `href` (`member.dashboardUrl` (the recipient's own link), `links.portal`).
+ * variable in its `href` (`member.dashboardUrl` (the leader's own link), a member's
+ * `dashboardUrl` inside `eachMember`, `replaced.dashboardUrl`, `links.portal`).
+ *
+ * Every email goes to the team leader only. On registering it holds every
+ * member's link (`eachMember` → `dashboardUrl`) for the leader to pass on; a
+ * replaced link (`linkReplaced`) or a member who joined later (`memberAdded`)
+ * comes with just that one link.
  *
  * ```ts
  * import { registrationEmail as t } from '@eventkit/sdk';
@@ -13,7 +19,8 @@
  * const html = `<!doctype html><html><body>
  *   <h1>${t.team.name} is in!</h1>
  *   ${t.eachMember((m) => `
- *     <p>${m.name}${t.when(m.isLeader, ' (leader)')} · ${m.participantCode}</p>
+ *     <p>${m.name}${t.when(m.isLeader, ' (leader)')} · ${m.participantCode}
+ *       ${t.when(m.dashboardUrl, `<a href="${m.dashboardUrl}">Their link</a>`)}</p>
  *     `)}
  *   ${t.when(t.member.dashboardUrl, t.button({ href: t.member.dashboardUrl, label: 'Open dashboard' }))}
  * </body></html>`;
@@ -43,19 +50,22 @@ export interface MemberVariables {
   participantCode: TemplateVariable;
   /** Set for the leader: use with `when` / `unless`. */
   isLeader: TemplateVariable;
-}
-
-/** The recipient of this email (one email goes to each member): `registrationEmail.member`. */
-export interface RecipientVariables extends MemberVariables {
-  /** The recipient's own personal link to their dashboard; empty without a portal URL. */
+  /**
+   * The member's personal link, for the leader to pass on: every member's on
+   * registering, only the replaced or added member's otherwise. Wrap in `when`.
+   */
   dashboardUrl: TemplateVariable;
 }
+
+/** The recipient of this email (always the team leader): `registrationEmail.member`. */
+export type RecipientVariables = MemberVariables;
 
 const eachMemberVars: MemberVariables = {
   name: v('name'),
   email: v('email'),
   participantCode: v('participantCode'),
   isLeader: v('isLeader'),
+  dashboardUrl: v('linkUrl'),
 };
 
 const recipient: RecipientVariables = {
@@ -82,7 +92,7 @@ export interface ButtonOptions {
   radius?: string;
 }
 
-/** The registration email (each member gets their own once the team registers). */
+/** The registration email. It goes to the team leader only. */
 export const registrationEmail = {
   event: {
     name: v('event.name'),
@@ -96,10 +106,19 @@ export const registrationEmail = {
   team: { name: v('team.name') },
   /** How many people registered. */
   memberCount: v('memberCount'),
-  /** Whoever this email is addressed to (each member gets their own, with only their own link). */
+  /**
+   * Whoever this email is addressed to: the team leader. `dashboardUrl` is their
+   * own link, set on registering and when they replaced it.
+   */
   member: recipient,
-  /** True when this email carries a replacement link (the old one stopped working). Use with `when`. */
+  /** True when this email carries a replacement link for `replaced`. Use with `when`. */
   linkReplaced: v('linkReplaced'),
+  /** Whose link the leader replaced, and the new one to pass on (with `linkReplaced`). */
+  replaced: { name: v('replaced.name'), dashboardUrl: v('replaced.linkUrl') },
+  /** True when this email is about a member who joined later (`added`). Use with `when`. */
+  memberAdded: v('memberAdded'),
+  /** Who joined the team later, and their link to pass on (with `memberAdded`). */
+  added: { name: v('added.name'), dashboardUrl: v('added.linkUrl') },
   /** The team's leader. */
   leader: {
     name: v('leader.name'),
@@ -110,11 +129,11 @@ export const registrationEmail = {
   links: {
     /** The event's portal (its home page). */
     portal: v('event.portalUrl'),
-    /** The recipient's own dashboard link (same as `member.dashboardUrl`). */
+    /** The leader's own dashboard link (same as `member.dashboardUrl`). */
     dashboard: v('member.linkUrl'),
   },
 
-  /** Repeats `render` for every member, the leader included, in form order (no links: those are the recipient's alone). */
+  /** Repeats `render` for every member, the leader included, in form order; `dashboardUrl` holds the links the email carries. */
   eachMember(render: (m: MemberVariables) => string): string {
     return `{{#members}}${render(eachMemberVars)}{{/members}}`;
   },
