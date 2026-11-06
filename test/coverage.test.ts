@@ -102,6 +102,7 @@ describe('every API operation is reachable through the devkit', () => {
     await p.me.team.get();
     await p.me.team.payReceipt(png());
     await p.me.team.handOver(ID, 'a@b.co');
+    await p.me.team.addMember({ name: 'n', email: 'n@x.co' });
     await p.me.polls.list();
     await p.me.polls.vote(ID, ID);
     await p.me.notifications.feed();
@@ -157,9 +158,11 @@ describe('every API operation is reachable through the devkit', () => {
     await e.teamRules.remove(ID);
     await e.teams.list();
     await e.teams.get(ID);
+    await e.teams.addMember(ID, { name: 'n', email: 'n@x.co' });
     await e.teams.shortlist(ID);
     await e.teams.confirm(ID);
     await e.teams.release({ stage: 'all' });
+    await e.registrations.update(ID, { name: 'n' });
     await e.registrations.cancel(ID);
     await e.registrations.restore(ID);
     await e.registrations.reissueLink(ID);
@@ -249,6 +252,6 @@ describe('every API operation is reachable through the devkit', () => {
     );
     const missing = all.filter((op) => !reached.has(op) && !NOT_FOR_FRONT_ENDS.includes(op));
     expect(missing).toEqual([]);
-    expect(all.length - NOT_FOR_FRONT_ENDS.length).toBe(150);
+    expect(all.length - NOT_FOR_FRONT_ENDS.length).toBe(153);
   });
 });

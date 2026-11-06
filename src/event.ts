@@ -213,6 +213,18 @@ export function eventApi(t: Transport, eventId: string) {
     teams: {
       list: () => call(api.GET('/v1/events/{eventId}/teams', at())),
       get: (teamId: string) => call(api.GET('/v1/events/{eventId}/teams/{teamId}', at({ teamId }))),
+      /**
+       * Add a member, up to the maximum team size. Returns their link, which is also
+       * emailed to the leader. With a per-person fee after the team paid, they wait for
+       * their own receipt.
+       */
+      addMember: (teamId: string, member: Body<`${E}/teams/{teamId}/members`, 'post'>) =>
+        call(
+          api.POST('/v1/events/{eventId}/teams/{teamId}/members', {
+            ...at({ teamId }),
+            body: member,
+          }),
+        ),
       /** Pay-after-shortlist events: registered → shortlisted. */
       shortlist: (teamId: string) =>
         call(api.POST('/v1/events/{eventId}/teams/{teamId}/shortlist', at({ teamId }))),
@@ -233,6 +245,20 @@ export function eventApi(t: Transport, eventId: string) {
         call(api.DELETE('/v1/events/{eventId}/teams/{teamId}', at({ teamId }))),
     },
     registrations: {
+      /**
+       * Correct a member's name or email. `resendToLeader` gives the whole team new links
+       * and emails them all to the leader (old links stop working).
+       */
+      update: (
+        registrationId: string,
+        patch: Body<`${E}/registrations/{registrationId}`, 'patch'>,
+      ) =>
+        call(
+          api.PATCH('/v1/events/{eventId}/registrations/{registrationId}', {
+            ...at({ registrationId }),
+            body: patch,
+          }),
+        ),
       cancel: (registrationId: string) =>
         call(
           api.POST(

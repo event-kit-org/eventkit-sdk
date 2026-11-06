@@ -75,6 +75,12 @@ export function portalApi(t: Transport, session: Session) {
       /** Leader: hand the team to another member. `confirm`: your email, or a phone number you gave. */
       handOver: (registrationId: string, confirm: string) =>
         call(api.POST('/v1/portal/me/team/leader', { body: { registrationId, confirm } })),
+      /**
+       * Leader: add a member until registration closes. Their link is emailed to you to
+       * pass on. With a per-person fee after you paid, upload another receipt for them.
+       */
+      addMember: (member: Body<'/v1/portal/me/team/members', 'post'>) =>
+        call(api.POST('/v1/portal/me/team/members', { body: member })),
     },
     polls: {
       list: () => call(api.GET('/v1/portal/me/polls')),
