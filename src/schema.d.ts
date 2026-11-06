@@ -9999,8 +9999,6 @@ export interface components {
         amountDue: number | null;
         /** @description In paise: what the approver entered as received; null until one is approved */
         paidAmount: number | null;
-        /** @description In paise: what the event's current fee asks minus paidAmount. Positive: the team owes extra; negative: it is owed a refund. Null until a receipt is approved */
-        balance: number | null;
         currency: string | null;
         /** @description After shortlist: receipts must be uploaded before this */
         deadline: string | null;
@@ -10069,12 +10067,10 @@ export interface components {
       pendingRelease: boolean;
       belowMinimum: boolean;
       latestProofStatus: ('pending' | 'approved' | 'rejected') | null;
-      /** @description In paise: what the approver entered as received */
+      /** @description In paise: what the approver entered from the receipt; null until approved */
       paidAmount: number | null;
       /** @description Members the approved receipt covered; null until one is approved */
       paidMembers: number | null;
-      /** @description In paise: the current fee minus paidAmount; positive the team owes extra, negative a refund; null until a receipt is approved */
-      balance: number | null;
       /** Format: date-time */
       createdAt: string;
     };
@@ -10928,8 +10924,6 @@ export interface components {
         amountDue: number | null;
         /** @description In paise: what the approver entered as received; null until one is approved */
         paidAmount: number | null;
-        /** @description In paise: what the event's current fee asks minus paidAmount. Positive: the team owes extra; negative: it is owed a refund. Null until a receipt is approved */
-        balance: number | null;
         currency: string | null;
         /** @description After shortlist: receipts must be uploaded before this */
         deadline: string | null;
@@ -10998,12 +10992,10 @@ export interface components {
       pendingRelease: boolean;
       belowMinimum: boolean;
       latestProofStatus: ('pending' | 'approved' | 'rejected') | null;
-      /** @description In paise: what the approver entered as received */
+      /** @description In paise: what the approver entered from the receipt; null until approved */
       paidAmount: number | null;
       /** @description Members the approved receipt covered; null until one is approved */
       paidMembers: number | null;
-      /** @description In paise: the current fee minus paidAmount; positive the team owes extra, negative a refund; null until a receipt is approved */
-      balance: number | null;
       /** Format: date-time */
       createdAt: string;
     };

@@ -3,4 +3,4 @@
 ---
 
 `payments.approve(proofId, paidAmount)` takes the amount received (paise); payment
-proofs carry `paidAmount`. Needs eventkit-core 0.19.0.
+proofs and teams carry `paidAmount`; teams no longer carry `balance`. Needs eventkit-core 0.19.0.

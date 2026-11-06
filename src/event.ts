@@ -277,7 +277,7 @@ export function eventApi(t: Transport, eventId: string) {
         ),
       /**
        * The team is confirmed (refused with NOT_ENOUGH_PLACES at capacity). paidAmount
-       * (paise) is what the receipt shows the team paid; the balance follows it.
+       * (paise) is what the receipt shows the team paid; it is not checked against the fee.
        */
       approve: (proofId: string, paidAmount: number) =>
         call(
