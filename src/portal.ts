@@ -81,6 +81,14 @@ export function portalApi(t: Transport, session: Session) {
        */
       addMember: (member: Body<'/v1/portal/me/team/members', 'post'>) =>
         call(api.POST('/v1/portal/me/team/members', { body: member })),
+      /**
+       * Leader: remove a teammate (cancels them) until registration closes; never below the
+       * minimum team size. Nothing is refunded automatically.
+       */
+      removeMember: (registrationId: string) =>
+        call(
+          api.POST('/v1/portal/me/team/members/{registrationId}/remove', at({ registrationId })),
+        ),
     },
     polls: {
       list: () => call(api.GET('/v1/portal/me/polls')),

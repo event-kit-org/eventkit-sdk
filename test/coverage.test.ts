@@ -103,6 +103,7 @@ describe('every API operation is reachable through the devkit', () => {
     await p.me.team.payReceipt(png());
     await p.me.team.handOver(ID, 'a@b.co');
     await p.me.team.addMember({ name: 'n', email: 'n@x.co' });
+    await p.me.team.removeMember(ID);
     await p.me.polls.list();
     await p.me.polls.vote(ID, ID);
     await p.me.notifications.feed();
@@ -252,6 +253,6 @@ describe('every API operation is reachable through the devkit', () => {
     );
     const missing = all.filter((op) => !reached.has(op) && !NOT_FOR_FRONT_ENDS.includes(op));
     expect(missing).toEqual([]);
-    expect(all.length - NOT_FOR_FRONT_ENDS.length).toBe(153);
+    expect(all.length - NOT_FOR_FRONT_ENDS.length).toBe(154);
   });
 });
