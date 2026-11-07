@@ -27,3 +27,14 @@ export type Result<P extends keyof paths, M extends keyof paths[P]> =
 export type Role = Schemas['Role'];
 export type Feature = Schemas['Feature'];
 export type EmailKind = Schemas['EmailKind'];
+
+/**
+ * A poll answer: `optionId` (choice, dropdown), `optionIds` (multi_choice) or
+ * `value` (text, number, date-time, rating). A plain string is an option id.
+ */
+export type PollAnswerInput =
+  string | { optionId?: string; optionIds?: string[]; value?: string | number };
+
+/** The request body for a poll answer. */
+export const pollAnswerBody = (answer: PollAnswerInput) =>
+  typeof answer === 'string' ? { optionId: answer } : answer;

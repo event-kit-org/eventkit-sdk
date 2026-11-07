@@ -127,6 +127,7 @@ describe('every API operation is reachable through the devkit', () => {
     await e.features();
     await e.setFeature('scanning', true);
     await e.teams.delete(ID);
+    await e.teams.update(ID, { name: 'X' });
     await e.delete('Event');
     await e.emails.get('registration');
     await e.emails.save('registration', { subject: 's', html: '<p>h</p>' });
@@ -167,6 +168,7 @@ describe('every API operation is reachable through the devkit', () => {
     await e.registrations.cancel(ID);
     await e.registrations.restore(ID);
     await e.registrations.reissueLink(ID);
+    await e.registrations.sendLink(ID, 'member');
     await e.registrations.rotateQr(ID);
     await e.payments.list();
     await e.payments.attachReceipt(ID, png());
@@ -210,10 +212,12 @@ describe('every API operation is reachable through the devkit', () => {
     await e.polls.renameOption(ID, ID, 'y');
     await e.polls.removeOption(ID, ID);
     await e.polls.vote(ID, ID);
+    await e.polls.answers(ID);
     await e.channels.list();
     await e.channels.create({ name: 'c', audience: ['admin'] });
     await e.channels.update(ID, { name: 'd' });
     await e.channels.remove(ID);
+    await e.channels.removeNotification(ID, ID);
     await e.channels.send(ID, { title: 't', body: 'b' });
     await e.notifications.feed();
     await e.criteria.list();
@@ -222,12 +226,15 @@ describe('every API operation is reachable through the devkit', () => {
     await e.criteria.remove(ID);
     await e.judging.teams();
     await e.judging.saveScores(ID, []);
+    await e.scoreBreakdown(ID);
     await e.leaderboard();
     await e.rounds.list();
     await e.rounds.create({} as never);
     await e.rounds.update(ID, {});
     await e.rounds.remove(ID);
     await e.rounds.duplicateCriteria(ID, ID);
+    await e.rounds.teams(ID);
+    await e.rounds.setTeams(ID, null);
     await e.submissions.list(ID);
     await e.submissions.create({} as never);
     await e.submissions.update(ID, {});
@@ -253,6 +260,6 @@ describe('every API operation is reachable through the devkit', () => {
     );
     const missing = all.filter((op) => !reached.has(op) && !NOT_FOR_FRONT_ENDS.includes(op));
     expect(missing).toEqual([]);
-    expect(all.length - NOT_FOR_FRONT_ENDS.length).toBe(154);
+    expect(all.length - NOT_FOR_FRONT_ENDS.length).toBe(161);
   });
 });

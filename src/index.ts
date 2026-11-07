@@ -49,6 +49,7 @@ export type {
   EmailKind,
   Feature,
   paths,
+  PollAnswerInput,
   Query,
   Result,
   Role,

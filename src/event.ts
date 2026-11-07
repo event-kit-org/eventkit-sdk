@@ -1,6 +1,14 @@
 import type { Transport } from './http';
 import { uploadFile, type UploadPurpose } from './uploads';
-import type { Body, EmailKind, Feature, Query, Role } from './types';
+import {
+  type Body,
+  type EmailKind,
+  type Feature,
+  type PollAnswerInput,
+  pollAnswerBody,
+  type Query,
+  type Role,
+} from './types';
 
 type E = '/v1/events/{eventId}';
 type Mail = '/v1/events/{eventId}/emails/{kind}';
@@ -243,6 +251,9 @@ export function eventApi(t: Transport, eventId: string) {
        */
       delete: (teamId: string) =>
         call(api.DELETE('/v1/events/{eventId}/teams/{teamId}', at({ teamId }))),
+      /** Admin: correct a team's name, team answers or leader (any active member). */
+      update: (teamId: string, patch: Body<`${E}/teams/{teamId}`, 'patch'>) =>
+        call(api.PATCH('/v1/events/{eventId}/teams/{teamId}', { ...at({ teamId }), body: patch })),
     },
     registrations: {
       /**
@@ -285,6 +296,17 @@ export function eventApi(t: Transport, eventId: string) {
           api.POST('/v1/events/{eventId}/registrations/{registrationId}/reissue-link', {
             ...at({ registrationId }),
             body: options,
+          }),
+        ),
+      /**
+       * Admin: email a member's current link again, unchanged, to the member or the
+       * leader. LINK_NOT_STORED for links made before links were kept: reissue once.
+       */
+      sendLink: (registrationId: string, to: 'member' | 'leader') =>
+        call(
+          api.POST('/v1/events/{eventId}/registrations/{registrationId}/send-link', {
+            ...at({ registrationId }),
+            body: { to },
           }),
         ),
       /** A new QR code; the old one stops scanning. */
@@ -512,12 +534,22 @@ export function eventApi(t: Transport, eventId: string) {
             at({ pollId, optionId }),
           ),
         ),
-      /** Vote, or change your vote, until the poll closes. */
-      vote: (pollId: string, optionId: string) =>
+      /** Answer, or change your answer, until the poll closes. A string is an option id. */
+      vote: (pollId: string, answer: PollAnswerInput) =>
         call(
           api.PUT('/v1/events/{eventId}/polls/{pollId}/vote', {
             ...at({ pollId }),
-            body: { optionId },
+            body: pollAnswerBody(answer),
+          }),
+        ),
+      /** Text, number, date-time and rating polls: the answers, newest first. */
+      answers: (pollId: string, query: { before?: string; limit?: number } = {}) =>
+        call(
+          api.GET('/v1/events/{eventId}/polls/{pollId}/answers', {
+            params: {
+              path: { eventId, pollId },
+              query: query as Query<`${E}/polls/{pollId}/answers`, 'get'>,
+            },
           }),
         ),
     },
@@ -537,6 +569,13 @@ export function eventApi(t: Transport, eventId: string) {
         ),
       remove: (channelId: string) =>
         call(api.DELETE('/v1/events/{eventId}/channels/{channelId}', at({ channelId }))),
+      /** Delete a sent notification for everyone: admins any, volunteers their own. */
+      removeNotification: (channelId: string, notificationId: string) =>
+        call(
+          api.DELETE('/v1/events/{eventId}/channels/{channelId}/notifications/{notificationId}', {
+            params: { path: { eventId, channelId, notificationId } },
+          }),
+        ),
       /** Volunteers send only to channels that include volunteers. Urgent ones are pushed. */
       send: (
         channelId: string,
@@ -592,6 +631,20 @@ export function eventApi(t: Transport, eventId: string) {
         ),
       remove: (roundId: string) =>
         call(api.DELETE('/v1/events/{eventId}/rounds/{roundId}', at({ roundId }))),
+      /** The teams in a round (null: every team). Admins and judges. */
+      teams: (roundId: string) =>
+        call(api.GET('/v1/events/{eventId}/rounds/{roundId}/teams', at({ roundId }))),
+      /**
+       * Admin: set the teams that go on to this round (after an elimination round).
+       * Only they submit, are judged and are ranked there; null admits every team.
+       */
+      setTeams: (roundId: string, teamIds: string[] | null) =>
+        call(
+          api.PUT('/v1/events/{eventId}/rounds/{roundId}/teams', {
+            ...at({ roundId }),
+            body: { teamIds },
+          }),
+        ),
       /** Copy the criteria of another round into this one. */
       duplicateCriteria: (roundId: string, fromRoundId: string) =>
         call(
@@ -707,6 +760,16 @@ export function eventApi(t: Transport, eventId: string) {
           }),
         ),
     },
+    /** Admin: who scored a team in a round, criterion by criterion, with comments. */
+    scoreBreakdown: (teamId: string, roundId?: string) =>
+      call(
+        api.GET('/v1/events/{eventId}/judging/teams/{teamId}/breakdown', {
+          params: {
+            path: { eventId, teamId },
+            query: { ...(roundId ? { roundId } : {}) } as never,
+          },
+        }),
+      ),
     /** Admins and judges always; everyone once the admin shows it (`leaderboardVisible`). */
     leaderboard: (roundId?: string) =>
       call(

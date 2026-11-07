@@ -1,7 +1,7 @@
 import { EventKitError } from './errors';
 import type { Transport } from './http';
 import type { Session } from './session';
-import type { Body, Query, Schemas } from './types';
+import { type Body, type PollAnswerInput, pollAnswerBody, type Query, type Schemas } from './types';
 import { putFile } from './uploads';
 
 type AnswersInput = Record<string, string | number | string[] | null>;
@@ -92,10 +92,13 @@ export function portalApi(t: Transport, session: Session) {
     },
     polls: {
       list: () => call(api.GET('/v1/portal/me/polls')),
-      /** Vote, or change your vote, until the poll closes. */
-      vote: (pollId: string, optionId: string) =>
+      /** Answer, or change your answer, until the poll closes. A string is an option id. */
+      vote: (pollId: string, answer: PollAnswerInput) =>
         call(
-          api.PUT('/v1/portal/me/polls/{pollId}/vote', { ...at({ pollId }), body: { optionId } }),
+          api.PUT('/v1/portal/me/polls/{pollId}/vote', {
+            ...at({ pollId }),
+            body: pollAnswerBody(answer),
+          }),
         ),
     },
     notifications: {
