@@ -12375,6 +12375,14 @@ export interface components {
       /** @description Who confirmed it */
       confirmedBy: string | null;
       memberCount: number;
+      /** @description Active members, the leader included, so lists can be searched */
+      members: {
+        /** Format: uuid */
+        registrationId: string;
+        name: string;
+        email: string;
+        participantCode: string;
+      }[];
       /** @description Members who RSVPed (attending or checked in) */
       attendingCount: number;
       /** @description Staged release: what participants are shown (registered, shortlisted or confirmed) */
@@ -13563,6 +13571,14 @@ export interface components {
       /** @description Who confirmed it */
       confirmedBy: string | null;
       memberCount: number;
+      /** @description Active members, the leader included, so lists can be searched */
+      members: {
+        /** Format: uuid */
+        registrationId: string;
+        name: string;
+        email: string;
+        participantCode: string;
+      }[];
       /** @description Members who RSVPed (attending or checked in) */
       attendingCount: number;
       /** @description Staged release: what participants are shown (registered, shortlisted or confirmed) */
