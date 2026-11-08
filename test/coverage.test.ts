@@ -106,6 +106,7 @@ describe('every API operation is reachable through the devkit', () => {
     await p.me.team.removeMember(ID);
     await p.me.polls.list();
     await p.me.polls.vote(ID, ID);
+    await p.me.polls.answerGroup(ID, []);
     await p.me.notifications.feed();
     await p.me.leaderboard();
     await p.me.submissions.list();
@@ -213,6 +214,11 @@ describe('every API operation is reachable through the devkit', () => {
     await e.polls.removeOption(ID, ID);
     await e.polls.vote(ID, ID);
     await e.polls.answers(ID);
+    await e.polls.groups.create({ title: 'T', audience: ['participant'], questions: [] });
+    await e.polls.groups.update(ID, {});
+    await e.polls.groups.addQuestion(ID, { question: 'Q' });
+    await e.polls.groups.remove(ID);
+    await e.polls.groups.answer(ID, []);
     await e.channels.list();
     await e.channels.create({ name: 'c', audience: ['admin'] });
     await e.channels.update(ID, { name: 'd' });
@@ -227,6 +233,7 @@ describe('every API operation is reachable through the devkit', () => {
     await e.judging.teams();
     await e.judging.saveScores(ID, []);
     await e.scoreBreakdown(ID);
+    await e.insights.checkpoint(ID);
     await e.leaderboard();
     await e.rounds.list();
     await e.rounds.create({} as never);
@@ -260,6 +267,6 @@ describe('every API operation is reachable through the devkit', () => {
     );
     const missing = all.filter((op) => !reached.has(op) && !NOT_FOR_FRONT_ENDS.includes(op));
     expect(missing).toEqual([]);
-    expect(all.length - NOT_FOR_FRONT_ENDS.length).toBe(161);
+    expect(all.length - NOT_FOR_FRONT_ENDS.length).toBe(168);
   });
 });

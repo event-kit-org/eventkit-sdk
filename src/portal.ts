@@ -100,6 +100,17 @@ export function portalApi(t: Transport, session: Session) {
             body: pollAnswerBody(answer),
           }),
         ),
+      /** Answer several questions of a set (`poll.group`) at once: all saved, or none. */
+      answerGroup: (
+        groupId: string,
+        answers: Body<'/v1/portal/me/polls/groups/{groupId}/answers', 'put'>['answers'],
+      ) =>
+        call(
+          api.PUT('/v1/portal/me/polls/groups/{groupId}/answers', {
+            ...at({ groupId }),
+            body: { answers },
+          }),
+        ),
     },
     notifications: {
       /** Newest first. Page with `before` = the last item's `sentAt`. */

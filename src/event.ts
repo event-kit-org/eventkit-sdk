@@ -414,6 +414,13 @@ export function eventApi(t: Transport, eventId: string) {
             params: { path: { eventId }, query: bucket ? { bucket } : {} },
           }),
         ),
+      /** A checkpoint's scans per 15/30/60-minute slot, totals, and meals handed over. */
+      checkpoint: (checkpointId: string, bucket?: 15 | 30 | 60) =>
+        call(
+          api.GET('/v1/events/{eventId}/insights/checkpoints/{checkpointId}', {
+            params: { path: { eventId, checkpointId }, query: bucket ? { bucket } : {} },
+          }),
+        ),
       /** Answer counts for a registration question. */
       field: (fieldId: string) =>
         call(api.GET('/v1/events/{eventId}/insights/fields/{fieldId}', at({ fieldId }))),
@@ -542,6 +549,43 @@ export function eventApi(t: Transport, eventId: string) {
             body: pollAnswerBody(answer),
           }),
         ),
+      /** Sets of questions answered together on one card (`poll.group`). */
+      groups: {
+        /** A set with all its questions; they share audience, closing time and results. */
+        create: (input: Body<`${E}/polls/groups`, 'post'>) =>
+          call(api.POST('/v1/events/{eventId}/polls/groups', { ...at(), body: input })),
+        /** Title, description, and every question's audience, closing time and results. */
+        update: (groupId: string, patch: Body<`${E}/polls/groups/{groupId}`, 'patch'>) =>
+          call(
+            api.PATCH('/v1/events/{eventId}/polls/groups/{groupId}', {
+              ...at({ groupId }),
+              body: patch,
+            }),
+          ),
+        addQuestion: (
+          groupId: string,
+          question: Body<`${E}/polls/groups/{groupId}/questions`, 'post'>,
+        ) =>
+          call(
+            api.POST('/v1/events/{eventId}/polls/groups/{groupId}/questions', {
+              ...at({ groupId }),
+              body: question,
+            }),
+          ),
+        remove: (groupId: string) =>
+          call(api.DELETE('/v1/events/{eventId}/polls/groups/{groupId}', at({ groupId }))),
+        /** Answer several questions at once: all saved, or none. */
+        answer: (
+          groupId: string,
+          answers: Body<`${E}/polls/groups/{groupId}/answers`, 'put'>['answers'],
+        ) =>
+          call(
+            api.PUT('/v1/events/{eventId}/polls/groups/{groupId}/answers', {
+              ...at({ groupId }),
+              body: { answers },
+            }),
+          ),
+      },
       /** Text, number, date-time and rating polls: the answers, newest first. */
       answers: (pollId: string, query: { before?: string; limit?: number } = {}) =>
         call(

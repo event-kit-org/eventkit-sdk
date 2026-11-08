@@ -1664,6 +1664,102 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/portal/me/polls/groups/{groupId}/answers': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Answer several of a set's questions at once (all saved, or none), until it closes (NOT_CONFIRMED until your team is confirmed) */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          groupId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            answers: {
+              /** Format: uuid */
+              optionId?: string;
+              optionIds?: string[];
+              value?: string | number;
+              /** Format: uuid */
+              pollId: string;
+            }[];
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Poll'][];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/portal/me/notifications': {
     parameters: {
       query?: never;
@@ -7356,6 +7452,436 @@ export interface paths {
     };
     trace?: never;
   };
+  '/v1/events/{eventId}/polls/groups': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Create a set of questions answered together on one card (admins and volunteers). Each question is a poll of any type; the set shares audience, closing time and results. */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            title: string;
+            description?: string;
+            audience: components['schemas']['RoleInput'][];
+            closesAt?: string | null;
+            resultsVisible?: boolean;
+            questions: {
+              question: string;
+              type?: components['schemas']['PollTypeInput'];
+              /** @description Rating polls (default 5) */
+              scaleMax?: number;
+              /** @description Choice polls: at least two. Other types: none. */
+              options?: string[];
+              /** @description Index into options */
+              defaultOptionIndex?: number;
+            }[];
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Poll'][];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/polls/groups/{groupId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete a set with its questions and answers */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          groupId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    /** Edit a set's title and description, and every question's audience, closing time and results setting */
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          groupId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            title?: string;
+            description?: string;
+            audience?: components['schemas']['RoleInput'][];
+            closesAt?: string | null;
+            resultsVisible?: boolean;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Poll'][];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    trace?: never;
+  };
+  '/v1/events/{eventId}/polls/groups/{groupId}/questions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Add a question at the end of a set */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          groupId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            question: string;
+            type?: components['schemas']['PollTypeInput'];
+            /** @description Rating polls (default 5) */
+            scaleMax?: number;
+            /** @description Choice polls: at least two. Other types: none. */
+            options?: string[];
+            /** @description Index into options */
+            defaultOptionIndex?: number;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Poll'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/polls/groups/{groupId}/answers': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Answer several of a set's questions at once (all saved, or none), until it closes */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          groupId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            answers: {
+              /** Format: uuid */
+              optionId?: string;
+              optionIds?: string[];
+              value?: string | number;
+              /** Format: uuid */
+              pollId: string;
+            }[];
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Poll'][];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/events/{eventId}/polls/{pollId}/options': {
     parameters: {
       query?: never;
@@ -8742,7 +9268,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Who scored a team in a round, criterion by criterion, with comments (admins only; judges see only their own scores) */
+    /** Who scored a team in a round, criterion by criterion, with comments. Admins any time; judges once the round is closed (BREAKDOWN_NOT_CLOSED before), so scoring stays independent */
     get: {
       parameters: {
         query?: {
@@ -10808,6 +11334,84 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/events/{eventId}/insights/checkpoints/{checkpointId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** A checkpoint's scans in each time slot (accepted, duplicates, other refusals), its totals, and for meal checkpoints what was handed over */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Minutes per slot: 15, 30 or 60 */
+          bucket?: number;
+        };
+        header?: never;
+        path: {
+          eventId: string;
+          checkpointId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['CheckpointStats'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/events/{eventId}/insights/dashboard': {
     parameters: {
       query?: never;
@@ -12521,6 +13125,15 @@ export interface components {
         id: string;
         name: string;
       }[];
+      /** @description A question in a set: show the set as one card and answer it with the group answers route */
+      group: {
+        /** Format: uuid */
+        id: string;
+        title: string;
+        description: string;
+        /** @description This question's place in the set */
+        position: number;
+      } | null;
     };
     /**
      * @description draft: admins and judges only. released: everyone sees it; teams submit. closed: everyone sees it; submissions are locked.
@@ -12936,11 +13549,38 @@ export interface components {
       /** @description Each option's votes, in order */
       buckets: components['schemas']['ChartBucketInput'][];
     };
+    ScanPointInput: {
+      /** @description The end of the slot */
+      at: string;
+      accepted: number;
+      duplicate: number;
+      refused: number;
+    };
+    CheckpointStatsInput: {
+      /** Format: uuid */
+      checkpointId: string;
+      name: string;
+      /** @enum {string} */
+      type: 'entry' | 'meal' | 'swag' | 'session' | 'gate';
+      totals: {
+        accepted: number;
+        duplicate: number;
+        refused: number;
+        /** @description Different people accepted here */
+        people: number;
+      };
+      series: components['schemas']['ScanPointInput'][];
+      /** @description Meal checkpoints with a poll: what was handed over (each person's choice, or the default) */
+      meals: components['schemas']['ChartBucketInput'][] | null;
+    };
     DashboardWidgetInput:
       | {
           /** @description Chosen by the client; unique in the list */
           id: string;
-          /** @enum {string} */
+          /**
+           * @description Checkpoints: bar is scans over time, pie is meals or accepted vs refused
+           * @enum {string}
+           */
           chart: 'bar' | 'pie';
           title?: string | null;
           /** @constant */
@@ -12951,13 +13591,30 @@ export interface components {
       | {
           /** @description Chosen by the client; unique in the list */
           id: string;
-          /** @enum {string} */
+          /**
+           * @description Checkpoints: bar is scans over time, pie is meals or accepted vs refused
+           * @enum {string}
+           */
           chart: 'bar' | 'pie';
           title?: string | null;
           /** @constant */
           kind: 'poll';
           /** Format: uuid */
           pollId: string;
+        }
+      | {
+          /** @description Chosen by the client; unique in the list */
+          id: string;
+          /**
+           * @description Checkpoints: bar is scans over time, pie is meals or accepted vs refused
+           * @enum {string}
+           */
+          chart: 'bar' | 'pie';
+          title?: string | null;
+          /** @constant */
+          kind: 'checkpoint';
+          /** Format: uuid */
+          checkpointId: string;
         };
     LinkPreviewInput: {
       /** @enum {string} */
@@ -13717,6 +14374,15 @@ export interface components {
         id: string;
         name: string;
       }[];
+      /** @description A question in a set: show the set as one card and answer it with the group answers route */
+      group: {
+        /** Format: uuid */
+        id: string;
+        title: string;
+        description: string;
+        /** @description This question's place in the set */
+        position: number;
+      } | null;
     };
     /**
      * @description draft: admins and judges only. released: everyone sees it; teams submit. closed: everyone sees it; submissions are locked.
@@ -14132,11 +14798,38 @@ export interface components {
       /** @description Each option's votes, in order */
       buckets: components['schemas']['ChartBucket'][];
     };
+    ScanPoint: {
+      /** @description The end of the slot */
+      at: string;
+      accepted: number;
+      duplicate: number;
+      refused: number;
+    };
+    CheckpointStats: {
+      /** Format: uuid */
+      checkpointId: string;
+      name: string;
+      /** @enum {string} */
+      type: 'entry' | 'meal' | 'swag' | 'session' | 'gate';
+      totals: {
+        accepted: number;
+        duplicate: number;
+        refused: number;
+        /** @description Different people accepted here */
+        people: number;
+      };
+      series: components['schemas']['ScanPoint'][];
+      /** @description Meal checkpoints with a poll: what was handed over (each person's choice, or the default) */
+      meals: components['schemas']['ChartBucket'][] | null;
+    };
     DashboardWidget:
       | {
           /** @description Chosen by the client; unique in the list */
           id: string;
-          /** @enum {string} */
+          /**
+           * @description Checkpoints: bar is scans over time, pie is meals or accepted vs refused
+           * @enum {string}
+           */
           chart: 'bar' | 'pie';
           title?: string | null;
           /** @constant */
@@ -14147,13 +14840,30 @@ export interface components {
       | {
           /** @description Chosen by the client; unique in the list */
           id: string;
-          /** @enum {string} */
+          /**
+           * @description Checkpoints: bar is scans over time, pie is meals or accepted vs refused
+           * @enum {string}
+           */
           chart: 'bar' | 'pie';
           title?: string | null;
           /** @constant */
           kind: 'poll';
           /** Format: uuid */
           pollId: string;
+        }
+      | {
+          /** @description Chosen by the client; unique in the list */
+          id: string;
+          /**
+           * @description Checkpoints: bar is scans over time, pie is meals or accepted vs refused
+           * @enum {string}
+           */
+          chart: 'bar' | 'pie';
+          title?: string | null;
+          /** @constant */
+          kind: 'checkpoint';
+          /** Format: uuid */
+          checkpointId: string;
         };
     LinkPreview: {
       /** @enum {string} */
