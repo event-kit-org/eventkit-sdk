@@ -56,7 +56,11 @@ export function eventApi(t: Transport, eventId: string) {
       call(api.DELETE('/v1/events/{eventId}', { ...at(), body: { confirmName } })),
     /** Which features are on. Every member can read this, to hide what's off. */
     features: () => call(api.GET('/v1/events/{eventId}/features', at())),
-    /** Admin: switch a feature off, or back on if it was bought. */
+    /**
+     * @deprecated Refused since eventkit-core 0.25.0 (403
+     * `FEATURES_MANAGED_BY_EVENTKIT`): only the eventKit platform admin switches
+     * an event's features. Read them with `features()`.
+     */
     setFeature: (feature: Feature, enabled: boolean) =>
       call(
         api.PATCH('/v1/events/{eventId}/features/{feature}', {
@@ -126,7 +130,11 @@ export function eventApi(t: Transport, eventId: string) {
     },
 
     billing: {
-      /** Buy features; an approved purchase switches them on. */
+      /**
+       * @deprecated Refused since eventkit-core 0.25.0 (403
+       * `FEATURES_MANAGED_BY_EVENTKIT`): organisers ask eventKit to switch
+       * features on, until billing goes live.
+       */
       purchase: (features: Feature[]) =>
         call(api.POST('/v1/events/{eventId}/billing/purchases', { ...at(), body: { features } })),
       /** Participant and volunteer counts (what pricing is based on). */

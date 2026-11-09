@@ -15,6 +15,9 @@ const NOT_FOR_FRONT_ENDS = [
   'POST /v1/portal/me/team/members/{registrationId}/reissue-link',
 ];
 
+/** The eventKit platform admin's own console (eventkit-admin), not club front ends. */
+const platformOnly = (op: string) => op.includes(' /v1/platform/');
+
 const ID = '33333333-3333-4333-8333-333333333333';
 
 describe('every API operation is reachable through the devkit', () => {
@@ -282,8 +285,11 @@ describe('every API operation is reachable through the devkit', () => {
     const all = Object.entries(spec.paths).flatMap(([p, ops]) =>
       Object.keys(ops).map((m) => `${m.toUpperCase()} ${p}`),
     );
-    const missing = all.filter((op) => !reached.has(op) && !NOT_FOR_FRONT_ENDS.includes(op));
+    const forFrontEnds = all.filter((op) => !platformOnly(op));
+    const missing = forFrontEnds.filter(
+      (op) => !reached.has(op) && !NOT_FOR_FRONT_ENDS.includes(op),
+    );
     expect(missing).toEqual([]);
-    expect(all.length - NOT_FOR_FRONT_ENDS.length).toBe(185);
+    expect(forFrontEnds.length - NOT_FOR_FRONT_ENDS.length).toBe(185);
   });
 });

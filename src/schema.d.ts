@@ -3065,6 +3065,588 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/platform/auth/login': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Sign in as the eventKit platform admin */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            /** Format: email */
+            email: string;
+            password: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['PlatformSession'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/auth/me': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** The signed-in platform admin */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['PlatformAdmin'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/auth/password': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Change the platform admin password. Other sessions end; the reply signs in again */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            currentPassword: string;
+            newPassword: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['PlatformSession'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/auth/password/forgot': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Email the platform admin a link to choose a new password (10 minutes, once). Answers 202 whatever the email */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            /** Format: email */
+            email: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        202: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/auth/password/reset': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Choose a new platform admin password with the emailed link; the reply signs in */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            token: string;
+            newPassword: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['PlatformSession'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/events': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Every event on this server, newest first (read only) */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['PlatformEventSummary'][];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/events/{eventId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** One event's details, organisers, counts and features (read only) */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['PlatformEventOverview'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    /** Delete an event for good, confirmed with its exact name: every team, registration and score in it goes */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            confirmName: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/platform/events/{eventId}/features/{feature}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Switch a feature on or off for an event. Only the platform admin can; events can't switch their own */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          feature: components['schemas']['FeatureInput'];
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            enabled: boolean;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              feature: components['schemas']['Feature'];
+              enabled: boolean;
+              /** Format: date-time */
+              updatedAt: string;
+            };
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/events/{eventId}': {
     parameters: {
       query?: never;
@@ -3702,7 +4284,7 @@ export interface paths {
     delete?: never;
     options?: never;
     head?: never;
-    /** Switch a feature off, or back on if it was bought for this event */
+    /** Refused (FEATURES_MANAGED_BY_EVENTKIT): only the eventKit platform admin switches an event's features */
     patch: {
       parameters: {
         query?: never;
@@ -4140,7 +4722,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Buy features for this event; an approved purchase switches them on */
+    /** Refused for now (FEATURES_MANAGED_BY_EVENTKIT): the eventKit platform admin switches features on */
     post: {
       parameters: {
         query?: never;
@@ -14264,6 +14846,78 @@ export interface components {
       status: components['schemas']['RegistrationStatusInput'];
       name: string;
     };
+    PlatformAdminInput: {
+      /** Format: uuid */
+      id: string;
+      /** Format: email */
+      email: string;
+      name: string;
+    };
+    PlatformSessionInput: {
+      admin: components['schemas']['PlatformAdminInput'];
+      token: components['schemas']['AccessTokenInput'];
+    };
+    PlatformFeatureStateInput: {
+      feature: components['schemas']['FeatureInput'];
+      enabled: boolean;
+    };
+    PlatformEventSummaryInput: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      hostedBy: string;
+      venue: string;
+      /** Format: date-time */
+      startAt: string;
+      /** Format: date-time */
+      endAt: string;
+      /** Format: date-time */
+      createdAt: string;
+      owner: {
+        /** Format: uuid */
+        id: string;
+        name: string;
+        email: string;
+      };
+      teams: number;
+      /** @description Registrations that are not cancelled */
+      people: number;
+      features: components['schemas']['PlatformFeatureStateInput'][];
+    };
+    PlatformEventOverviewInput: {
+      event: components['schemas']['EventInput'];
+      owner: {
+        /** Format: uuid */
+        id: string;
+        name: string;
+        email: string;
+      };
+      organisers: {
+        /** Format: uuid */
+        id: string;
+        name: string;
+        email: string;
+        /** @enum {string} */
+        role: 'admin' | 'reviewer';
+        isOwner: boolean;
+      }[];
+      counts: {
+        teams: number;
+        /** @description Registrations that are not cancelled */
+        people: number;
+        /** @description Confirmed, attending or checked in */
+        confirmed: number;
+        checkedIn: number;
+        cancelled: number;
+        /** @description Volunteers and judges */
+        staff: number;
+      };
+      features: {
+        feature: components['schemas']['FeatureInput'];
+        enabled: boolean;
+        updatedAt: string | null;
+      }[];
+    };
     /**
      * @description draft: admins and judges only. released: everyone sees it; teams submit and judges score. closed: everyone sees it; submissions and scores are locked.
      * @enum {string}
@@ -15620,6 +16274,78 @@ export interface components {
       registrationId: string;
       status: components['schemas']['RegistrationStatus'];
       name: string;
+    };
+    PlatformAdmin: {
+      /** Format: uuid */
+      id: string;
+      /** Format: email */
+      email: string;
+      name: string;
+    };
+    PlatformSession: {
+      admin: components['schemas']['PlatformAdmin'];
+      token: components['schemas']['AccessToken'];
+    };
+    PlatformFeatureState: {
+      feature: components['schemas']['Feature'];
+      enabled: boolean;
+    };
+    PlatformEventSummary: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      hostedBy: string;
+      venue: string;
+      /** Format: date-time */
+      startAt: string;
+      /** Format: date-time */
+      endAt: string;
+      /** Format: date-time */
+      createdAt: string;
+      owner: {
+        /** Format: uuid */
+        id: string;
+        name: string;
+        email: string;
+      };
+      teams: number;
+      /** @description Registrations that are not cancelled */
+      people: number;
+      features: components['schemas']['PlatformFeatureState'][];
+    };
+    PlatformEventOverview: {
+      event: components['schemas']['Event'];
+      owner: {
+        /** Format: uuid */
+        id: string;
+        name: string;
+        email: string;
+      };
+      organisers: {
+        /** Format: uuid */
+        id: string;
+        name: string;
+        email: string;
+        /** @enum {string} */
+        role: 'admin' | 'reviewer';
+        isOwner: boolean;
+      }[];
+      counts: {
+        teams: number;
+        /** @description Registrations that are not cancelled */
+        people: number;
+        /** @description Confirmed, attending or checked in */
+        confirmed: number;
+        checkedIn: number;
+        cancelled: number;
+        /** @description Volunteers and judges */
+        staff: number;
+      };
+      features: {
+        feature: components['schemas']['Feature'];
+        enabled: boolean;
+        updatedAt: string | null;
+      }[];
     };
     /**
      * @description draft: admins and judges only. released: everyone sees it; teams submit and judges score. closed: everyone sees it; submissions and scores are locked.

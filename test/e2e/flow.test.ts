@@ -1,7 +1,10 @@
 /**
  * The whole event, through the devkit only, against a running eventkit-core:
- *   EVENTKIT_API_URL=http://localhost:4000 EVENTKIT_PLATFORM_KEY=... npm run test:e2e
- * Every account is fresh; run it against a development database.
+ *   EVENTKIT_API_URL=http://localhost:4000 EVENTKIT_PLATFORM_KEY=... \
+ *   EVENTKIT_ADMIN_EMAIL=... EVENTKIT_ADMIN_PASSWORD=... npm run test:e2e
+ * Every account is fresh; run it against a development database. The platform
+ * admin (made with `npm run admin:create` in eventkit-core) switches the
+ * event's features on, as events can't since core 0.25.0.
  */
 import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
@@ -25,6 +28,29 @@ const fails = (p: Promise<unknown>) =>
     () => null,
     (e: unknown) => e,
   );
+
+/** The eventKit platform admin switches features on (eventkit-admin does this). */
+async function switchOn(eventId: string, features: string[]) {
+  const email = process.env.EVENTKIT_ADMIN_EMAIL;
+  const password = process.env.EVENTKIT_ADMIN_PASSWORD;
+  if (!email || !password) throw new Error('Set EVENTKIT_ADMIN_EMAIL and EVENTKIT_ADMIN_PASSWORD.');
+  const headers = { 'Content-Type': 'application/json', 'X-Api-Key': platformKey };
+  const login = await fetch(`${apiUrl}/v1/platform/auth/login`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ email, password }),
+  });
+  if (!login.ok) throw new Error(`platform admin login failed: ${await login.text()}`);
+  const { token } = (await login.json()) as { token: { accessToken: string } };
+  for (const feature of features) {
+    const res = await fetch(`${apiUrl}/v1/platform/events/${eventId}/features/${feature}`, {
+      method: 'PUT',
+      headers: { ...headers, Authorization: `Bearer ${token.accessToken}` },
+      body: JSON.stringify({ enabled: true }),
+    });
+    if (!res.ok) throw new Error(`switching ${feature} on failed: ${await res.text()}`);
+  }
+}
 
 /** A browser on the club's portal: its own session, the event's key. */
 const portal = (apiKey: string, eventId: string): EventKit =>
@@ -54,7 +80,7 @@ describe('an event, end to end through the devkit', () => {
     });
     const ev = console_.event(event.id);
     await ev.setPortal({ url: PORTAL, paths: { me: '/p/{token}' } });
-    await ev.billing.purchase(['registration', 'scanning']);
+    await switchOn(event.id, ['registration', 'scanning']);
     const { key: clubKey } = await ev.apiKeys.create('Club site');
     const regLink = await ev.createRegistrationLink({ label: 'site' });
     expect(regLink.url).toBe(`${PORTAL}/register/${regLink.token}`);
@@ -82,7 +108,7 @@ describe('an event, end to end through the devkit', () => {
       (typeof registered.members)[0],
       (typeof registered.members)[0],
     ];
-    expect(asha.participantCode).toMatch(/^[A-Z0-9]+-\d{4}$/);
+    expect(asha.participantCode).toMatch(/^[A-Z0-9]+-[A-Za-z0-9]{6}$/);
     expect(asha.link!.url).toBe(`${PORTAL}/p/${asha.link!.token}`);
 
     // Each opens their personal link on their own phone.
