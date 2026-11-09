@@ -1827,6 +1827,125 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/portal/me/leaderboards': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Public saved leaderboards (per track, top teams, overall…), from the event day, once your team is confirmed */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['SavedLeaderboard'][];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/portal/me/leaderboards/{leaderboardId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** A public saved leaderboard's ranking (released and closed rounds only) */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          leaderboardId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['LeaderboardResults'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/portal/me/leaderboard': {
     parameters: {
       query?: never;
@@ -1938,6 +2057,95 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/portal/me/submissions/{submissionId}/responses': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Send your team's response (any confirmed member). One per team unless the form allows more (ALREADY_SUBMITTED); a response is not edited, the organisers delete it instead. Only while the form is open (ROUND_CLOSED, SUBMISSION_CLOSED), from the event day, once your team is confirmed (NOT_CONFIRMED before). After the deadline it is accepted and marked late. */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          submissionId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            answers: components['schemas']['AnswersBodyInput'];
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['PortalSubmission'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/portal/me/submissions/{submissionId}/entry': {
     parameters: {
       query?: never;
@@ -1946,7 +2154,7 @@ export interface paths {
       cookie?: never;
     };
     get?: never;
-    /** Save your team's entry (any active member; replaces earlier answers). Only while the round is released, from the event day, once your team is confirmed (NOT_CONFIRMED before). After the deadline it is saved and marked late. */
+    /** Deprecated: use POST /responses. Send your team's response (any confirmed member). One per team unless the form allows more (ALREADY_SUBMITTED); a response is not edited, the organisers delete it instead. Only while the form is open (ROUND_CLOSED, SUBMISSION_CLOSED), from the event day, once your team is confirmed (NOT_CONFIRMED before). After the deadline it is accepted and marked late. */
     put: {
       parameters: {
         query?: never;
@@ -4754,6 +4962,100 @@ export interface paths {
         };
       };
     };
+    trace?: never;
+  };
+  '/v1/events/{eventId}/members/{userId}/judging': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Turn judging on or off for an admin (yourself, the owner or a co-admin). Admins score teams only while it is on, and stay admins */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          userId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            canJudge: boolean;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              /** Format: uuid */
+              userId: string;
+              canJudge: boolean;
+            };
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   '/v1/events/{eventId}/teams': {
@@ -9102,7 +9404,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Teams to judge (at least one member checked in), with your own scores in the round */
+    /** Teams to judge (at least one member checked in), with your own scores and comment in the round. Judges, and admins who turned on judging (JUDGING_NOT_ENABLED) */
     get: {
       parameters: {
         query?: {
@@ -9171,7 +9473,7 @@ export interface paths {
       cookie?: never;
     };
     get?: never;
-    /** Save your scores for a team (each 0 to the criterion's maximum). Judges and admins; an admin scores as one more judge. */
+    /** Save your scores for a team (each 0 to the criterion's maximum) and your overall comment. Judges, and admins who turned on judging; such an admin scores as one more judge. Not on a closed round (ROUND_CLOSED) */
     put: {
       parameters: {
         query?: {
@@ -9192,8 +9494,9 @@ export interface paths {
               /** Format: uuid */
               criterionId: string;
               value: number;
-              comment?: string | null;
             }[];
+            /** @description Your overall comment on the team. Null or blank clears it; leave it out to keep it */
+            comment?: string | null;
           };
         };
       };
@@ -9204,7 +9507,7 @@ export interface paths {
             [name: string]: unknown;
           };
           content: {
-            'application/json': components['schemas']['Score'][];
+            'application/json': components['schemas']['SavedScores'];
           };
         };
         /** @description Default Response */
@@ -9261,6 +9564,83 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/events/{eventId}/judging/teams/{teamId}/scores/{judgeId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Remove one judge's scores and comment on a team in a round (admins), e.g. so they score it again. Not on a closed round (ROUND_CLOSED): reopen it first */
+    delete: {
+      parameters: {
+        query?: {
+          /** @description The round. Default: the latest released or closed round (for admins and judges, the first round until one is released). */
+          roundId?: string;
+        };
+        header?: never;
+        path: {
+          eventId: string;
+          teamId: string;
+          judgeId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/events/{eventId}/judging/teams/{teamId}/breakdown': {
     parameters: {
       query?: never;
@@ -9268,7 +9648,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Who scored a team in a round, criterion by criterion, with comments. Admins any time; judges once the round is closed (BREAKDOWN_NOT_CLOSED before), so scoring stays independent */
+    /** Who scored a team in a round, criterion by criterion, with each judge's comment. Admins any time; judges once the round is closed (BREAKDOWN_NOT_CLOSED before), so scoring stays independent */
     get: {
       parameters: {
         query?: {
@@ -9341,8 +9721,9 @@ export interface paths {
     get: {
       parameters: {
         query?: {
-          /** @description The round. Default: the latest released or closed round (for admins and judges, the first round until one is released). */
           roundId?: string;
+          /** @description Rank by normalisedTotal (lenient and harsh judges evened out) */
+          normalise?: 'true' | 'false';
         };
         header?: never;
         path: {
@@ -9882,6 +10263,719 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/events/{eventId}/tracks': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** The tracks teams compete in, in order */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Track'][];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    /** Add a track (admins) */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            name: string;
+            position?: number;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Track'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/tracks/{trackId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete a track (admins): its teams lose their track, and its leaderboards rank every team */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          trackId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    /** Rename or reorder a track (admins) */
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          trackId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            name?: string;
+            position?: number;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Track'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    trace?: never;
+  };
+  '/v1/events/{eventId}/teams/{teamId}/track': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Put a team in a track, or none (admins). A team is in one track at most */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          teamId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            trackId: string | null;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              /** Format: uuid */
+              teamId: string;
+              trackId: string | null;
+            };
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/leaderboards': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Saved leaderboards you can see: admins every one, judges theirs and public ones, other staff public ones */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['SavedLeaderboard'][];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    /** Set up a leaderboard over one or more rounds (admins): how they add up, which track, how many teams, and who sees it */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            name: string;
+            /** @enum {string} */
+            method?: 'sum' | 'percent' | 'average';
+            normalise?: boolean;
+            trackId?: string | null;
+            topN?: number | null;
+            /** @enum {string} */
+            visibility?: 'admins' | 'judges' | 'public';
+            position?: number;
+            rounds: {
+              /** Format: uuid */
+              roundId: string;
+              weight?: number;
+            }[];
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['SavedLeaderboard'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/leaderboards/{leaderboardId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete a saved leaderboard (admins); scores stay */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          leaderboardId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    /** Change a saved leaderboard (admins); rounds, when given, replace the list */
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          leaderboardId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          'application/json': {
+            name?: string;
+            /** @enum {string} */
+            method?: 'sum' | 'percent' | 'average';
+            normalise?: boolean;
+            trackId?: string | null;
+            topN?: number | null;
+            /** @enum {string} */
+            visibility?: 'admins' | 'judges' | 'public';
+            position?: number;
+            rounds?: {
+              /** Format: uuid */
+              roundId: string;
+              weight?: number;
+            }[];
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['SavedLeaderboard'];
+          };
+        };
+        /** @description Default Response */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    trace?: never;
+  };
+  '/v1/events/{eventId}/leaderboards/{leaderboardId}/results': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** A saved leaderboard's ranking, for those who may see it. Only admins and judges count draft rounds */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          leaderboardId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['LeaderboardResults'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/events/{eventId}/submissions': {
     parameters: {
       query?: never;
@@ -9960,6 +11054,10 @@ export interface paths {
             position?: number;
             /** @description Saves after it are still accepted, and marked late. Null: no deadline */
             deadline?: string | null;
+            /** @description Let a team send another response after its first. Default false */
+            allowMultiple?: boolean;
+            /** @description No saves from then on, even while the round is released (now: close it now). Null: open while the round is */
+            closesAt?: string | null;
             /** Format: uuid */
             roundId: string;
             fields: {
@@ -10136,6 +11234,10 @@ export interface paths {
             position?: number;
             /** @description Saves after it are still accepted, and marked late. Null: no deadline */
             deadline?: string | null;
+            /** @description Let a team send another response after its first. Default false */
+            allowMultiple?: boolean;
+            /** @description No saves from then on, even while the round is released (now: close it now). Null: open while the round is */
+            closesAt?: string | null;
           };
         };
       };
@@ -10262,7 +11364,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Every team's entry, by team name */
+    /** Every team's responses, by team name, each team's newest first */
     get: {
       parameters: {
         query?: never;
@@ -10316,6 +11418,137 @@ export interface paths {
     put?: never;
     post?: never;
     delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/submissions/{submissionId}/status': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Who has submitted and who hasn't: the round's confirmed teams (its team list, or every team), each by name */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          submissionId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['SubmissionStatus'];
+          };
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/events/{eventId}/submissions/{submissionId}/entries/{entryId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete a response (admins), e.g. one sent with wrong details, so the team can send it again */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          eventId: string;
+          submissionId: string;
+          entryId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Default Response */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+        /** @description Default Response */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['Error'];
+          };
+        };
+      };
+    };
     options?: never;
     head?: never;
     patch?: never;
@@ -12627,6 +13860,8 @@ export interface components {
       role: components['schemas']['RoleInput'];
       /** @description The owner; co-admins have role admin too */
       isOwner: boolean;
+      /** @description Whether you score teams: judges always, admins once judging is turned on */
+      canJudge: boolean;
     };
     /** @enum {string} */
     EmailKindInput: 'registration';
@@ -12708,6 +13943,8 @@ export interface components {
       phone: string | null;
       role: components['schemas']['RoleInput'];
       isOwner: boolean;
+      /** @description Scores teams: judges always, admins once judging is turned on */
+      canJudge: boolean;
       /** Format: date-time */
       joinedAt: string;
     };
@@ -12864,6 +14101,8 @@ export interface components {
       name: string;
       /** Format: uuid */
       leaderRegistrationId: string;
+      /** @description The track the team competes in */
+      trackId: string | null;
       /** Format: date-time */
       createdAt: string;
       /** @description The leader's registration status */
@@ -13025,6 +14264,148 @@ export interface components {
       status: components['schemas']['RegistrationStatusInput'];
       name: string;
     };
+    /**
+     * @description draft: admins and judges only. released: everyone sees it; teams submit and judges score. closed: everyone sees it; submissions and scores are locked.
+     * @enum {string}
+     */
+    RoundPhaseInput: 'draft' | 'released' | 'closed';
+    /**
+     * @description normal, or elimination: when it ends, the admin picks the teams that go on to a later round (PUT that round's /teams).
+     * @enum {string}
+     */
+    RoundKindInput: 'normal' | 'elimination';
+    RoundInput: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      position: number;
+      phase: components['schemas']['RoundPhaseInput'];
+      kind: components['schemas']['RoundKindInput'];
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    RoundRefInput: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      phase: components['schemas']['RoundPhaseInput'];
+    };
+    CriterionInput: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      roundId: string;
+      name: string;
+      description: string;
+      maxScore: number;
+      position: number;
+    };
+    ScoreInput: {
+      /** Format: uuid */
+      criterionId: string;
+      value: number;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    JudgingTeamInput: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      members: string[];
+      /** @description Only your own scores */
+      myScores: components['schemas']['ScoreInput'][];
+      /** @description Your one overall comment on the team in this round */
+      myComment: string | null;
+    };
+    SavedScoresInput: {
+      scores: components['schemas']['ScoreInput'][];
+      /** @description Your one overall comment on the team in this round */
+      comment: string | null;
+    };
+    LeaderboardInput: {
+      visibleToEveryone: boolean;
+      /** @description The round ranked; null when no round is shown yet */
+      round: components['schemas']['RoundRefInput'] | null;
+      entries: {
+        rank: number;
+        team: {
+          /** Format: uuid */
+          id: string;
+          name: string;
+        };
+        /** @description Sum over criteria of the average judge score */
+        total: number;
+        /** @description The total with lenient and harsh judges evened out: each judge's totals as z-scores against their own average, back on the 0..maxTotal scale, averaged */
+        normalisedTotal: number;
+        maxTotal: number;
+        judges: number;
+        criteria: {
+          /** Format: uuid */
+          criterionId: string;
+          average: number | null;
+        }[];
+      }[];
+    };
+    TrackInput: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      position: number;
+      teamCount: number;
+    };
+    SavedLeaderboardInput: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      /**
+       * @description sum: weighted totals added up. percent: each round as a % of its maximum, weighted average. average: weighted average of the totals
+       * @enum {string}
+       */
+      method: 'sum' | 'percent' | 'average';
+      /** @description Rank by normalised totals (lenient and harsh judges evened out) */
+      normalise: boolean;
+      track: {
+        /** Format: uuid */
+        id: string;
+        name: string;
+      } | null;
+      /** @description Show only the first N teams; null for all */
+      topN: number | null;
+      /**
+       * @description admins, judges (and admins), or public (everyone in the event)
+       * @enum {string}
+       */
+      visibility: 'admins' | 'judges' | 'public';
+      position: number;
+      rounds: {
+        round: components['schemas']['RoundRefInput'];
+        weight: number;
+      }[];
+    };
+    LeaderboardResultsInput: {
+      leaderboard: components['schemas']['SavedLeaderboardInput'];
+      entries: {
+        rank: number;
+        team: {
+          /** Format: uuid */
+          id: string;
+          name: string;
+        };
+        total: number;
+        maxTotal: number;
+        rounds: {
+          /** Format: uuid */
+          roundId: string;
+          /** @description Null: not in that round */
+          total: number | null;
+          maxTotal: number;
+        }[];
+        /** @description The latest counted round the team took part in */
+        lastRoundId: string | null;
+      }[];
+    };
     ChannelInput: {
       /** Format: uuid */
       id: string;
@@ -13135,82 +14516,6 @@ export interface components {
         position: number;
       } | null;
     };
-    /**
-     * @description draft: admins and judges only. released: everyone sees it; teams submit. closed: everyone sees it; submissions are locked.
-     * @enum {string}
-     */
-    RoundPhaseInput: 'draft' | 'released' | 'closed';
-    /**
-     * @description normal, or elimination: when it ends, the admin picks the teams that go on to a later round (PUT that round's /teams).
-     * @enum {string}
-     */
-    RoundKindInput: 'normal' | 'elimination';
-    RoundInput: {
-      /** Format: uuid */
-      id: string;
-      name: string;
-      position: number;
-      phase: components['schemas']['RoundPhaseInput'];
-      kind: components['schemas']['RoundKindInput'];
-      /** Format: date-time */
-      createdAt: string;
-      /** Format: date-time */
-      updatedAt: string;
-    };
-    RoundRefInput: {
-      /** Format: uuid */
-      id: string;
-      name: string;
-      phase: components['schemas']['RoundPhaseInput'];
-    };
-    CriterionInput: {
-      /** Format: uuid */
-      id: string;
-      /** Format: uuid */
-      roundId: string;
-      name: string;
-      description: string;
-      maxScore: number;
-      position: number;
-    };
-    ScoreInput: {
-      /** Format: uuid */
-      criterionId: string;
-      value: number;
-      comment: string | null;
-      /** Format: date-time */
-      updatedAt: string;
-    };
-    JudgingTeamInput: {
-      /** Format: uuid */
-      id: string;
-      name: string;
-      members: string[];
-      /** @description Only your own scores */
-      myScores: components['schemas']['ScoreInput'][];
-    };
-    LeaderboardInput: {
-      visibleToEveryone: boolean;
-      /** @description The round ranked; null when no round is shown yet */
-      round: components['schemas']['RoundRefInput'] | null;
-      entries: {
-        rank: number;
-        team: {
-          /** Format: uuid */
-          id: string;
-          name: string;
-        };
-        /** @description Sum over criteria of the average judge score */
-        total: number;
-        maxTotal: number;
-        judges: number;
-        criteria: {
-          /** Format: uuid */
-          criterionId: string;
-          average: number | null;
-        }[];
-      }[];
-    };
     SubmissionFieldInput: {
       /** Format: uuid */
       id: string;
@@ -13249,8 +14554,12 @@ export interface components {
       position: number;
       /** @description Saves after it are still accepted, and marked late */
       deadline: string | null;
+      /** @description No saves from then on, even while the round is released */
+      closesAt: string | null;
+      /** @description Whether a team may send another response after its first */
+      allowMultiple: boolean;
       fields: components['schemas']['SubmissionFieldInput'][];
-      /** @description Teams that have submitted */
+      /** @description Responses sent (a team may send several) */
       entryCount: number;
       /** Format: date-time */
       createdAt: string;
@@ -13268,22 +14577,22 @@ export interface components {
         name: string;
       };
       answers: components['schemas']['AnswersInput'];
-      /** @description The member who saved it last */
+      /** @description The member who sent it */
       submittedBy: {
         /** Format: uuid */
         registrationId: string;
         name: string;
       } | null;
-      /** @description Last saved after the deadline */
+      /** @description Sent after the deadline */
       late: boolean;
       /**
        * Format: date-time
-       * @description First submitted
+       * @description Sent
        */
       createdAt: string;
       /**
        * Format: date-time
-       * @description Last saved
+       * @description Same as createdAt: responses are not edited
        */
       updatedAt: string;
     };
@@ -13296,13 +14605,42 @@ export interface components {
       position: number;
       /** @description Saves after it are still accepted, and marked late */
       deadline: string | null;
+      /** @description No saves from then on */
+      closesAt: string | null;
+      /** @description Whether your team may send more than one */
+      allowMultiple: boolean;
       fields: components['schemas']['SubmissionFieldInput'][];
-      /** @description Whether your team can still save (round released, and your team is in it) */
+      /** @description Whether your team can still save (round released, form's close time not reached, and your team is in it) */
       open: boolean;
       /** @description Your team did not go on to this round (after an elimination round) */
       eliminated: boolean;
-      /** @description Your team's entry, if any */
+      /** @description Whether your team can send a response now (open, and none sent yet unless it allows more) */
+      canSubmit: boolean;
+      /** @description Your team's latest response, if any */
       entry: components['schemas']['SubmissionEntryInput'] | null;
+      /** @description Every response your team sent, newest first */
+      responses: components['schemas']['SubmissionEntryInput'][];
+    };
+    SubmissionStatusInput: {
+      submitted: {
+        team: {
+          /** Format: uuid */
+          id: string;
+          name: string;
+        };
+        responses: number;
+        /**
+         * Format: date-time
+         * @description Their latest response
+         */
+        lastAt: string;
+      }[];
+      /** @description Confirmed teams in the round with no response yet */
+      pending: {
+        /** Format: uuid */
+        id: string;
+        name: string;
+      }[];
     };
     UploadTicketInput: {
       /** @description Pass this back to the API once the upload is done */
@@ -13652,6 +14990,8 @@ export interface components {
       user: components['schemas']['UserInput'];
       /** @enum {string} */
       role: 'admin' | 'volunteer' | 'judge';
+      /** @description Whether they score teams: judges always, admins once judging is turned on */
+      canJudge: boolean;
       token: components['schemas']['AccessTokenInput'];
     };
     ReleaseResultInput: {
@@ -13712,12 +15052,13 @@ export interface components {
         total: number;
         /** Format: date-time */
         updatedAt: string;
+        /** @description Their overall comment */
+        comment: string | null;
         scores: {
           /** Format: uuid */
           criterionId: string;
           /** @description Null: not scored */
           value: number | null;
-          comment: string | null;
         }[];
       }[];
     };
@@ -13875,6 +15216,8 @@ export interface components {
       role: components['schemas']['Role'];
       /** @description The owner; co-admins have role admin too */
       isOwner: boolean;
+      /** @description Whether you score teams: judges always, admins once judging is turned on */
+      canJudge: boolean;
     };
     /** @enum {string} */
     EmailKind: 'registration';
@@ -13956,6 +15299,8 @@ export interface components {
       phone: string | null;
       role: components['schemas']['Role'];
       isOwner: boolean;
+      /** @description Scores teams: judges always, admins once judging is turned on */
+      canJudge: boolean;
       /** Format: date-time */
       joinedAt: string;
     };
@@ -14113,6 +15458,8 @@ export interface components {
       name: string;
       /** Format: uuid */
       leaderRegistrationId: string;
+      /** @description The track the team competes in */
+      trackId: string | null;
       /** Format: date-time */
       createdAt: string;
       /** @description The leader's registration status */
@@ -14274,6 +15621,148 @@ export interface components {
       status: components['schemas']['RegistrationStatus'];
       name: string;
     };
+    /**
+     * @description draft: admins and judges only. released: everyone sees it; teams submit and judges score. closed: everyone sees it; submissions and scores are locked.
+     * @enum {string}
+     */
+    RoundPhase: 'draft' | 'released' | 'closed';
+    /**
+     * @description normal, or elimination: when it ends, the admin picks the teams that go on to a later round (PUT that round's /teams).
+     * @enum {string}
+     */
+    RoundKind: 'normal' | 'elimination';
+    Round: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      position: number;
+      phase: components['schemas']['RoundPhase'];
+      kind: components['schemas']['RoundKind'];
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    RoundRef: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      phase: components['schemas']['RoundPhase'];
+    };
+    Criterion: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      roundId: string;
+      name: string;
+      description: string;
+      maxScore: number;
+      position: number;
+    };
+    Score: {
+      /** Format: uuid */
+      criterionId: string;
+      value: number;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    JudgingTeam: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      members: string[];
+      /** @description Only your own scores */
+      myScores: components['schemas']['Score'][];
+      /** @description Your one overall comment on the team in this round */
+      myComment: string | null;
+    };
+    SavedScores: {
+      scores: components['schemas']['Score'][];
+      /** @description Your one overall comment on the team in this round */
+      comment: string | null;
+    };
+    Leaderboard: {
+      visibleToEveryone: boolean;
+      /** @description The round ranked; null when no round is shown yet */
+      round: components['schemas']['RoundRef'] | null;
+      entries: {
+        rank: number;
+        team: {
+          /** Format: uuid */
+          id: string;
+          name: string;
+        };
+        /** @description Sum over criteria of the average judge score */
+        total: number;
+        /** @description The total with lenient and harsh judges evened out: each judge's totals as z-scores against their own average, back on the 0..maxTotal scale, averaged */
+        normalisedTotal: number;
+        maxTotal: number;
+        judges: number;
+        criteria: {
+          /** Format: uuid */
+          criterionId: string;
+          average: number | null;
+        }[];
+      }[];
+    };
+    Track: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      position: number;
+      teamCount: number;
+    };
+    SavedLeaderboard: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      /**
+       * @description sum: weighted totals added up. percent: each round as a % of its maximum, weighted average. average: weighted average of the totals
+       * @enum {string}
+       */
+      method: 'sum' | 'percent' | 'average';
+      /** @description Rank by normalised totals (lenient and harsh judges evened out) */
+      normalise: boolean;
+      track: {
+        /** Format: uuid */
+        id: string;
+        name: string;
+      } | null;
+      /** @description Show only the first N teams; null for all */
+      topN: number | null;
+      /**
+       * @description admins, judges (and admins), or public (everyone in the event)
+       * @enum {string}
+       */
+      visibility: 'admins' | 'judges' | 'public';
+      position: number;
+      rounds: {
+        round: components['schemas']['RoundRef'];
+        weight: number;
+      }[];
+    };
+    LeaderboardResults: {
+      leaderboard: components['schemas']['SavedLeaderboard'];
+      entries: {
+        rank: number;
+        team: {
+          /** Format: uuid */
+          id: string;
+          name: string;
+        };
+        total: number;
+        maxTotal: number;
+        rounds: {
+          /** Format: uuid */
+          roundId: string;
+          /** @description Null: not in that round */
+          total: number | null;
+          maxTotal: number;
+        }[];
+        /** @description The latest counted round the team took part in */
+        lastRoundId: string | null;
+      }[];
+    };
     Channel: {
       /** Format: uuid */
       id: string;
@@ -14384,82 +15873,6 @@ export interface components {
         position: number;
       } | null;
     };
-    /**
-     * @description draft: admins and judges only. released: everyone sees it; teams submit. closed: everyone sees it; submissions are locked.
-     * @enum {string}
-     */
-    RoundPhase: 'draft' | 'released' | 'closed';
-    /**
-     * @description normal, or elimination: when it ends, the admin picks the teams that go on to a later round (PUT that round's /teams).
-     * @enum {string}
-     */
-    RoundKind: 'normal' | 'elimination';
-    Round: {
-      /** Format: uuid */
-      id: string;
-      name: string;
-      position: number;
-      phase: components['schemas']['RoundPhase'];
-      kind: components['schemas']['RoundKind'];
-      /** Format: date-time */
-      createdAt: string;
-      /** Format: date-time */
-      updatedAt: string;
-    };
-    RoundRef: {
-      /** Format: uuid */
-      id: string;
-      name: string;
-      phase: components['schemas']['RoundPhase'];
-    };
-    Criterion: {
-      /** Format: uuid */
-      id: string;
-      /** Format: uuid */
-      roundId: string;
-      name: string;
-      description: string;
-      maxScore: number;
-      position: number;
-    };
-    Score: {
-      /** Format: uuid */
-      criterionId: string;
-      value: number;
-      comment: string | null;
-      /** Format: date-time */
-      updatedAt: string;
-    };
-    JudgingTeam: {
-      /** Format: uuid */
-      id: string;
-      name: string;
-      members: string[];
-      /** @description Only your own scores */
-      myScores: components['schemas']['Score'][];
-    };
-    Leaderboard: {
-      visibleToEveryone: boolean;
-      /** @description The round ranked; null when no round is shown yet */
-      round: components['schemas']['RoundRef'] | null;
-      entries: {
-        rank: number;
-        team: {
-          /** Format: uuid */
-          id: string;
-          name: string;
-        };
-        /** @description Sum over criteria of the average judge score */
-        total: number;
-        maxTotal: number;
-        judges: number;
-        criteria: {
-          /** Format: uuid */
-          criterionId: string;
-          average: number | null;
-        }[];
-      }[];
-    };
     SubmissionField: {
       /** Format: uuid */
       id: string;
@@ -14498,8 +15911,12 @@ export interface components {
       position: number;
       /** @description Saves after it are still accepted, and marked late */
       deadline: string | null;
+      /** @description No saves from then on, even while the round is released */
+      closesAt: string | null;
+      /** @description Whether a team may send another response after its first */
+      allowMultiple: boolean;
       fields: components['schemas']['SubmissionField'][];
-      /** @description Teams that have submitted */
+      /** @description Responses sent (a team may send several) */
       entryCount: number;
       /** Format: date-time */
       createdAt: string;
@@ -14517,22 +15934,22 @@ export interface components {
         name: string;
       };
       answers: components['schemas']['Answers'];
-      /** @description The member who saved it last */
+      /** @description The member who sent it */
       submittedBy: {
         /** Format: uuid */
         registrationId: string;
         name: string;
       } | null;
-      /** @description Last saved after the deadline */
+      /** @description Sent after the deadline */
       late: boolean;
       /**
        * Format: date-time
-       * @description First submitted
+       * @description Sent
        */
       createdAt: string;
       /**
        * Format: date-time
-       * @description Last saved
+       * @description Same as createdAt: responses are not edited
        */
       updatedAt: string;
     };
@@ -14545,13 +15962,42 @@ export interface components {
       position: number;
       /** @description Saves after it are still accepted, and marked late */
       deadline: string | null;
+      /** @description No saves from then on */
+      closesAt: string | null;
+      /** @description Whether your team may send more than one */
+      allowMultiple: boolean;
       fields: components['schemas']['SubmissionField'][];
-      /** @description Whether your team can still save (round released, and your team is in it) */
+      /** @description Whether your team can still save (round released, form's close time not reached, and your team is in it) */
       open: boolean;
       /** @description Your team did not go on to this round (after an elimination round) */
       eliminated: boolean;
-      /** @description Your team's entry, if any */
+      /** @description Whether your team can send a response now (open, and none sent yet unless it allows more) */
+      canSubmit: boolean;
+      /** @description Your team's latest response, if any */
       entry: components['schemas']['SubmissionEntry'] | null;
+      /** @description Every response your team sent, newest first */
+      responses: components['schemas']['SubmissionEntry'][];
+    };
+    SubmissionStatus: {
+      submitted: {
+        team: {
+          /** Format: uuid */
+          id: string;
+          name: string;
+        };
+        responses: number;
+        /**
+         * Format: date-time
+         * @description Their latest response
+         */
+        lastAt: string;
+      }[];
+      /** @description Confirmed teams in the round with no response yet */
+      pending: {
+        /** Format: uuid */
+        id: string;
+        name: string;
+      }[];
     };
     UploadTicket: {
       /** @description Pass this back to the API once the upload is done */
@@ -14901,6 +16347,8 @@ export interface components {
       user: components['schemas']['User'];
       /** @enum {string} */
       role: 'admin' | 'volunteer' | 'judge';
+      /** @description Whether they score teams: judges always, admins once judging is turned on */
+      canJudge: boolean;
       token: components['schemas']['AccessToken'];
     };
     ReleaseResult: {
@@ -14961,12 +16409,13 @@ export interface components {
         total: number;
         /** Format: date-time */
         updatedAt: string;
+        /** @description Their overall comment */
+        comment: string | null;
         scores: {
           /** Format: uuid */
           criterionId: string;
           /** @description Null: not scored */
           value: number | null;
-          comment: string | null;
         }[];
       }[];
     };

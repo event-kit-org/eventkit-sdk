@@ -143,10 +143,34 @@ export function portalApi(t: Transport, session: Session) {
           params: { query: { ...(roundId ? { roundId } : {}) } as never },
         }),
       ),
+    /** Public saved leaderboards (per track, top teams, overall…). */
+    leaderboards: {
+      list: () => call(api.GET('/v1/portal/me/leaderboards')),
+      results: (leaderboardId: string) =>
+        call(
+          api.GET('/v1/portal/me/leaderboards/{leaderboardId}', {
+            params: { path: { leaderboardId } },
+          }),
+        ),
+    },
     submissions: {
-      /** Each round's forms: `{round, fields, open, entry}`. */
+      /** Each round's forms: `{round, fields, open, canSubmit, entry, responses}`. */
       list: () => call(api.GET('/v1/portal/me/submissions')),
-      /** Save your team's answers (while the submission is open). */
+      /**
+       * Send your team's response (while the form is open). One per team unless the
+       * form allows more (ALREADY_SUBMITTED); responses aren't edited afterwards.
+       */
+      sendResponse: (
+        submissionId: string,
+        answers: Body<`${Me}/submissions/{submissionId}/responses`, 'post'>['answers'],
+      ) =>
+        call(
+          api.POST('/v1/portal/me/submissions/{submissionId}/responses', {
+            ...at({ submissionId }),
+            body: { answers },
+          }),
+        ),
+      /** @deprecated Use sendResponse: this now sends a response too. */
       saveEntry: (
         submissionId: string,
         answers: Body<`${Me}/submissions/{submissionId}/entry`, 'put'>['answers'],

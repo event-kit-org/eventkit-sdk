@@ -122,6 +122,21 @@ export const useSubmissionEntries = (submissionId: string, o: EventOpt = {}) =>
 export const useLeaderboard = (roundId?: string, o: EventOpt = {}) =>
   useEventQuery('leaderboard', (e) => e.leaderboard(roundId), o, [roundId]);
 /** The notification feed, refreshed every 30 s. */
+/** Saved leaderboards the caller may see. */
+export const useSavedLeaderboards = (o: EventOpt = {}) =>
+  useEventQuery('leaderboards', (e) => e.leaderboards.list(), o);
+/** A saved leaderboard's ranking; null for none. */
+export const useSavedLeaderboardResults = (leaderboardId: string | null, o: EventOpt = {}) =>
+  useEventQuery(
+    'leaderboard-results',
+    (e) => e.leaderboards.results(leaderboardId!),
+    {
+      enabled: leaderboardId !== null,
+      refetchInterval: 30_000,
+      ...o,
+    },
+    [leaderboardId],
+  );
 export const useNotifications = (o: EventOpt & { refetchIntervalMs?: number } = {}) =>
   useEventQuery('notifications', (e) => e.notifications.feed(), {
     refetchInterval: o.refetchIntervalMs ?? 30_000,
@@ -213,6 +228,24 @@ export function useMyLeaderboard(roundId?: string) {
   return useQuery({
     queryKey: [...portalKeys.of('leaderboard'), roundId ?? null],
     queryFn: () => ek.portal.me.leaderboard(roundId),
+    refetchInterval: 30_000,
+  });
+}
+/** Public saved leaderboards (per track, top teams, overall…). */
+export function useMyLeaderboards() {
+  const ek = useEventKit();
+  return useQuery({
+    queryKey: portalKeys.of('leaderboards'),
+    queryFn: () => ek.portal.me.leaderboards.list(),
+  });
+}
+/** A public saved leaderboard's ranking; null for none. */
+export function useMyLeaderboardResults(leaderboardId: string | null) {
+  const ek = useEventKit();
+  return useQuery({
+    queryKey: [...portalKeys.of('leaderboard-results'), leaderboardId],
+    queryFn: () => ek.portal.me.leaderboards.results(leaderboardId!),
+    enabled: leaderboardId !== null,
     refetchInterval: 30_000,
   });
 }

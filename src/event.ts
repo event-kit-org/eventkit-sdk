@@ -189,6 +189,14 @@ export function eventApi(t: Transport, eventId: string) {
         call(
           api.PATCH('/v1/events/{eventId}/members/{userId}', { ...at({ userId }), body: { role } }),
         ),
+      /** Turn judging on or off for an admin (any admin, for themselves or another). */
+      setCanJudge: (userId: string, canJudge: boolean) =>
+        call(
+          api.PUT('/v1/events/{eventId}/members/{userId}/judging', {
+            ...at({ userId }),
+            body: { canJudge },
+          }),
+        ),
       /**
        * Remove someone: admins remove staff, the owner removes organisers, and
        * anyone but the owner can remove themselves (leave the event).
@@ -723,10 +731,23 @@ export function eventApi(t: Transport, eventId: string) {
             at({ submissionId }),
           ),
         ),
-      /** What teams handed in. */
+      /** Every response teams sent, by team, each team's newest first. */
       entries: (submissionId: string) =>
         call(
           api.GET('/v1/events/{eventId}/submissions/{submissionId}/entries', at({ submissionId })),
+        ),
+      /** Admin: delete a response so the team can send it again. */
+      removeEntry: (submissionId: string, entryId: string) =>
+        call(
+          api.DELETE(
+            '/v1/events/{eventId}/submissions/{submissionId}/entries/{entryId}',
+            at({ submissionId, entryId }),
+          ),
+        ),
+      /** Who has submitted and who hasn't (admins and judges). */
+      status: (submissionId: string) =>
+        call(
+          api.GET('/v1/events/{eventId}/submissions/{submissionId}/status', at({ submissionId })),
         ),
       fields: {
         add: (
@@ -788,10 +809,15 @@ export function eventApi(t: Transport, eventId: string) {
             params: { path: { eventId }, query: { ...(roundId ? { roundId } : {}) } as never },
           }),
         ),
-      /** Each score from 0 to the criterion's maximum. Judges and admins. */
+      /**
+       * Each score from 0 to the criterion's maximum, plus your overall comment on
+       * the team (a string sets it, null clears it, undefined keeps it). Judges, and
+       * admins who turned on judging. Refused on a closed round (ROUND_CLOSED).
+       */
       saveScores: (
         teamId: string,
-        scores: { criterionId: string; value: number; comment?: string | null }[],
+        scores: { criterionId: string; value: number }[],
+        comment?: string | null,
         roundId?: string,
       ) =>
         call(
@@ -800,11 +826,21 @@ export function eventApi(t: Transport, eventId: string) {
               path: { eventId, teamId },
               query: { ...(roundId ? { roundId } : {}) } as never,
             },
-            body: { scores },
+            body: { scores, ...(comment === undefined ? {} : { comment }) },
+          }),
+        ),
+      /** Admin: remove one judge's scores and comment on a team (not on a closed round). */
+      removeScores: (teamId: string, judgeId: string, roundId?: string) =>
+        call(
+          api.DELETE('/v1/events/{eventId}/judging/teams/{teamId}/scores/{judgeId}', {
+            params: {
+              path: { eventId, teamId, judgeId },
+              query: { ...(roundId ? { roundId } : {}) } as never,
+            },
           }),
         ),
     },
-    /** Admin: who scored a team in a round, criterion by criterion, with comments. */
+    /** Who scored a team in a round, criterion by criterion, with each judge's comment. */
     scoreBreakdown: (teamId: string, roundId?: string) =>
       call(
         api.GET('/v1/events/{eventId}/judging/teams/{teamId}/breakdown', {
@@ -814,13 +850,66 @@ export function eventApi(t: Transport, eventId: string) {
           },
         }),
       ),
-    /** Admins and judges always; everyone once the admin shows it (`leaderboardVisible`). */
-    leaderboard: (roundId?: string) =>
+    /**
+     * Admins and judges always; everyone once the admin shows it (`leaderboardVisible`).
+     * `normalise` ranks by normalisedTotal (lenient and harsh judges evened out).
+     */
+    leaderboard: (roundId?: string, normalise = false) =>
       call(
         api.GET('/v1/events/{eventId}/leaderboard', {
-          params: { path: { eventId }, query: { ...(roundId ? { roundId } : {}) } as never },
+          params: {
+            path: { eventId },
+            query: {
+              ...(roundId ? { roundId } : {}),
+              ...(normalise ? { normalise: 'true' } : {}),
+            } as never,
+          },
         }),
       ),
+    /** Tracks teams compete in (admins manage them). */
+    tracks: {
+      list: () => call(api.GET('/v1/events/{eventId}/tracks', at())),
+      create: (input: Body<`${E}/tracks`, 'post'>) =>
+        call(api.POST('/v1/events/{eventId}/tracks', { ...at(), body: input })),
+      update: (trackId: string, patch: Body<`${E}/tracks/{trackId}`, 'patch'>) =>
+        call(
+          api.PATCH('/v1/events/{eventId}/tracks/{trackId}', { ...at({ trackId }), body: patch }),
+        ),
+      remove: (trackId: string) =>
+        call(api.DELETE('/v1/events/{eventId}/tracks/{trackId}', at({ trackId }))),
+      /** Put a team in a track, or none. */
+      setTeam: (teamId: string, trackId: string | null) =>
+        call(
+          api.PUT('/v1/events/{eventId}/teams/{teamId}/track', {
+            ...at({ teamId }),
+            body: { trackId },
+          }),
+        ),
+    },
+    /** Saved leaderboards over rounds: per track, top N, overall, weighted. */
+    leaderboards: {
+      list: () => call(api.GET('/v1/events/{eventId}/leaderboards', at())),
+      create: (input: Body<`${E}/leaderboards`, 'post'>) =>
+        call(api.POST('/v1/events/{eventId}/leaderboards', { ...at(), body: input })),
+      update: (leaderboardId: string, patch: Body<`${E}/leaderboards/{leaderboardId}`, 'patch'>) =>
+        call(
+          api.PATCH('/v1/events/{eventId}/leaderboards/{leaderboardId}', {
+            ...at({ leaderboardId }),
+            body: patch,
+          }),
+        ),
+      remove: (leaderboardId: string) =>
+        call(
+          api.DELETE('/v1/events/{eventId}/leaderboards/{leaderboardId}', at({ leaderboardId })),
+        ),
+      results: (leaderboardId: string) =>
+        call(
+          api.GET(
+            '/v1/events/{eventId}/leaderboards/{leaderboardId}/results',
+            at({ leaderboardId }),
+          ),
+        ),
+    },
 
     // ------------------------------------------------------------ files
     uploads: {

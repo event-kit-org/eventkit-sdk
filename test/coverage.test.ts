@@ -109,8 +109,11 @@ describe('every API operation is reachable through the devkit', () => {
     await p.me.polls.answerGroup(ID, []);
     await p.me.notifications.feed();
     await p.me.leaderboard();
+    await p.me.leaderboards.list();
+    await p.me.leaderboards.results(ID);
     await p.me.submissions.list();
     await p.me.submissions.saveEntry(ID, {});
+    await p.me.submissions.sendResponse(ID, {});
     await p.me.pushDevice.put({ endpoint: 'https://p.test', keys: { p256dh: 'p', auth: 'a' } });
     await p.me.pushDevice.remove('https://p.test');
     await p.staff.signup({
@@ -151,6 +154,7 @@ describe('every API operation is reachable through the devkit', () => {
     await e.members.list();
     await e.members.add('a@b.co', 'reviewer');
     await e.members.changeRole(ID, 'judge');
+    await e.members.setCanJudge(ID, true);
     await e.members.remove(ID);
     await e.fields.list();
     await e.fields.create({} as never);
@@ -232,9 +236,20 @@ describe('every API operation is reachable through the devkit', () => {
     await e.criteria.remove(ID);
     await e.judging.teams();
     await e.judging.saveScores(ID, []);
+    await e.judging.removeScores(ID, ID);
     await e.scoreBreakdown(ID);
     await e.insights.checkpoint(ID);
     await e.leaderboard();
+    await e.tracks.list();
+    await e.tracks.create({ name: 't' });
+    await e.tracks.update(ID, {});
+    await e.tracks.remove(ID);
+    await e.tracks.setTeam(ID, null);
+    await e.leaderboards.list();
+    await e.leaderboards.create({ name: 'l', rounds: [] });
+    await e.leaderboards.update(ID, {});
+    await e.leaderboards.remove(ID);
+    await e.leaderboards.results(ID);
     await e.rounds.list();
     await e.rounds.create({} as never);
     await e.rounds.update(ID, {});
@@ -248,6 +263,8 @@ describe('every API operation is reachable through the devkit', () => {
     await e.submissions.remove(ID);
     await e.submissions.duplicate(ID);
     await e.submissions.entries(ID);
+    await e.submissions.removeEntry(ID, ID);
+    await e.submissions.status(ID);
     await e.submissions.fields.add(ID, {} as never);
     await e.submissions.fields.update(ID, ID, {});
     await e.submissions.fields.remove(ID, ID);
@@ -267,6 +284,6 @@ describe('every API operation is reachable through the devkit', () => {
     );
     const missing = all.filter((op) => !reached.has(op) && !NOT_FOR_FRONT_ENDS.includes(op));
     expect(missing).toEqual([]);
-    expect(all.length - NOT_FOR_FRONT_ENDS.length).toBe(168);
+    expect(all.length - NOT_FOR_FRONT_ENDS.length).toBe(185);
   });
 });
