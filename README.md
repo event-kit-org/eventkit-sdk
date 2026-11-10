@@ -18,6 +18,8 @@ npm clones the repo and builds it (the `prepare` script), and your
 `package.json` gets `"@eventkit/sdk": "github:event-kit-org/eventkit-sdk"`.
 Imports stay `@eventkit/sdk`, `@eventkit/sdk/react` and `@eventkit/sdk/sw`.
 Pin a commit for reproducible builds: `github:event-kit-org/eventkit-sdk#<commit>`.
+npm 11 warns that the package's `prepare` script isn't in your `allowScripts`;
+run `npm install-scripts approve @eventkit/sdk` once to record it.
 
 Hosts that install without git, or skip build scripts, can use a tarball
 instead: `npm pack` in a clone, commit the `.tgz` to your repo, and
