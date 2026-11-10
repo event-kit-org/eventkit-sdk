@@ -6,9 +6,22 @@ with UPI receipts, personal links with QR codes, RSVP, check-in scanning
 leaderboards. Every API operation is a typed function here, generated from
 eventkit-core's OpenAPI spec.
 
+## Install
+
+The SDK isn't on the npm registry. Install it from GitHub:
+
 ```bash
-npm install @eventkit/sdk
+npm install github:event-kit-org/eventkit-sdk
 ```
+
+npm clones the repo and builds it (the `prepare` script), and your
+`package.json` gets `"@eventkit/sdk": "github:event-kit-org/eventkit-sdk"`.
+Imports stay `@eventkit/sdk`, `@eventkit/sdk/react` and `@eventkit/sdk/sw`.
+Pin a commit for reproducible builds: `github:event-kit-org/eventkit-sdk#<commit>`.
+
+Hosts that install without git, or skip build scripts, can use a tarball
+instead: `npm pack` in a clone, commit the `.tgz` to your repo, and
+`npm install ./vendor/eventkit-sdk-<version>.tgz` (how `mach-one-web` does it).
 
 ## Who uses what
 
@@ -207,6 +220,6 @@ full template portal built only on this SDK.
 
 ## Develop
 
-`npm test` (unit, 90% gate), `npm run test:e2e` (against a running eventkit-core:
+`npm install` also builds `dist/` (`prepare`). `npm test` (unit, 90% gate), `npm run test:e2e` (against a running eventkit-core:
 `EVENTKIT_API_URL`, `EVENTKIT_PLATFORM_KEY`), `npm run gen:api` (types from
 `../eventkit-core/openapi.json`), `npx changeset` to release.
