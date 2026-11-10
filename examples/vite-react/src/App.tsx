@@ -84,16 +84,20 @@ function Register({ linkToken }: { linkToken: string }) {
     return (
       <section>
         <h2>{register.data.team.name} is registered</h2>
-        <p>Save these now: each person's link is shown only once. Send each one to its owner.</p>
+        <p>
+          Note everyone's participant ID. Your own personal link is below, shown only once; when the
+          event sends email, you also get every member's link to pass on.
+        </p>
         {register.data.members.map((m) => (
           <article key={m.registrationId} style={{ borderTop: '1px solid #ccc', padding: 8 }}>
             <strong>
               {m.name} · {m.participantCode}
             </strong>
-            <QRCodeSVG value={m.qrToken} size={120} title={`${m.name}'s check-in QR code`} />
-            <p>
-              Personal link: <code>{m.link.url ?? m.link.token}</code>
-            </p>
+            {m.link && (
+              <p>
+                Your personal link: <code>{m.link.url ?? m.link.token}</code>
+              </p>
+            )}
           </article>
         ))}
       </section>
@@ -188,12 +192,11 @@ function Me() {
   const link = useSecretLink(paths);
   const me = useMe();
   const rsvp = usePortalMutation((portal) => portal.me.rsvp());
-  const reset = usePortalMutation((portal) => portal.me.resetLink());
   if (link.status === 'error') {
     return (
       <p role="alert">
         {isEventKitError(link.error, 'LINK_NOT_FOUND')
-          ? 'This link was replaced. Use your newest link, or ask your team leader for a new one.'
+          ? 'This link was replaced. Use your newest link, or ask the organisers for a new one.'
           : 'Could not open your link.'}
       </p>
     );
@@ -214,15 +217,7 @@ function Me() {
       {['confirmed', 'attending', 'checked_in'].includes(status) && (
         <QRCodeSVG value={qrToken} size={200} title="Your check-in QR code" />
       )}
-      <p>
-        <button onClick={() => reset.mutate(undefined)}>My link leaked: give me a new one</button>
-        {reset.data && (
-          <>
-            {' '}
-            New link: <code>{reset.data.url ?? reset.data.token}</code>
-          </>
-        )}
-      </p>
+      <p>Link leaked or lost? Ask the organisers: only they can issue a new one.</p>
     </section>
   );
 }
